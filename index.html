@@ -28,6 +28,7 @@
       <a href="#como">Como funciona</a>
       <a href="#recursos">Recursos</a>
       <a href="#multiplicador">Multiplicador</a>
+      <a href="#valor">Quanto custa</a>
       <a href="#preco">Preço</a>
       <a href="#faq">Dúvidas</a>
     </nav>
@@ -254,7 +255,7 @@
           </thead>
           <tbody>
             <tr><td>Tempo por vídeo curto</td><td>40 min a 2 h</td><td>10–20 min + upload</td><td class="hl">~2 min</td></tr>
-            <tr><td>Custo por vídeo</td><td>o seu tempo</td><td>créditos / minuto exportado</td><td class="hl">zero — roda no seu PC</td></tr>
+            <tr><td>Custo por vídeo</td><td>o seu tempo (ou R$ 120–650 por Reel no freelancer)</td><td>créditos / minuto exportado</td><td class="hl">zero — roda no seu PC</td></tr>
             <tr><td>Seu vídeo sai da máquina?</td><td>não</td><td>sim, sempre</td><td class="hl">não</td></tr>
             <tr><td>Estilo da marca fixo</td><td>copiar projeto a projeto</td><td>templates genéricos</td><td class="hl">um estilo, todos os vídeos</td></tr>
             <tr><td>Variações para tráfego</td><td>uma por uma</td><td>uma por uma</td><td class="hl">27 de uma vez</td></tr>
@@ -266,22 +267,102 @@
     </div>
   </section>
 
+  <!-- ================= QUANTO CUSTA EDITAR ================= -->
+  <section class="valor" id="valor">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker">Quanto custa editar hoje</p>
+        <h2>Um Reel editado custa de <b>R$ 120</b> a <b>R$ 650</b>.<br>Quantos você posta por mês?</h2>
+        <p class="sub">Faixas praticadas no Brasil em 2026 por um Reel de 60 a 90 segundos, editado por freelancer ou agência.</p>
+      </div>
+
+      <div class="faixas">
+        <div class="faixa">
+          <p class="faixa-nome">Edição básica</p>
+          <p class="faixa-preco">R$ 50 <i>a</i> 120</p>
+          <p class="faixa-desc">Corte simples, legenda estática.</p>
+        </div>
+        <div class="faixa">
+          <p class="faixa-nome">Boa / profissional</p>
+          <p class="faixa-preco">R$ 120 <i>a</i> 300</p>
+          <p class="faixa-desc">Corte com ritmo, legenda no estilo, trilha.</p>
+        </div>
+        <div class="faixa faixa-hl">
+          <p class="faixa-nome">Legendas dinâmicas, B-roll, sound design</p>
+          <p class="faixa-preco">R$ 250 <i>a</i> 500<sup>+</sup></p>
+          <p class="faixa-desc">É exatamente o que o ATIVAVID entrega em cada vídeo.</p>
+        </div>
+        <div class="faixa">
+          <p class="faixa-nome">Editor experiente / premium</p>
+          <p class="faixa-preco">R$ 600<sup>+</sup></p>
+          <p class="faixa-desc">Produção sob medida, por Reel.</p>
+        </div>
+      </div>
+      <p class="faixas-nota">Em São Paulo, a referência de 2026 coloca um Reel simples entre <b>R$ 120 e R$ 500</b>, e com legendas dinâmicas e efeitos entre <b>R$ 180 e R$ 650</b>. A mediana de mercado fica em torno de <b>R$ 200 por vídeo</b> (faixa central de R$ 135 a R$ 280).</p>
+
+      <div class="calc" id="calc">
+        <div class="calc-in">
+          <p class="calc-title">Faça a conta da sua empresa</p>
+          <label class="calc-field">
+            <span>Vídeos por mês <output id="calcVideosOut">30</output></span>
+            <input type="range" id="calcVideos" min="4" max="300" step="1" value="30" aria-label="Vídeos por mês">
+          </label>
+          <div class="calc-presets" role="group" aria-label="Atalhos">
+            <button type="button" data-v="10">10 / mês</button>
+            <button type="button" data-v="30" class="on">1 por dia</button>
+            <button type="button" data-v="90">3 por dia</button>
+            <button type="button" data-v="300">10 por dia</button>
+          </div>
+          <label class="calc-field">
+            <span>Quanto você pagaria por edição <output id="calcPrecoOut">R$ 150</output></span>
+            <input type="range" id="calcPreco" min="50" max="600" step="10" value="150" aria-label="Preço por edição">
+          </label>
+        </div>
+        <div class="calc-out">
+          <div class="calc-row">
+            <p class="calc-lab">Editando fora, por mês</p>
+            <p class="calc-num" id="calcFora">R$ 4.500</p>
+            <p class="calc-sub" id="calcForaAno">R$ 54.000 por ano</p>
+          </div>
+          <div class="calc-row calc-row-hl">
+            <p class="calc-lab">Com o ATIVAVID, por mês</p>
+            <p class="calc-num">R$ 59</p>
+            <p class="calc-sub" id="calcPorVideo">R$ 1,97 por vídeo</p>
+          </div>
+          <div class="calc-row calc-row-sobra">
+            <p class="calc-lab">Sobra no seu caixa</p>
+            <p class="calc-num" id="calcSobra">R$ 4.441 <span>/mês</span></p>
+            <p class="calc-sub" id="calcVezes">76 vezes o valor da assinatura</p>
+          </div>
+        </div>
+      </div>
+      <blockquote class="valor-quote">
+        <p>30 vídeos por mês a R$ 150 são <b>R$ 4.500 por mês</b> em edição. Dez vídeos por dia, como uma operação de tráfego faz, são <b>R$ 45.000 por mês</b> — o ATIVAVID entrega os mesmos vídeos por R$ 59.</p>
+      </blockquote>
+    </div>
+  </section>
+
   <!-- ================= PREÇO ================= -->
   <section class="pricing" id="preco">
     <div class="wrap">
+      <div class="launch">
+        <span class="launch-tag">Oferta de lançamento</span>
+        <p>O ATIVAVID está em lançamento. Quando a oferta acabar, o valor passa a ser <b>R$ 99,90 por mês</b> e <b>R$ 899 por ano</b>. Quem assina agora entra pelo preço de lançamento.</p>
+      </div>
       <div class="sec-head">
-        <p class="kicker">Preço</p>
-        <h2>Teste 7 dias. Depois, menos que um vídeo de freelancer.</h2>
+        <p class="kicker">Preço de lançamento</p>
+        <h2>Teste 7 dias. Depois, menos que meio vídeo de freelancer por mês.</h2>
         <p class="sub">Instala hoje, edita hoje. Sem cartão para testar. Se fizer sentido, você assina dentro do app.</p>
       </div>
       <div class="plans">
         <div class="plan">
           <p class="plan-name">Mensal</p>
+          <p class="price-de">de <s>R$ 99,90</s> por</p>
           <p class="price"><small>R$</small>59<span>/mês</span></p>
-          <p class="plan-note">Para começar sem compromisso.</p>
+          <p class="plan-note">Menos de <b>R$ 2 por vídeo</b> se você posta um por dia.</p>
           <ul class="ticks">
             <li>Vídeos ilimitados</li>
-            <li>Todos os recursos</li>
+            <li>Todos os recursos, incluindo o Multiplicador</li>
             <li>Atualizações automáticas</li>
             <li>Cancela quando quiser</li>
           </ul>
@@ -289,15 +370,18 @@
         <div class="plan plan-best">
           <p class="badge">Mais escolhido</p>
           <p class="plan-name">Anual</p>
+          <p class="price-de">de <s>R$ 899</s> por</p>
           <p class="price"><small>R$</small>399<span>/ano</span></p>
-          <p class="plan-note">Sai por <b>R$ 33,25 por mês</b> — o preço de meio vídeo editado.</p>
+          <p class="plan-note">Sai por <b>R$ 33,25 por mês</b> — o que um editor cobra por um quarto de Reel.</p>
           <ul class="ticks">
             <li>Tudo do mensal</li>
-            <li>Economize R$ 309 no ano</li>
+            <li>R$ 500 abaixo do valor cheio de R$ 899</li>
+            <li>Economize R$ 309 em relação ao mensal</li>
             <li>Um pagamento, um ano sem pensar nisso</li>
           </ul>
         </div>
       </div>
+      <p class="launch-note">Preço de lançamento válido para quem assinar durante a oferta. Depois dela, novos assinantes pagam o valor cheio.</p>
       <div class="cta-center">
         <a class="btn btn-primary btn-lg" href="/download" data-ativa-form="ativavid-864e5e" data-cta="preco">Baixar e começar os 7 dias grátis</a>
         <p class="micro-line">Instalador para Windows 10/11 (64 bits) · ~1 minuto para instalar · a IA local baixa os componentes no primeiro uso</p>

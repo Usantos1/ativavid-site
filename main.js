@@ -88,3 +88,35 @@
     });
   });
 })();
+
+/* --- Faça a conta: vídeos/mês x preço por edição --- */
+(function () {
+  const v = document.getElementById('calcVideos');
+  const p = document.getElementById('calcPreco');
+  if (!v || !p) return;
+  const ASSINATURA = 59;
+  const brl = (n, cents) => 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0 });
+  const el = (id) => document.getElementById(id);
+  const presets = Array.from(document.querySelectorAll('.calc-presets button'));
+  const render = () => {
+    const videos = Number(v.value);
+    const preco = Number(p.value);
+    const fora = videos * preco;
+    el('calcVideosOut').textContent = String(videos);
+    el('calcPrecoOut').textContent = brl(preco);
+    el('calcFora').textContent = brl(fora);
+    el('calcForaAno').textContent = brl(fora * 12) + ' por ano';
+    el('calcPorVideo').textContent = brl(ASSINATURA / videos, true) + ' por vídeo';
+    const sobra = Math.max(0, fora - ASSINATURA);
+    el('calcSobra').innerHTML = brl(sobra) + ' <span>/mês</span>';
+    const vezes = fora / ASSINATURA;
+    el('calcVezes').textContent = vezes >= 2
+      ? Math.round(vezes).toLocaleString('pt-BR') + ' vezes o valor da assinatura'
+      : 'já compensa a partir do primeiro vídeo';
+    presets.forEach((b) => b.classList.toggle('on', Number(b.dataset.v) === videos));
+  };
+  v.addEventListener('input', render);
+  p.addEventListener('input', render);
+  presets.forEach((b) => b.addEventListener('click', () => { v.value = b.dataset.v; render(); }));
+  render();
+})();

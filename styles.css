@@ -247,3 +247,63 @@ tr:last-child td { border-bottom: 0; }
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
 .reveal.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+/* ===== Quanto custa editar (âncora de valor) ===== */
+.valor { padding: 96px 0; background: var(--bg-2, #0e1015); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.valor h2 b { color: var(--red); }
+.faixas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.faixa { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 22px 20px; }
+.faixa-hl { border-color: rgba(255, 0, 4, .55); box-shadow: 0 0 0 4px rgba(255, 0, 4, .10); }
+.faixa-nome { font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); min-height: 2.6em; }
+.faixa-preco { font-family: var(--display); font-weight: 900; font-size: 30px; line-height: 1.1; margin-top: 10px; font-variant-numeric: tabular-nums; }
+.faixa-preco i { font-style: normal; font-weight: 600; font-size: 16px; color: var(--dim); margin: 0 4px; }
+.faixa-preco sup { font-size: 16px; color: var(--red); }
+.faixa-desc { color: var(--dim); font-size: 15px; margin-top: 8px; }
+.faixa-hl .faixa-desc { color: var(--text); }
+.faixas-nota { color: var(--dim); max-width: 60em; margin-top: 18px; font-size: 15px; }
+.faixas-nota b { color: var(--text); }
+
+.calc { margin-top: 44px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+.calc-title { font-family: var(--display); font-weight: 800; font-size: 22px; margin-bottom: 18px; }
+.calc-field { display: block; margin-top: 18px; }
+.calc-field > span { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; margin-bottom: 8px; }
+.calc-field output { font-family: var(--display); font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.calc-field input[type="range"] { width: 100%; accent-color: var(--red); cursor: pointer; }
+.calc-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.calc-presets button { font: inherit; font-family: var(--display); font-weight: 600; font-size: 13px; color: var(--text); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; cursor: pointer; }
+.calc-presets button.on, .calc-presets button:hover { border-color: var(--red); color: #fff; background: rgba(255, 0, 4, .12); }
+.calc-presets button:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+.calc-out { display: grid; gap: 12px; align-content: start; }
+.calc-row { border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; background: var(--bg); }
+.calc-row-hl { border-color: rgba(31, 209, 168, .5); }
+.calc-row-sobra { border-color: var(--red); background: linear-gradient(180deg, rgba(255, 0, 4, .12), rgba(255, 0, 4, .03)); }
+.calc-lab { font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.calc-num { font-family: var(--display); font-weight: 900; font-size: 34px; line-height: 1.1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.calc-row-hl .calc-num { color: var(--teal); }
+.calc-row-sobra .calc-num { color: #fff; }
+.calc-num span { font-size: 16px; color: var(--dim); font-weight: 600; }
+.calc-sub { color: var(--dim); font-size: 14px; margin-top: 4px; }
+.valor-quote { margin-top: 36px; border-left: 4px solid var(--red); padding: 6px 0 6px 22px; max-width: 60em; font-size: 20px; line-height: 1.5; }
+.valor-quote b { color: var(--text); }
+.valor-quote p { color: var(--dim); }
+
+/* ===== Oferta de lançamento ===== */
+.launch { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 36px; padding: 16px 20px; border: 1px solid rgba(255, 0, 4, .5); border-radius: 14px; background: linear-gradient(90deg, rgba(255, 0, 4, .14), rgba(255, 0, 4, .03)); }
+.launch-tag { font-family: var(--display); font-weight: 800; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #fff; background: var(--red); padding: 7px 12px; border-radius: 999px; white-space: nowrap; }
+.launch p { color: var(--dim); margin: 0; }
+.launch p b { color: var(--text); }
+.price-de { margin-top: 14px; color: var(--dim); font-size: 14px; }
+.price-de s { color: var(--dim); text-decoration-color: var(--red); text-decoration-thickness: 2px; font-weight: 600; }
+.launch-note { color: var(--dim); font-size: 14px; margin-top: 14px; max-width: 60em; }
+
+@media (max-width: 960px) {
+  .faixas { grid-template-columns: 1fr 1fr; }
+  .calc { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .faixas { grid-template-columns: 1fr; }
+  .valor { padding: 64px 0; }
+  .calc { padding: 20px; }
+  .calc-num { font-size: 28px; }
+  .valor-quote { font-size: 17px; }
+}
