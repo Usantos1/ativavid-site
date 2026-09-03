@@ -349,3 +349,10 @@ tr:last-child td { border-bottom: 0; }
 .faixa.on::before { position: static; display: block; margin-bottom: 8px; }
 .faixa-total { margin-top: 12px; }
 .faixas-dica { font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--text); }
+
+/* ===== persuasão: pílula da oferta no herói, CTA do meio ===== */
+.pill-launch { display: inline-flex; align-items: center; gap: 10px; margin: -8px 0 22px; padding: 8px 14px 8px 8px; border: 1px solid rgba(255, 0, 4, .5); border-radius: 999px; background: rgba(255, 0, 4, .10); font-family: var(--display); font-weight: 700; font-size: 14px; }
+.pill-launch b { background: var(--red); color: #fff; border-radius: 999px; padding: 4px 10px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.pill-launch s { color: var(--dim); font-weight: 600; text-decoration-color: var(--red); }
+.cta-meio { margin-top: 34px; }
+.who-card p { font-size: 15px; }
