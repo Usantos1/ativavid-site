@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260903c">
+  <link rel="stylesheet" href="styles.css?v=20260903d">
 </head>
 <body>
 
@@ -52,7 +52,7 @@
           <a class="btn btn-primary btn-lg" href="/download" data-ativa-form="ativavid-864e5e" data-cta="hero">
             Baixar e testar 7 dias grátis
           </a>
-          <a class="btn btn-ghost btn-lg" href="#vsl">Ver o ATIVAVID editando</a>
+          <a class="btn btn-ghost btn-lg" href="#valor">Quanto você gasta editando?</a>
         </div>
         <ul class="micro">
           <li>Sem cartão</li>
@@ -83,20 +83,80 @@
     </div>
   </section>
 
-  <!-- ================= VSL ================= -->
-  <section class="vsl" id="vsl">
+  <!-- ================= QUANTO CUSTA EDITAR ================= -->
+  <section class="valor" id="valor">
     <div class="wrap">
       <div class="sec-head">
-        <p class="kicker">Sem truque de demo</p>
-        <h2>Onze minutos do ATIVAVID trabalhando de verdade</h2>
-        <p class="sub">Um vídeo gravado na bancada, importado, editado, legendado e entregue — na tela, sem corte.</p>
+        <p class="kicker">Faça a conta</p>
+        <h2>Um Reel editado custa de <b>R$ 120</b> a <b>R$ 650</b>.<br>Quantos você posta por mês?</h2>
+        <p class="sub">Faixas praticadas no Brasil em 2026 por um Reel de 60 a 90 segundos, editado por freelancer ou agência.</p>
       </div>
-      <div class="player" data-yt="COLOQUE_O_ID_DO_YOUTUBE">
-        <img class="poster" src="assets/ui-editor.jpg" alt="Prévia do ATIVAVID editando um vídeo" width="1600" height="746">
-        <button class="play" type="button" aria-label="Assistir ao vídeo">
-          <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+
+      <p class="faixas-dica">Toque na faixa que mais parece com o que você paga (ou pagaria):</p>
+      <div class="faixas" id="faixas">
+        <button type="button" class="faixa" data-preco="85" data-min="50" data-max="120">
+          <span class="faixa-nome">Edição básica</span>
+          <span class="faixa-preco">R$ 50 <i>a</i> 120</span>
+          <span class="faixa-desc">Corte simples, legenda estática.</span>
+        </button>
+        <button type="button" class="faixa on" data-preco="150" data-min="120" data-max="250">
+          <span class="faixa-nome">Boa / profissional</span>
+          <span class="faixa-preco">R$ 120 <i>a</i> 300</span>
+          <span class="faixa-desc">Corte com ritmo, legenda no estilo, trilha.</span>
+        </button>
+        <button type="button" class="faixa" data-preco="375" data-min="250" data-max="600">
+          <span class="faixa-tag">nível ATIVAVID</span>
+          <span class="faixa-nome">Legendas dinâmicas, B-roll, sound design</span>
+          <span class="faixa-preco">R$ 250 <i>a</i> 500<sup>+</sup></span>
+          <span class="faixa-desc">É o que o ATIVAVID entrega em cada vídeo.</span>
+        </button>
+        <button type="button" class="faixa" data-preco="600" data-min="600" data-max="100000">
+          <span class="faixa-nome">Editor experiente / premium</span>
+          <span class="faixa-preco">R$ 600<sup>+</sup></span>
+          <span class="faixa-desc">Produção sob medida, por Reel.</span>
         </button>
       </div>
+      <p class="faixas-nota">Em São Paulo, a referência de 2026 coloca um Reel simples entre <b>R$ 120 e R$ 500</b>, e com legendas dinâmicas e efeitos entre <b>R$ 180 e R$ 650</b>. A mediana de mercado fica em torno de <b>R$ 200 por vídeo</b> (faixa central de R$ 135 a R$ 280).</p>
+
+      <div class="calc" id="calc">
+        <div class="calc-in">
+          <p class="calc-title">Faça a conta da sua empresa</p>
+          <label class="calc-field">
+            <span>Vídeos por mês <output id="calcVideosOut">30</output></span>
+            <input type="range" id="calcVideos" min="4" max="300" step="1" value="30" aria-label="Vídeos por mês">
+          </label>
+          <div class="calc-presets" role="group" aria-label="Atalhos">
+            <button type="button" data-v="10">10 / mês</button>
+            <button type="button" data-v="30" class="on">1 por dia</button>
+            <button type="button" data-v="90">3 por dia</button>
+            <button type="button" data-v="300">10 por dia</button>
+          </div>
+          <label class="calc-field">
+            <span>Quanto você pagaria por edição <output id="calcPrecoOut">R$ 150</output></span>
+            <input type="range" id="calcPreco" min="50" max="600" step="10" value="150" aria-label="Preço por edição">
+          </label>
+        </div>
+        <div class="calc-out">
+          <div class="calc-row">
+            <p class="calc-lab">Editando fora, por mês</p>
+            <p class="calc-num" id="calcFora">R$ 4.500</p>
+            <p class="calc-sub" id="calcForaAno">R$ 54.000 por ano</p>
+          </div>
+          <div class="calc-row calc-row-hl">
+            <p class="calc-lab">Com o ATIVAVID, por mês</p>
+            <p class="calc-num">R$ 59</p>
+            <p class="calc-sub" id="calcPorVideo">R$ 1,97 por vídeo</p>
+          </div>
+          <div class="calc-row calc-row-sobra">
+            <p class="calc-lab">Sobra no seu caixa</p>
+            <p class="calc-num" id="calcSobra">R$ 4.441 <span>/mês</span></p>
+            <p class="calc-sub" id="calcVezes">76 vezes o valor da assinatura</p>
+          </div>
+        </div>
+      </div>
+      <blockquote class="valor-quote">
+        <p>30 vídeos por mês a R$ 150 são <b>R$ 4.500 por mês</b> em edição. Dez vídeos por dia, como uma operação de tráfego faz, são <b>R$ 45.000 por mês</b> — o ATIVAVID entrega os mesmos vídeos por R$ 59.</p>
+      </blockquote>
     </div>
   </section>
 
@@ -267,81 +327,6 @@
     </div>
   </section>
 
-  <!-- ================= QUANTO CUSTA EDITAR ================= -->
-  <section class="valor" id="valor">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="kicker">Quanto custa editar hoje</p>
-        <h2>Um Reel editado custa de <b>R$ 120</b> a <b>R$ 650</b>.<br>Quantos você posta por mês?</h2>
-        <p class="sub">Faixas praticadas no Brasil em 2026 por um Reel de 60 a 90 segundos, editado por freelancer ou agência.</p>
-      </div>
-
-      <div class="faixas">
-        <div class="faixa">
-          <p class="faixa-nome">Edição básica</p>
-          <p class="faixa-preco">R$ 50 <i>a</i> 120</p>
-          <p class="faixa-desc">Corte simples, legenda estática.</p>
-        </div>
-        <div class="faixa">
-          <p class="faixa-nome">Boa / profissional</p>
-          <p class="faixa-preco">R$ 120 <i>a</i> 300</p>
-          <p class="faixa-desc">Corte com ritmo, legenda no estilo, trilha.</p>
-        </div>
-        <div class="faixa faixa-hl">
-          <p class="faixa-nome">Legendas dinâmicas, B-roll, sound design</p>
-          <p class="faixa-preco">R$ 250 <i>a</i> 500<sup>+</sup></p>
-          <p class="faixa-desc">É exatamente o que o ATIVAVID entrega em cada vídeo.</p>
-        </div>
-        <div class="faixa">
-          <p class="faixa-nome">Editor experiente / premium</p>
-          <p class="faixa-preco">R$ 600<sup>+</sup></p>
-          <p class="faixa-desc">Produção sob medida, por Reel.</p>
-        </div>
-      </div>
-      <p class="faixas-nota">Em São Paulo, a referência de 2026 coloca um Reel simples entre <b>R$ 120 e R$ 500</b>, e com legendas dinâmicas e efeitos entre <b>R$ 180 e R$ 650</b>. A mediana de mercado fica em torno de <b>R$ 200 por vídeo</b> (faixa central de R$ 135 a R$ 280).</p>
-
-      <div class="calc" id="calc">
-        <div class="calc-in">
-          <p class="calc-title">Faça a conta da sua empresa</p>
-          <label class="calc-field">
-            <span>Vídeos por mês <output id="calcVideosOut">30</output></span>
-            <input type="range" id="calcVideos" min="4" max="300" step="1" value="30" aria-label="Vídeos por mês">
-          </label>
-          <div class="calc-presets" role="group" aria-label="Atalhos">
-            <button type="button" data-v="10">10 / mês</button>
-            <button type="button" data-v="30" class="on">1 por dia</button>
-            <button type="button" data-v="90">3 por dia</button>
-            <button type="button" data-v="300">10 por dia</button>
-          </div>
-          <label class="calc-field">
-            <span>Quanto você pagaria por edição <output id="calcPrecoOut">R$ 150</output></span>
-            <input type="range" id="calcPreco" min="50" max="600" step="10" value="150" aria-label="Preço por edição">
-          </label>
-        </div>
-        <div class="calc-out">
-          <div class="calc-row">
-            <p class="calc-lab">Editando fora, por mês</p>
-            <p class="calc-num" id="calcFora">R$ 4.500</p>
-            <p class="calc-sub" id="calcForaAno">R$ 54.000 por ano</p>
-          </div>
-          <div class="calc-row calc-row-hl">
-            <p class="calc-lab">Com o ATIVAVID, por mês</p>
-            <p class="calc-num">R$ 59</p>
-            <p class="calc-sub" id="calcPorVideo">R$ 1,97 por vídeo</p>
-          </div>
-          <div class="calc-row calc-row-sobra">
-            <p class="calc-lab">Sobra no seu caixa</p>
-            <p class="calc-num" id="calcSobra">R$ 4.441 <span>/mês</span></p>
-            <p class="calc-sub" id="calcVezes">76 vezes o valor da assinatura</p>
-          </div>
-        </div>
-      </div>
-      <blockquote class="valor-quote">
-        <p>30 vídeos por mês a R$ 150 são <b>R$ 4.500 por mês</b> em edição. Dez vídeos por dia, como uma operação de tráfego faz, são <b>R$ 45.000 por mês</b> — o ATIVAVID entrega os mesmos vídeos por R$ 59.</p>
-      </blockquote>
-    </div>
-  </section>
-
   <!-- ================= PREÇO ================= -->
   <section class="pricing" id="preco">
     <div class="wrap">
@@ -471,6 +456,6 @@
 </div>
 
 <script src="https://ativavid.primecamp.com.br/embed.js?v=1.2.3" data-form="ativavid-864e5e" data-mode="modal" data-path="/" data-theme="dark" defer></script>
-  <script src="main.js?v=20260903c" defer></script>
+  <script src="main.js?v=20260903d" defer></script>
 </body>
 </html>

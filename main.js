@@ -45,28 +45,6 @@
     }
   }
 
-  /* --- VSL: carrega o YouTube só no clique --- */
-  const player = document.querySelector('.player');
-  if (player) {
-    const id = player.dataset.yt || '';
-    const btn = player.querySelector('.play');
-    btn.addEventListener('click', () => {
-      if (!id || id.startsWith('COLOQUE')) {
-        btn.setAttribute('aria-label', 'Vídeo em breve');
-        btn.style.opacity = '.5';
-        return;
-      }
-      const f = document.createElement('iframe');
-      f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0&modestbranding=1`;
-      f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
-      f.allowFullscreen = true;
-      f.title = 'ATIVAVID editando um vídeo';
-      player.querySelector('.poster').remove();
-      btn.remove();
-      player.appendChild(f);
-    });
-  }
-
   /* --- barra fixa de CTA no celular, depois do herói --- */
   const sticky = document.getElementById('stickyCta');
   const hero = document.querySelector('.hero');
@@ -98,9 +76,15 @@
   const brl = (n, cents) => 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0 });
   const el = (id) => document.getElementById(id);
   const presets = Array.from(document.querySelectorAll('.calc-presets button'));
+  const faixas = Array.from(document.querySelectorAll('.faixa'));
   const render = () => {
     const videos = Number(v.value);
     const preco = Number(p.value);
+    // a faixa acesa e a que contem o preco escolhido
+    faixas.forEach((f) => {
+      const mn = Number(f.dataset.min), mx = Number(f.dataset.max);
+      f.classList.toggle('on', preco >= mn && preco < mx);
+    });
     const fora = videos * preco;
     el('calcVideosOut').textContent = String(videos);
     el('calcPrecoOut').textContent = brl(preco);
@@ -118,5 +102,11 @@
   v.addEventListener('input', render);
   p.addEventListener('input', render);
   presets.forEach((b) => b.addEventListener('click', () => { v.value = b.dataset.v; render(); }));
+  faixas.forEach((f) => f.addEventListener('click', () => {
+    p.value = f.dataset.preco;
+    render();
+    const calc = document.getElementById('calc');
+    if (calc && window.matchMedia('(max-width: 960px)').matches) calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
   render();
 })();
