@@ -84,6 +84,9 @@
     faixas.forEach((f) => {
       const mn = Number(f.dataset.min), mx = Number(f.dataset.max);
       f.classList.toggle('on', preco >= mn && preco < mx);
+      // o total de CADA faixa, ao vivo, para a escolha responder na hora
+      const t = f.querySelector('[data-total]');
+      if (t) t.textContent = brl(Number(f.dataset.preco) * videos) + ' /mês com ' + videos + ' vídeos';
     });
     const fora = videos * preco;
     el('calcVideosOut').textContent = String(videos);
@@ -98,6 +101,11 @@
       ? Math.round(vezes).toLocaleString('pt-BR') + ' vezes o valor da assinatura'
       : 'já compensa a partir do primeiro vídeo';
     presets.forEach((b) => b.classList.toggle('on', Number(b.dataset.v) === videos));
+    // os numeros piscam quando mudam
+    ['calcFora', 'calcSobra', 'calcPorVideo'].forEach((id) => {
+      const n = el(id); if (!n) return;
+      n.classList.remove('bump'); void n.offsetWidth; n.classList.add('bump');
+    });
   };
   v.addEventListener('input', render);
   p.addEventListener('input', render);

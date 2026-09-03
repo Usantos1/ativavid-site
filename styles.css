@@ -321,3 +321,16 @@ tr:last-child td { border-bottom: 0; }
 .launch-planos { margin: 22px 0 0; }
 .price-consulta { font-size: 28px; white-space: nowrap; }
 .valor { border-top: 0; }
+.faixa-total { display: block; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); font-family: var(--display); font-weight: 700; font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.faixa.on .faixa-total { color: var(--red); }
+@keyframes bump { 0% { transform: scale(1); } 30% { transform: scale(1.06); color: #fff; } 100% { transform: scale(1); } }
+.calc-num.bump { animation: bump .45s ease; transform-origin: left center; }
+.calc-sub.bump { animation: bump .45s ease; transform-origin: left center; }
+@media (prefers-reduced-motion: reduce) { .calc-num.bump, .calc-sub.bump { animation: none; } }
+@media (max-width: 560px) {
+  .faixa { padding: 16px; }
+  .faixa-nome { min-height: 0; padding-right: 40%; }
+  .faixa-preco { font-size: 26px; }
+  .calc-field > span { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .calc-presets button { padding: 8px 12px; }
+}
