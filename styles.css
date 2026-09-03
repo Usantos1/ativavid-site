@@ -197,7 +197,12 @@ th.hl { color: var(--red) !important; }
 tr:last-child td { border-bottom: 0; }
 
 /* ---------- preço ---------- */
-.plans { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 900px; }
+.plans { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; align-items: start; }
+.plan-escala { border-style: dashed; border-color: rgba(31, 209, 168, .45); }
+.price-consulta { font-size: 34px; padding: 10px 0 8px; color: var(--teal); }
+.plan-cta { margin-top: 20px; width: 100%; border-color: rgba(31, 209, 168, .6); }
+.plan-cta:hover { border-color: var(--teal); }
+@media (max-width: 1000px) { .plans { grid-template-columns: 1fr 1fr; } .plan-escala { grid-column: 1 / -1; } }
 .plan { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px; }
 .plan-best { border-color: rgba(255, 0, 4, .6); box-shadow: 0 0 0 4px rgba(255, 0, 4, .12), var(--shadow); }
 .badge { position: absolute; top: -14px; left: 26px; background: var(--red); color: #fff; font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; }
@@ -312,3 +317,7 @@ tr:last-child td { border-bottom: 0; }
   .calc-num { font-size: 28px; }
   .valor-quote { font-size: 17px; }
 }
+.tag-launch { display: inline-block; vertical-align: middle; margin-left: 8px; font-size: 10px; letter-spacing: .1em; color: #fff; background: var(--red); border-radius: 999px; padding: 4px 9px; }
+.launch-planos { margin: 22px 0 0; }
+.price-consulta { font-size: 28px; white-space: nowrap; }
+.valor { border-top: 0; }
