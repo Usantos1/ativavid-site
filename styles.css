@@ -345,3 +345,7 @@ tr:last-child td { border-bottom: 0; }
 .launch-note { text-align: center; margin-inline: auto; }
 .pipeline { justify-content: center; }
 .ticks li b { color: var(--text); }
+.faixa-nome { min-height: 0; padding-right: 0; }
+.faixa.on::after { position: static; display: block; margin-bottom: 8px; }
+.faixa-total { margin-top: 12px; }
+.faixas-dica { font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--text); }
