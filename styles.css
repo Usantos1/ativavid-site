@@ -264,7 +264,7 @@ tr:last-child td { border-bottom: 0; }
 .faixa:hover { border-color: var(--dim); transform: translateY(-2px); }
 .faixa:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
 .faixa.on { border-color: var(--red); box-shadow: 0 0 0 4px rgba(255, 0, 4, .14), 0 18px 40px rgba(0, 0, 0, .35); background: linear-gradient(180deg, rgba(255, 0, 4, .10), var(--panel) 60%); }
-.faixa.on::after { content: "✓ usando na conta"; position: absolute; right: 14px; top: 14px; font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
+.faixa.on::before { content: "✓ usando na conta"; position: absolute; right: 14px; top: 14px; font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
 .faixa-tag { display: inline-block; font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); border: 1px solid rgba(31, 209, 168, .5); border-radius: 999px; padding: 3px 9px; margin-bottom: 10px; }
 .faixa-nome { display: block; font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); min-height: 2.6em; padding-right: 30%; }
 .faixa-preco { display: block; font-family: var(--display); font-weight: 900; font-size: 26px; line-height: 1.1; margin-top: 10px; font-variant-numeric: tabular-nums; }
@@ -346,6 +346,6 @@ tr:last-child td { border-bottom: 0; }
 .pipeline { justify-content: center; }
 .ticks li b { color: var(--text); }
 .faixa-nome { min-height: 0; padding-right: 0; }
-.faixa.on::after { position: static; display: block; margin-bottom: 8px; }
+.faixa.on::before { position: static; display: block; margin-bottom: 8px; }
 .faixa-total { margin-top: 12px; }
 .faixas-dica { font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--text); }
