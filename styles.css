@@ -372,3 +372,69 @@ tr:last-child td { border-bottom: 0; }
 .nao-precisa li { text-decoration: line-through; text-decoration-color: rgba(255, 0, 4, .6); }
 @media (max-width: 960px) { .local-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .local-grid { grid-template-columns: 1fr; } }
+
+
+/* ---------- CTA com feixe ----------
+   O anel NAO e `box-shadow`: sao dois backgrounds com a borda transparente.
+   O `padding-box` pinta o miolo grafite, o `border-box` pinta o conico. So
+   ~40% do circulo tem cor, e por isso o brilho parece um feixe ANDANDO na
+   borda em vez de um anel aceso.
+   Mesma receita usada no aplicativo (5.1.45). */
+@property --alc-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes alc-border-spin { to { --alc-angle: 360deg; } }
+
+.btn-primary.alc-shiny {
+  --alc-angle: 0deg;
+  --feixe-a: #a30003;
+  --feixe-b: var(--red-2);
+  --glow: 255 59 62;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#2a1416, #0b0c10) padding-box,
+    conic-gradient(from var(--alc-angle),
+      transparent 0%, var(--feixe-a) 5%, var(--feixe-b) 15%,
+      var(--feixe-a) 30%, transparent 40%, transparent 100%) border-box;
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / .15),
+    inset 0 -2px 6px rgb(0 0 0 / .2),
+    0 12px 30px -8px rgb(0 0 0 / .55);
+  animation: alc-border-spin 2.5s linear infinite;
+}
+.btn-primary.alc-shiny:hover {
+  /* o hover de `.btn-primary` troca o `background` por uma cor chapada, o que
+     apagaria o anel — aqui ele e repetido e so a sombra responde */
+  background:
+    linear-gradient(#2a1416, #0b0c10) padding-box,
+    conic-gradient(from var(--alc-angle),
+      transparent 0%, var(--feixe-a) 5%, var(--feixe-b) 15%,
+      var(--feixe-a) 30%, transparent 40%, transparent 100%) border-box;
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / .25),
+    0 18px 44px -8px rgb(var(--glow) / .55);
+}
+/* A textura. Centro em .5px faz o ponto cair DENTRO de um pixel em tela 1x;
+   centrado na quina do tile ele sumiria fora de retina. A mascara diagonal
+   deixa a faixa so num pedaco — cobrir o botao inteiro vira ruido. */
+.alc-dots {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border-radius: inherit; background-size: 5px 5px;
+  background-image: radial-gradient(circle at .5px .5px,
+    rgb(var(--glow) / .6) .5px, transparent 0);
+  --alc-dots-mask: linear-gradient(125deg, transparent 54%,
+    rgb(0 0 0 / .85) 66%, rgb(0 0 0 / .85) 74%, transparent 85%);
+  -webkit-mask-image: var(--alc-dots-mask); mask-image: var(--alc-dots-mask);
+}
+.alc-btn-content { position: relative; z-index: 2; display: inline-flex;
+  align-items: center; justify-content: center; gap: 8px; }
+
+/* Sete gradientes conicos girando. Uma landing fica aberta em segundo plano
+   o tempo todo — fora de foco eles nao estao sendo olhados. */
+html.janela-parada .btn-primary.alc-shiny { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary.alc-shiny { animation: none !important; }
+}
