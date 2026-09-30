@@ -11,6 +11,18 @@
 @font-face { font-family: "Poppins"; font-style: normal; font-weight: 900; font-display: swap; src: url("assets/fonts/poppins-900.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: "Source Sans 3"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("assets/fonts/source-sans-3.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
+/* Fallback com as MEDIDAS da fonte real. Quando a Poppins chegava depois da
+   primeira pintura (celular lento), o titulo mudava de largura, quebrava a
+   linha diferente e empurrava o paragrafo de baixo (CLS 0,105 numa rodada do
+   Lighthouse). Com a Arial ajustada para ocupar a mesma caixa, a troca de
+   fonte nao move nada. Larguras medidas no Chrome, pesos a pesos. */
+@font-face { font-family: "Poppins Fallback"; font-weight: 400; src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("Arimo"); size-adjust: 109.96%; ascent-override: 95.49%; descent-override: 31.83%; line-gap-override: 9.09%; }
+@font-face { font-family: "Poppins Fallback"; font-weight: 600; src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("Arimo Bold"); size-adjust: 105.51%; ascent-override: 99.52%; descent-override: 33.17%; line-gap-override: 9.48%; }
+@font-face { font-family: "Poppins Fallback"; font-weight: 700 800; src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("Arimo Bold"); size-adjust: 106.74%; ascent-override: 98.37%; descent-override: 32.79%; line-gap-override: 9.37%; }
+@font-face { font-family: "Poppins Fallback"; font-weight: 900; src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("Arimo Bold"); size-adjust: 107.31%; ascent-override: 97.85%; descent-override: 32.62%; line-gap-override: 9.32%; }
+@font-face { font-family: "Source Sans Fallback"; font-weight: 400; src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("Arimo"); size-adjust: 90.63%; ascent-override: 112.99%; descent-override: 44.14%; line-gap-override: 0.00%; }
+@font-face { font-family: "Source Sans Fallback"; font-weight: 600 900; src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("Arimo Bold"); size-adjust: 87.96%; ascent-override: 116.42%; descent-override: 45.48%; line-gap-override: 0.00%; }
+
 :root {
   --bg: #0b0c10;
   --bg-2: #121419;
@@ -25,8 +37,8 @@
   --fine: #8a93a0;     /* letra miuda do rodape: 6,29:1 (era 4,32) */
   --teal: #1fd1a8;
   --amber: #ffb020;
-  --display: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --display: "Poppins", "Poppins Fallback", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body: "Source Sans 3", "Source Sans Fallback", "Segoe UI", system-ui, sans-serif;
   --wrap: 1180px;
   --radius: 16px;
   --shadow: 0 30px 80px rgba(0, 0, 0, .55);
