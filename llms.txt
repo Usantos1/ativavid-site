@@ -1,0 +1,56 @@
+# ATIVAVID
+
+> Editor de vídeo com IA que roda no PC do cliente (Windows 10/11, 64 bits). A pessoa arrasta o vídeo bruto e, em cerca de 2 minutos, recebe o vídeo cortado, legendado no estilo da marca, com headline, trilha, capa e a legenda do post, pronto para Reels, Shorts, TikTok e YouTube. O vídeo não sai do computador. Produto brasileiro, em português. 7 dias grátis, sem cartão.
+
+O problema que o ATIVAVID resolve é o da edição que come a noite: quem precisa postar todo dia grava rápido, mas perde de 40 minutos a 2 horas editando cada vídeo, ou paga de R$ 120 a R$ 650 por Reel a um editor. O ATIVAVID faz o trabalho pesado na máquina da pessoa e deixa a timeline aberta para o ajuste fino.
+
+- [Site](https://ativavid.com/): apresentação, calculadora de economia, preços e dúvidas.
+- [Baixar o instalador](https://ativavid.com/download): instalador para Windows 10/11 (64 bits); o teste de 7 dias começa no app.
+- [Preços](https://ativavid.com/#preco): planos Pro Mensal, Pro Anual e Pro Escala.
+- [Dúvidas frequentes](https://ativavid.com/#faq): respostas curtas sobre privacidade, requisitos e custo.
+- [Instagram @ativavid](https://instagram.com/ativavid): perfil oficial do produto.
+
+## Para quem é
+
+- **Lojas e assistências técnicas** que postam vídeo todo dia. O ATIVAVID nasceu numa assistência de celulares e hoje edita centenas de vídeos por mês nela.
+- **Criadores e especialistas** que gravam rápido mas não têm tempo de editar.
+- **Agências e social media**: um estilo por cliente, aprovação em lote, pasta pronta para entregar.
+- **Gestores de tráfego pago**: criativos em volume, com variações de gancho e CTA.
+
+Não serve para quem usa Mac ou Linux (hoje é só Windows).
+
+## Como funciona
+
+1. **Arraste o vídeo**: um arquivo, uma pasta ou vários takes. Clique em *Editar com IA*.
+2. **A IA edita no PC**: tira silêncios e erros, escolhe o corte, aplica legenda, headline, trilha e capa.
+3. **Aprove e poste**: ajuste se quiser, marque *Aprovado* e receba a pasta pronta com vídeo, capa e legenda do post.
+
+Etapas automáticas: transcrição local → corte inteligente → legenda no estilo da marca → headline → trilha por IA → capa → legenda do post.
+
+## O que roda onde
+
+- **No PC do cliente**: transcrição da fala, composição da trilha, corte, legenda e render. Funciona sem internet depois de instalado.
+- **Na conta de IA do cliente** (inclusive as gratuitas): o planejamento do corte e a legenda do post. Só o texto da transcrição sai do PC. Não há custo de tokens nem créditos por vídeo.
+
+## Recursos
+
+- Timeline com camadas (vídeo, legendas, headline, trilha, efeitos, b-roll); corrigir a legenda é clicar na palavra e digitar.
+- Estilo da marca configurado uma vez (cores, legenda, headline, hashtags) e copiável entre projetos.
+- Biblioteca pessoal de fotos, vídeos e trilhas usada como b-roll.
+- Ficha de cada vídeo: duração antes e depois, o que saiu, nota do corte, trilha usada.
+- Vertical 9:16 (Reels, Shorts, TikTok) e horizontal 16:9 (YouTube, com capítulos e .srt).
+- **Multiplicador de criativos**: 3 ganchos × 3 corpos × 3 CTAs = 27 vídeos prontos para teste de tráfego.
+- Clipes de podcast, 5 versões do mesmo vídeo, correção por marcação, 4K HDR do iPhone.
+
+## Preços (oferta de lançamento, em reais)
+
+- **Teste grátis**: 7 dias com todos os recursos, sem cartão.
+- **Pro Mensal**: R$ 59/mês (valor cheio R$ 99,90). 1 computador, vídeos ilimitados.
+- **Pro Anual**: R$ 399/ano (valor cheio R$ 899), cerca de R$ 33,25 por mês. 1 computador.
+- **Pro Escala**: sob consulta, a partir de 2 computadores, para agências e operações de tráfego.
+
+A assinatura é feita dentro do app. Cancela quando quiser; vídeos, projetos e estilos ficam no PC do cliente.
+
+## Requisitos
+
+Windows 10 ou 11, 64 bits. Com placa NVIDIA é mais rápido; sem ela, funciona na CPU. O instalador leva cerca de 1 minuto e a IA local baixa os componentes no primeiro uso.

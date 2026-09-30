@@ -77,7 +77,7 @@
   const el = (id) => document.getElementById(id);
   const presets = Array.from(document.querySelectorAll('.calc-presets button'));
   const faixas = Array.from(document.querySelectorAll('.faixa'));
-  const render = () => {
+  const render = (piscar) => {
     const videos = Number(v.value);
     const preco = Number(p.value);
     // a faixa acesa e a que contem o preco escolhido
@@ -101,18 +101,21 @@
       ? Math.round(vezes).toLocaleString('pt-BR') + ' vezes o valor da assinatura'
       : 'já compensa a partir do primeiro vídeo';
     presets.forEach((b) => b.classList.toggle('on', Number(b.dataset.v) === videos));
-    // os numeros piscam quando mudam
+    // os numeros piscam quando MUDAM. Na primeira pintura nao: o `offsetWidth`
+    // que reinicia a animacao forca um layout da pagina inteira ainda no
+    // carregamento (era a tarefa longa de ~740 ms do main.js no celular).
+    if (!piscar) return;
     ['calcFora', 'calcSobra', 'calcPorVideo'].forEach((id) => {
       const n = el(id); if (!n) return;
       n.classList.remove('bump'); void n.offsetWidth; n.classList.add('bump');
     });
   };
-  v.addEventListener('input', render);
-  p.addEventListener('input', render);
-  presets.forEach((b) => b.addEventListener('click', () => { v.value = b.dataset.v; render(); }));
+  v.addEventListener('input', () => render(true));
+  p.addEventListener('input', () => render(true));
+  presets.forEach((b) => b.addEventListener('click', () => { v.value = b.dataset.v; render(true); }));
   faixas.forEach((f) => f.addEventListener('click', () => {
     p.value = f.dataset.preco;
-    render();
+    render(true);
     const calc = document.getElementById('calc');
     if (calc && window.matchMedia('(max-width: 960px)').matches) calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }));

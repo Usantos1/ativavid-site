@@ -1,6 +1,15 @@
 /* ATIVAVID — página de vendas. Identidade do app: fundo quase preto,
    vermelho da marca #ff0004, verde-azulado dos estados "concluído".
-   Display: Poppins (a fonte do produto). Corpo: Source Sans 3. */
+   Display: Poppins (a fonte do produto). Corpo: Source Sans 3.
+   As fontes moram em assets/fonts (recorte latin do Google Fonts, licenca
+   OFL): buscar no Google custava dois dominios e ~860 ms de bloqueio no
+   celular. */
+
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 400; font-display: swap; src: url("assets/fonts/poppins-400.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 600; font-display: swap; src: url("assets/fonts/poppins-600.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 800; font-display: swap; src: url("assets/fonts/poppins-800.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 900; font-display: swap; src: url("assets/fonts/poppins-900.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Source Sans 3"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("assets/fonts/source-sans-3.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 :root {
   --bg: #0b0c10;
@@ -11,6 +20,9 @@
   --dim: #a3abb6;
   --red: #ff0004;
   --red-2: #ff3b3e;
+  --red-deep: #e60004; /* fundo de selo com texto branco: 4,81:1 */
+  --red-ink: #ff3b3e;  /* texto vermelho pequeno sobre painel: 4,93:1 */
+  --fine: #8a93a0;     /* letra miuda do rodape: 6,29:1 (era 4,32) */
   --teal: #1fd1a8;
   --amber: #ffb020;
   --display: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -41,7 +53,7 @@ h2 { font-size: clamp(26px, 3.2vw, 38px); font-weight: 800; }
 h3 { font-size: 19px; font-weight: 700; }
 p { margin: 0; }
 .wrap { width: min(var(--wrap), calc(100% - 40px)); margin-inline: auto; }
-.skip { position: absolute; left: -999px; top: 8px; background: var(--red); color: #fff; padding: 8px 12px; border-radius: 8px; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--red-deep); color: #fff; padding: 8px 12px; border-radius: 8px; }
 .skip:focus { left: 8px; z-index: 100; }
 
 /* ---------- botões ---------- */
@@ -193,7 +205,7 @@ th small { display: block; font-weight: 400; color: var(--dim); }
 td:first-child { color: var(--text); font-weight: 600; }
 td { color: var(--dim); }
 .hl { background: rgba(255, 0, 4, .07); color: var(--text) !important; font-weight: 700; }
-th.hl { color: var(--red) !important; }
+th.hl { color: var(--red-ink) !important; }
 tr:last-child td { border-bottom: 0; }
 
 /* ---------- preço ---------- */
@@ -207,7 +219,7 @@ tr:last-child td { border-bottom: 0; }
 @media (max-width: 1000px) { .plans { grid-template-columns: 1fr 1fr; } .plan-escala { grid-column: 1 / -1; } }
 .plan { position: relative; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px; }
 .plan-best { border-color: rgba(255, 0, 4, .6); box-shadow: 0 0 0 4px rgba(255, 0, 4, .12), var(--shadow); }
-.badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: var(--red); color: #fff; font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; }
+.badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: var(--red-deep); color: #fff; font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; }
 .plan-name { font-family: var(--display); font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; font-size: 13px; }
 .price { font-family: var(--display); font-weight: 900; font-size: 46px; line-height: 1; margin-top: 8px; font-variant-numeric: tabular-nums; }
 .price small { font-size: 22px; vertical-align: top; margin-right: 4px; color: var(--dim); }
@@ -243,11 +255,12 @@ tr:last-child td { border-bottom: 0; }
 .foot-links { display: flex; flex-wrap: wrap; gap: 18px; }
 .foot-links a { color: var(--text); text-decoration: none; font-weight: 600; }
 .foot-links a:hover { color: var(--red); }
-.fine { grid-column: 1 / -1; font-size: 13px; color: #6f7784; }
+.fine { grid-column: 1 / -1; font-size: 13px; color: var(--fine); }
 @media (max-width: 760px) { .foot-in { grid-template-columns: 1fr; } }
 
 /* ---------- sticky cta (mobile) ---------- */
 .sticky-cta { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 60; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(23, 26, 33, .96); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px 10px 16px; box-shadow: var(--shadow); font-family: var(--display); font-weight: 600; font-size: 14px; }
+.sticky-cta[hidden] { display: none; }
 @media (min-width: 861px) { .sticky-cta { display: none !important; } }
 
 /* ---------- reveal ---------- */
@@ -264,12 +277,12 @@ tr:last-child td { border-bottom: 0; }
 .faixa:hover { border-color: var(--dim); transform: translateY(-2px); }
 .faixa:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
 .faixa.on { border-color: var(--red); box-shadow: 0 0 0 4px rgba(255, 0, 4, .14), 0 18px 40px rgba(0, 0, 0, .35); background: linear-gradient(180deg, rgba(255, 0, 4, .10), var(--panel) 60%); }
-.faixa.on::before { content: "✓ usando na conta"; position: absolute; right: 14px; top: 14px; font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
+.faixa.on::before { content: "✓ usando na conta"; position: absolute; right: 14px; top: 14px; font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--red-ink); }
 .faixa-tag { display: inline-block; font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); border: 1px solid rgba(31, 209, 168, .5); border-radius: 999px; padding: 3px 9px; margin-bottom: 10px; }
 .faixa-nome { display: block; font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); min-height: 2.6em; padding-right: 30%; }
 .faixa-preco { display: block; font-family: var(--display); font-weight: 900; font-size: 26px; line-height: 1.1; margin-top: 10px; font-variant-numeric: tabular-nums; }
 .faixa-preco i { font-style: normal; font-weight: 600; font-size: 16px; color: var(--dim); margin: 0 4px; }
-.faixa-preco sup { font-size: 16px; color: var(--red); }
+.faixa-preco sup { font-size: 16px; color: var(--red-ink); }
 .faixa-desc { display: block; color: var(--dim); font-size: 15px; margin-top: 8px; }
 .faixa.on .faixa-desc { color: var(--text); }
 .faixas-nota { color: var(--dim); max-width: 60em; margin-top: 18px; font-size: 15px; }
@@ -301,7 +314,7 @@ tr:last-child td { border-bottom: 0; }
 
 /* ===== Oferta de lançamento ===== */
 .launch { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 36px; padding: 16px 20px; border: 1px solid rgba(255, 0, 4, .5); border-radius: 14px; background: linear-gradient(90deg, rgba(255, 0, 4, .14), rgba(255, 0, 4, .03)); }
-.launch-tag { font-family: var(--display); font-weight: 800; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #fff; background: var(--red); padding: 7px 12px; border-radius: 999px; white-space: nowrap; }
+.launch-tag { font-family: var(--display); font-weight: 800; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #fff; background: var(--red-deep); padding: 7px 12px; border-radius: 999px; white-space: nowrap; }
 .launch p { color: var(--dim); margin: 0; }
 .launch p b { color: var(--text); }
 .price-de { margin-top: 14px; color: var(--dim); font-size: 14px; }
@@ -319,12 +332,12 @@ tr:last-child td { border-bottom: 0; }
   .calc-num { font-size: 28px; }
   .valor-quote { font-size: 17px; }
 }
-.tag-launch { display: inline-block; vertical-align: middle; margin-left: 8px; font-size: 10px; letter-spacing: .1em; color: #fff; background: var(--red); border-radius: 999px; padding: 4px 9px; }
+.tag-launch { display: inline-block; vertical-align: middle; margin-left: 8px; font-size: 10px; letter-spacing: .1em; color: #fff; background: var(--red-deep); border-radius: 999px; padding: 4px 9px; }
 .launch-planos { margin: 22px 0 0; }
 .price-consulta { font-size: 28px; white-space: nowrap; }
 .valor { border-top: 0; }
 .faixa-total { display: block; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); font-family: var(--display); font-weight: 700; font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.faixa.on .faixa-total { color: var(--red); }
+.faixa.on .faixa-total { color: var(--red-ink); }
 @keyframes bump { 0% { transform: scale(1); } 30% { transform: scale(1.06); color: #fff; } 100% { transform: scale(1); } }
 .calc-num.bump { animation: bump .45s ease; transform-origin: left center; }
 .calc-sub.bump { animation: bump .45s ease; transform-origin: left center; }
@@ -352,7 +365,7 @@ tr:last-child td { border-bottom: 0; }
 
 /* ===== persuasão: pílula da oferta no herói, CTA do meio ===== */
 .pill-launch { display: inline-flex; align-items: center; gap: 10px; margin: -8px 0 22px; padding: 8px 14px 8px 8px; border: 1px solid rgba(255, 0, 4, .5); border-radius: 999px; background: rgba(255, 0, 4, .10); font-family: var(--display); font-weight: 700; font-size: 14px; }
-.pill-launch b { background: var(--red); color: #fff; border-radius: 999px; padding: 4px 10px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.pill-launch b { background: var(--red-deep); color: #fff; border-radius: 999px; padding: 4px 10px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
 .pill-launch s { color: var(--dim); font-weight: 600; text-decoration-color: var(--red); }
 .cta-meio { margin-top: 34px; }
 .who-card p { font-size: 15px; }
@@ -375,16 +388,18 @@ tr:last-child td { border-bottom: 0; }
 
 
 /* ---------- CTA com feixe ----------
-   O anel NAO e `box-shadow`: sao dois backgrounds com a borda transparente.
-   O `padding-box` pinta o miolo grafite, o `border-box` pinta o conico. So
-   ~40% do circulo tem cor, e por isso o brilho parece um feixe ANDANDO na
-   borda em vez de um anel aceso.
-   Mesma receita usada no aplicativo (5.1.45). */
-@property --alc-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-@keyframes alc-border-spin { to { --alc-angle: 360deg; } }
+   O anel e um gradiente conico num quadrado maior que o botao, GIRANDO por
+   `transform` atras de um miolo grafite recuado 1px (::after). So ~40% do
+   circulo tem cor, e por isso o brilho parece um feixe ANDANDO na borda em
+   vez de um anel aceso.
+   Antes o giro animava uma propriedade registrada (--alc-angle): cada quadro
+   recalculava estilo e repintava os 7 botoes no thread principal — no
+   Lighthouse de celular eram ~17 s de trabalho e 1,2 s de bloqueio.
+   `transform` roda no compositor e nao toca o thread principal.
+   Mesma receita visual usada no aplicativo (5.1.45). */
+@keyframes alc-border-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
 .btn-primary.alc-shiny {
-  --alc-angle: 0deg;
   --feixe-a: #a30003;
   --feixe-b: var(--red-2);
   --glow: 255 59 62;
@@ -392,31 +407,33 @@ tr:last-child td { border-bottom: 0; }
   overflow: hidden;
   isolation: isolate;
   color: #fff;
-  border: 1px solid transparent;
-  background:
-    linear-gradient(#2a1416, #0b0c10) padding-box,
-    conic-gradient(from var(--alc-angle),
-      transparent 0%, var(--feixe-a) 5%, var(--feixe-b) 15%,
-      var(--feixe-a) 30%, transparent 40%, transparent 100%) border-box;
-  box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / .15),
-    inset 0 -2px 6px rgb(0 0 0 / .2),
-    0 12px 30px -8px rgb(0 0 0 / .55);
+  border: 0; /* o 1px da borda virou padding: quem desenha o anel sao os pseudos */
+  padding: 14px 25px;
+  background: transparent;
+  box-shadow: 0 12px 30px -8px rgb(0 0 0 / .55);
+}
+.btn-lg.alc-shiny { padding: 17px 29px; }
+.btn-sm.alc-shiny { padding: 11px 19px; }
+.btn-primary.alc-shiny::before {
+  content: ""; position: absolute; z-index: -2; left: 50%; top: 50%;
+  width: 160%; aspect-ratio: 1;
+  background: conic-gradient(from 0deg,
+    transparent 0%, var(--feixe-a) 5%, var(--feixe-b) 15%,
+    var(--feixe-a) 30%, transparent 40%, transparent 100%);
+  transform: translate(-50%, -50%);
   animation: alc-border-spin 2.5s linear infinite;
 }
-.btn-primary.alc-shiny:hover {
-  /* o hover de `.btn-primary` troca o `background` por uma cor chapada, o que
-     apagaria o anel — aqui ele e repetido e so a sombra responde */
-  background:
-    linear-gradient(#2a1416, #0b0c10) padding-box,
-    conic-gradient(from var(--alc-angle),
-      transparent 0%, var(--feixe-a) 5%, var(--feixe-b) 15%,
-      var(--feixe-a) 30%, transparent 40%, transparent 100%) border-box;
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / .25),
-    0 18px 44px -8px rgb(var(--glow) / .55);
+.btn-primary.alc-shiny::after {
+  content: ""; position: absolute; z-index: -1; inset: 1px; border-radius: inherit;
+  background: linear-gradient(#2a1416, #0b0c10);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / .15), inset 0 -2px 6px rgb(0 0 0 / .2);
 }
+.btn-primary.alc-shiny:hover {
+  background: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px -8px rgb(var(--glow) / .55);
+}
+.btn-primary.alc-shiny:hover::after { box-shadow: inset 0 1px 1px rgb(255 255 255 / .25); }
 /* A textura. Centro em .5px faz o ponto cair DENTRO de um pixel em tela 1x;
    centrado na quina do tile ele sumiria fora de retina. A mascara diagonal
    deixa a faixa so num pedaco — cobrir o botao inteiro vira ruido. */
@@ -432,9 +449,9 @@ tr:last-child td { border-bottom: 0; }
 .alc-btn-content { position: relative; z-index: 2; display: inline-flex;
   align-items: center; justify-content: center; gap: 8px; }
 
-/* Sete gradientes conicos girando. Uma landing fica aberta em segundo plano
-   o tempo todo — fora de foco eles nao estao sendo olhados. */
-html.janela-parada .btn-primary.alc-shiny { animation-play-state: paused; }
+/* Uma landing fica aberta em segundo plano o tempo todo — fora de foco o
+   feixe nao esta sendo olhado. */
+html.janela-parada .btn-primary.alc-shiny::before { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .btn-primary.alc-shiny { animation: none !important; }
+  .btn-primary.alc-shiny::before { animation: none !important; }
 }

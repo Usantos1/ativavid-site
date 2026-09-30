@@ -1,0 +1,39 @@
+{
+  "specVersion": "1.0",
+  "entries": [
+    {
+      "identifier": "urn:air:ativavid.com:resource:ativavid",
+      "displayName": "ATIVAVID — Editor de vídeo com IA que roda no seu PC",
+      "type": "text/markdown; profile=\"urn:air:agent-skills\"",
+      "url": "https://ativavid.com/llms.txt",
+      "description": "Editor de vídeo com IA para Windows: transcreve, corta silêncios e erros, legenda no estilo da marca, cria headline, trilha, capa e a legenda do post para Reels, Shorts, TikTok e YouTube, sem o vídeo sair do computador. Para lojas, criadores, agências e gestores de tráfego. 7 dias grátis, sem cartão.",
+      "capabilities": [
+        "editar_video_com_ia_no_pc",
+        "cortar_silencios_e_erros",
+        "legendar_no_estilo_da_marca",
+        "gerar_headline_trilha_e_capa",
+        "multiplicar_criativos_para_trafego",
+        "exportar_reels_shorts_e_youtube"
+      ],
+      "representativeQueries": [
+        "editor de video com IA que roda no computador",
+        "programa que corta silencio e legenda video automaticamente",
+        "alternativa ao CapCut para editar reels em volume",
+        "como editar video para instagram sem pagar editor",
+        "ferramenta para criar varios criativos de video para anuncio"
+      ],
+      "tags": [
+        "edicao-de-video",
+        "inteligencia-artificial",
+        "legenda-automatica",
+        "reels",
+        "shorts",
+        "youtube",
+        "windows",
+        "trafego-pago"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-09-30T00:00:00Z"
+    }
+  ]
+}

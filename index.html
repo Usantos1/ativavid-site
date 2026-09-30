@@ -5,16 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ATIVAVID — Você grava. A IA edita. No seu PC.</title>
   <meta name="description" content="ATIVAVID é o editor de vídeo com IA que roda na sua máquina: transcreve, corta silêncios e erros, legenda no seu estilo, cria headline, trilha, capa e a legenda do post. Reels, Shorts e YouTube. 7 dias grátis, sem cartão.">
+  <link rel="canonical" href="https://ativavid.com/">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0b0c10">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ativavid.com/">
+  <meta property="og:site_name" content="ATIVAVID">
+  <meta property="og:locale" content="pt_BR">
   <meta property="og:title" content="ATIVAVID — Você grava. A IA edita. No seu PC.">
   <meta property="og:description" content="Editor de vídeo com IA que roda no seu Windows. Do arquivo bruto ao vídeo pronto para postar, em minutos. 7 dias grátis.">
-  <meta property="og:image" content="assets/og.jpg">
-  <meta property="og:type" content="website">
-  <link rel="icon" href="assets/icon.png" type="image/png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="assets/ui-editor.jpg">
-  <link rel="stylesheet" href="styles.css?v=20260903p">
+  <meta property="og:image" content="https://ativavid.com/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="ATIVAVID — editor de vídeo com IA para Windows">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ATIVAVID — Você grava. A IA edita. No seu PC.">
+  <meta name="twitter:description" content="Editor de vídeo com IA que roda no seu Windows. Do arquivo bruto ao vídeo pronto para postar, em minutos. 7 dias grátis.">
+  <meta name="twitter:image" content="https://ativavid.com/assets/og.jpg">
+  <link rel="icon" href="assets/icon-64.png" type="image/png" sizes="64x64">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <!-- Para agentes de IA: o que o ATIVAVID é, em Markdown, e o catálogo ARD -->
+  <link rel="alternate" type="text/markdown" href="/llms.txt" title="ATIVAVID para agentes de IA">
+  <link rel="ai-catalog" href="/.well-known/ai-catalog.json">
+  <link rel="ard" href="/.well-known/ard.json">
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/poppins-900.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/source-sans-3.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/poppins-800.woff2" crossorigin>
+  <link rel="preload" as="image" href="assets/ui-editor-1600.webp" imagesrcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" imagesizes="(max-width: 960px) calc(100vw - 40px), 560px" fetchpriority="high">
+  <link rel="stylesheet" href="styles.css?v=20260930a">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://ativavid.com/#organization",
+        "name": "ATIVAVID",
+        "url": "https://ativavid.com/",
+        "logo": "https://ativavid.com/assets/icon-512.png",
+        "areaServed": "BR",
+        "sameAs": ["https://instagram.com/ativavid"],
+        "parentOrganization": { "@type": "Organization", "name": "Prime Camp" }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://ativavid.com/#website",
+        "url": "https://ativavid.com/",
+        "name": "ATIVAVID",
+        "inLanguage": "pt-BR",
+        "publisher": { "@id": "https://ativavid.com/#organization" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://ativavid.com/#app",
+        "name": "ATIVAVID",
+        "description": "Editor de vídeo com IA que roda no seu PC: transcreve, corta silêncios e erros, legenda no seu estilo, cria headline, trilha, capa e a legenda do post. Reels, Shorts, TikTok e YouTube.",
+        "applicationCategory": "MultimediaApplication",
+        "applicationSubCategory": "Editor de vídeo com IA",
+        "operatingSystem": "Windows 10, Windows 11 (64 bits)",
+        "url": "https://ativavid.com/",
+        "downloadUrl": "https://ativavid.com/download",
+        "image": "https://ativavid.com/assets/og.jpg",
+        "screenshot": "https://ativavid.com/assets/ui-editor-1600.webp",
+        "inLanguage": "pt-BR",
+        "publisher": { "@id": "https://ativavid.com/#organization" },
+        "featureList": [
+          "Transcrição local, sem internet depois de instalado",
+          "Corte automático de silêncios e erros",
+          "Legenda no estilo da marca",
+          "Headline, trilha por IA e capa automáticas",
+          "Legenda do post com hashtags",
+          "Multiplicador: 3 ganchos × 3 corpos × 3 CTAs = 27 criativos",
+          "Reels 9:16 e YouTube 16:9 com capítulos e .srt",
+          "Timeline com camadas para ajuste fino"
+        ],
+        "offers": [
+          { "@type": "Offer", "name": "Teste grátis de 7 dias", "price": "0", "priceCurrency": "BRL", "availability": "https://schema.org/InStock", "url": "https://ativavid.com/download" },
+          { "@type": "Offer", "name": "Pro Mensal", "price": "59.00", "priceCurrency": "BRL", "availability": "https://schema.org/InStock", "url": "https://ativavid.com/#preco",
+            "priceSpecification": { "@type": "UnitPriceSpecification", "price": "59.00", "priceCurrency": "BRL", "unitCode": "MON", "referenceQuantity": { "@type": "QuantitativeValue", "value": 1, "unitCode": "MON" } } },
+          { "@type": "Offer", "name": "Pro Anual", "price": "399.00", "priceCurrency": "BRL", "availability": "https://schema.org/InStock", "url": "https://ativavid.com/#preco",
+            "priceSpecification": { "@type": "UnitPriceSpecification", "price": "399.00", "priceCurrency": "BRL", "unitCode": "ANN", "referenceQuantity": { "@type": "QuantitativeValue", "value": 1, "unitCode": "ANN" } } }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://ativavid.com/#faq",
+        "mainEntity": [
+          { "@type": "Question", "name": "Preciso saber editar vídeo?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Arraste o vídeo e clique em Editar com IA. A timeline existe para quem quiser ajustar." } },
+          { "@type": "Question", "name": "Meu vídeo vai parar em algum servidor?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Transcrição, corte e render acontecem no seu PC. Só o texto da transcrição vai para a IA que planeja o corte, e você escolhe qual IA." } },
+          { "@type": "Question", "name": "Tem custo de tokens ou créditos por vídeo?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Ele usa a sua conta de IA (inclusive as gratuitas). Trilha e transcrição rodam no seu PC. Você paga a assinatura e mais nada." } },
+          { "@type": "Question", "name": "Roda no meu computador?", "acceptedAnswer": { "@type": "Answer", "text": "Windows 10 ou 11, 64 bits. Com placa NVIDIA é mais rápido; sem ela, funciona na CPU. O app faz o diagnóstico da máquina e diz o que esperar." } },
+          { "@type": "Question", "name": "E se a IA errar uma palavra ou um corte?", "acceptedAnswer": { "@type": "Answer", "text": "Clique na legenda e corrija. Marque o trecho e escreva \"não corta aqui\". Só o que mudou é refeito." } },
+          { "@type": "Question", "name": "Funciona para vídeo longo, tipo YouTube?", "acceptedAnswer": { "@type": "Answer", "text": "Sim. Horizontal sai com selo, capítulos, legenda e o .srt do CC. Vertical sai pronto para Reels, Shorts e TikTok." } },
+          { "@type": "Question", "name": "Funciona no Mac?", "acceptedAnswer": { "@type": "Answer", "text": "Ainda não, hoje é só Windows." } },
+          { "@type": "Question", "name": "O que acontece quando os 7 dias acabam?", "acceptedAnswer": { "@type": "Answer", "text": "O app mostra os planos. Se não assinar, para de editar, mas seus vídeos e projetos continuam nas suas pastas. Assinou, volta na hora." } }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
@@ -22,8 +112,8 @@
 
 <header class="nav" id="topo">
   <div class="wrap nav-in">
-    <a class="brand" href="#topo" aria-label="ATIVAVID">
-      <img src="assets/logo.png" alt="ATIVAVID" width="140" height="44">
+    <a class="brand" href="#topo" aria-label="ATIVAVID — voltar ao topo">
+      <img src="assets/logo-280.webp" alt="ATIVAVID" width="140" height="44" decoding="async">
     </a>
     <nav class="nav-links" aria-label="Seções">
       <a href="#como">Como funciona</a>
@@ -65,7 +155,7 @@
       <div class="hero-visual" aria-hidden="true">
         <div class="device">
           <div class="device-bar"><span></span><span></span><span></span></div>
-          <img src="assets/ui-editor.jpg" alt="" width="1600" height="746" fetchpriority="high">
+          <img src="assets/ui-editor-1600.webp" srcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" sizes="(max-width: 960px) calc(100vw - 40px), 560px" alt="" width="1600" height="745" fetchpriority="high">
         </div>
         <div class="chip chip-a"><b>CONCLUÍDO</b> · 1:20 → 1:00 · 16 s de silêncio removidos</div>
         <div class="chip chip-b">score <b>80</b></div>
@@ -252,33 +342,33 @@
             <li>Reabra dias depois e continue de onde parou</li>
           </ul>
         </div>
-        <figure class="feat-shot"><img src="assets/ui-editor.jpg" alt="Editor do ATIVAVID com timeline em camadas" loading="lazy" width="1600" height="746"></figure>
+        <figure class="feat-shot"><img src="assets/ui-editor-1600.webp" srcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 640px" alt="Editor do ATIVAVID com timeline em camadas" loading="lazy" decoding="async" width="1600" height="745"></figure>
       </article>
 
       <div class="feat-grid">
         <article class="feat">
-          <figure class="feat-shot"><img src="assets/ui-estilos.jpg" alt="Tela de Estilos com 18 estilos de headline" loading="lazy" width="1600" height="746"></figure>
+          <figure class="feat-shot"><img src="assets/ui-estilos-1200.webp" srcset="assets/ui-estilos-800.webp 800w, assets/ui-estilos-1200.webp 1200w, assets/ui-estilos-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 580px" alt="Tela de Estilos com 18 estilos de headline" loading="lazy" decoding="async" width="1600" height="745"></figure>
           <div class="feat-copy">
             <h3>O estilo da sua marca, uma vez</h3>
             <p>Cores, legenda, headline e hashtags configurados uma vez. Todo vídeo sai com a sua cara. <b>Copie o estilo</b> e cole nos outros.</p>
           </div>
         </article>
         <article class="feat">
-          <figure class="feat-shot"><img src="assets/ui-biblioteca.jpg" alt="Biblioteca de imagens, vídeos, trilhas e efeitos" loading="lazy" width="1600" height="746"></figure>
+          <figure class="feat-shot"><img src="assets/ui-biblioteca-1200.webp" srcset="assets/ui-biblioteca-800.webp 800w, assets/ui-biblioteca-1200.webp 1200w, assets/ui-biblioteca-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 580px" alt="Biblioteca de imagens, vídeos, trilhas e efeitos" loading="lazy" decoding="async" width="1600" height="745"></figure>
           <div class="feat-copy">
             <h3>Sua biblioteca vira b-roll</h3>
             <p>Fotos, takes e trilhas suas. A IA encaixa o b-roll na frase certa; você ajusta na timeline se quiser.</p>
           </div>
         </article>
         <article class="feat">
-          <figure class="feat-shot"><img src="assets/ui-concluidos.jpg" alt="Concluídos: cada vídeo com sua ficha" loading="lazy" width="1600" height="746"></figure>
+          <figure class="feat-shot"><img src="assets/ui-concluidos-1200.webp" srcset="assets/ui-concluidos-800.webp 800w, assets/ui-concluidos-1200.webp 1200w, assets/ui-concluidos-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 580px" alt="Concluídos: cada vídeo com sua ficha" loading="lazy" decoding="async" width="1600" height="745"></figure>
           <div class="feat-copy">
             <h3>Cada vídeo com a sua ficha</h3>
             <p>Duração antes e depois, o que saiu, nota do corte, trilha usada. Sem caixa-preta.</p>
           </div>
         </article>
         <article class="feat">
-          <figure class="feat-shot"><img src="assets/ui-multiplicador.jpg" alt="Multiplicador de criativos: ganchos, corpos e CTAs" loading="lazy" width="1600" height="746"></figure>
+          <figure class="feat-shot"><img src="assets/ui-multiplicador-1200.webp" srcset="assets/ui-multiplicador-800.webp 800w, assets/ui-multiplicador-1200.webp 1200w, assets/ui-multiplicador-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 580px" alt="Multiplicador de criativos: ganchos, corpos e CTAs" loading="lazy" decoding="async" width="1600" height="745"></figure>
           <div class="feat-copy">
             <h3>Reels 9:16 e YouTube 16:9</h3>
             <p>Vertical para Reels, Shorts e TikTok. Horizontal para o YouTube, com capítulos e o .srt do CC. Sem exportar duas vezes.</p>
@@ -488,12 +578,12 @@
 <footer class="foot">
   <div class="wrap foot-in">
     <div>
-      <img src="assets/logo.png" alt="ATIVAVID" width="120" height="38">
+      <img src="assets/logo-280.webp" alt="ATIVAVID" width="120" height="38" loading="lazy" decoding="async">
       <p>Editor de vídeo com IA que roda no seu PC. Feito na rotina de uma loja que posta todo dia.</p>
     </div>
     <div class="foot-links">
       <a href="/download" data-ativa-form="ativavid-864e5e">Baixar a última versão</a>
-      <a href="https://instagram.com/ativavid" rel="noopener" target="_blank">@ativavid</a>
+      <a href="https://instagram.com/ativavid" rel="noopener me" target="_blank" aria-label="@ativavid no Instagram (abre em nova aba)">@ativavid</a>
     </div>
     <p class="fine">© <span id="ano">2026</span> ATIVAVID · Prime Camp. Todos os direitos reservados.</p>
   </div>
@@ -505,6 +595,6 @@
 </div>
 
 <script src="https://ativavid.primecamp.com.br/embed.js?v=1.2.3" data-form="ativavid-864e5e" data-mode="modal" data-path="/" data-theme="dark" defer></script>
-  <script src="main.js?v=20260903p" defer></script>
+  <script src="main.js?v=20260930a" defer></script>
 </body>
 </html>
