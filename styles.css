@@ -386,7 +386,7 @@ tr:last-child td { border-bottom: 0; }
 .local { background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .local-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .local-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
-.local-ico { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: rgba(31, 209, 168, .12); color: var(--teal); font-family: var(--display); font-weight: 900; font-size: 15px; letter-spacing: .04em; margin-bottom: 14px; border: 1px solid rgba(31, 209, 168, .35); }
+.local-ico { display: inline-grid; place-items: center; min-width: 44px; padding: 0 10px; height: 44px; border-radius: 12px; background: rgba(31, 209, 168, .12); color: var(--teal); font-family: var(--display); font-weight: 900; font-size: 15px; letter-spacing: .04em; margin-bottom: 14px; border: 1px solid rgba(31, 209, 168, .35); }
 .local-card h3 { font-size: 17px; }
 .local-card p { color: var(--dim); font-size: 15px; margin-top: 8px; }
 .nao-precisa { margin-top: 28px; border: 1px dashed rgba(255, 0, 4, .5); border-radius: var(--radius); padding: 20px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 26px; }
@@ -466,4 +466,83 @@ tr:last-child td { border-bottom: 0; }
 html.janela-parada .btn-primary.alc-shiny::before { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
   .btn-primary.alc-shiny::before { animation: none !important; }
+}
+
+/* ===== Windows e Mac ===== */
+.os-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 16px; color: var(--dim); font-size: 15px; }
+.os-line b { color: var(--text); font-weight: 600; }
+.os-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2); font-family: var(--display); font-weight: 600; font-size: 13px; color: var(--text); }
+.os-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--teal); }
+.plataformas { background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.plat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.plat-card { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+.plat-card h3 { font-size: 22px; margin-top: 6px; }
+.plat-card .ticks { margin-bottom: 20px; }
+.plat-tag { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); }
+.plat-meta { color: var(--dim); font-size: 14px; margin: auto 0 14px; padding-top: 4px; font-variant-numeric: tabular-nums; }
+.plat-btn { width: 100%; }
+.plat-btn:hover { border-color: var(--teal); }
+.plat-nota { text-align: center; color: var(--dim); font-size: 15px; margin-top: 22px; }
+.plat-nota b { color: var(--text); }
+.btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; pointer-events: none; }
+@media (max-width: 760px) { .plat-grid { grid-template-columns: 1fr; } }
+
+/* ===== /baixar ===== */
+.dl-hero { position: relative; overflow: hidden; padding: 84px 0 56px; text-align: center; }
+.dl-hero::before { content: ""; position: absolute; inset: -30% -10% auto -10%; height: 90%; pointer-events: none;
+  background: radial-gradient(50% 60% at 50% 20%, rgba(255, 0, 4, .20), transparent 70%); }
+.dl-hero-in { position: relative; max-width: 760px; }
+.dl-lead { margin: 18px auto 30px; }
+.dl-main { display: flex; flex-direction: column; align-items: center; }
+.dl-main[hidden] { display: none; } /* display:flex venceria o `hidden` */
+.dl-aviso { max-width: 560px; margin: 22px auto 0; padding: 14px 18px; border: 1px solid rgba(255, 176, 32, .5); border-radius: 14px; background: rgba(255, 176, 32, .08); color: var(--text); }
+.dl-h2 { text-align: center; margin-bottom: 30px; }
+.dl-opcoes { padding-top: 40px; }
+.dl-nota { text-align: center; color: var(--dim); font-size: 15px; margin-top: 18px; }
+.dl-passos { background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.passo-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 26px; }
+.passo-card summary { cursor: pointer; list-style: none; padding: 18px 30px 18px 0; position: relative; font-family: var(--display); font-weight: 800; font-size: 19px; }
+.passo-card summary::-webkit-details-marker { display: none; }
+.passo-card summary::after { content: "+"; position: absolute; right: 2px; top: 13px; font-size: 26px; font-weight: 400; color: var(--red-ink); transition: transform .2s ease; }
+.passo-card[open] summary::after { transform: rotate(45deg); }
+.passo-card summary:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; border-radius: 6px; }
+.passo-card ol { margin: 0 0 20px; padding-left: 22px; display: grid; gap: 10px; color: var(--dim); }
+.passo-card ol b { color: var(--text); }
+.pg-baixar .nav .btn-ghost { white-space: nowrap; }
+/* a pílula da oferta quebrava em 4 linhas no celular ("R$ / 59/mês") */
+.pill-launch { white-space: nowrap; max-width: 100%; }
+@media (max-width: 420px) {
+  .pill-launch { gap: 8px; font-size: 13px; padding: 6px 12px 6px 6px; }
+  .pill-launch b { font-size: 10px; padding: 4px 8px; letter-spacing: .06em; }
+}
+/* o desenho 3 x 3 x 3 = 27 tinha ~385 px de largura minima: em celular de
+   360 px a pagina inteira rolava para o lado */
+@media (max-width: 960px) { .multi-in { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 420px) {
+  .combo { gap: 6px; }
+  .combo .col { gap: 6px; }
+  .combo i { font-size: 12px; padding: 8px 6px; border-radius: 8px; }
+  .combo .lab { font-size: 10px; letter-spacing: .06em; }
+  .combo .x, .combo .eq { font-size: 20px; }
+  .grid27 { grid-template-columns: repeat(3, 10px); gap: 4px; }
+  .grid27 span { width: 10px; height: 18px; }
+}
+/* botao grande com texto longo nao quebrava a linha e passava da tela em 320-360 px */
+@media (max-width: 420px) {
+  .btn-lg { white-space: normal; text-align: center; line-height: 1.2; max-width: 100%; }
+  .btn-lg.alc-shiny { padding: 15px 22px; font-size: 16px; }
+}
+/* em 320 px a pílula inteira não cabe: ela quebra ENTRE os pedaços (selo,
+   preço, preço riscado), nunca no meio de "R$ 59/mês" */
+.pill-launch { flex-wrap: wrap; row-gap: 6px; border-radius: 22px; }
+@media (max-width: 960px) { .hero-in { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) { .plans { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 420px) {
+  .btn-lg { display: flex; width: 100%; }
+  .btn-lg .alc-btn-content { display: block; white-space: normal; }
+  .price-consulta { white-space: normal; }
+}
+@media (max-width: 420px) {
+  .btn-primary.alc-shiny:not(.btn-sm) { display: flex; width: 100%; white-space: normal; text-align: center; line-height: 1.2; }
+  .btn-primary.alc-shiny:not(.btn-sm) .alc-btn-content { display: block; white-space: normal; }
 }
