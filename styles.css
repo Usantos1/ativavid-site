@@ -634,3 +634,7 @@ button.btn-primary.alc-shiny { border: 0; }
 .link-botao { -webkit-appearance: none; appearance: none; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; font: inherit; font-weight: 600; color: var(--text); }
 .link-botao:hover { color: var(--red-ink); }
 .dado { font-size: 16px !important; padding: 14px 16px; border-radius: 14px; background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px var(--line); }
+/* título do momento por cima do texto E da imagem, centralizado (Multiplicador) */
+.momento-titulo > h3 { grid-column: 1 / -1; text-align: center; max-width: 22em; margin: 0 auto 8px; font-size: clamp(30px, 3.4vw, 48px); }
+/* a promessa da seção e o subtítulo no centro da tela */
+.dia-tit, .dia-sub { text-align: center; margin-inline: auto; }
