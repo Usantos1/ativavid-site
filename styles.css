@@ -638,3 +638,8 @@ button.btn-primary.alc-shiny { border: 0; }
 .momento-titulo > h3 { grid-column: 1 / -1; text-align: center; max-width: 22em; margin: 0 auto 8px; font-size: clamp(30px, 3.4vw, 48px); }
 /* a promessa da seção e o subtítulo no centro da tela */
 .dia-tit, .dia-sub { text-align: center; margin-inline: auto; }
+
+/* a pílula da oferta parece botão, então é botão: abre o formulário */
+button.pilula { -webkit-appearance: none; appearance: none; border: 0; color: var(--text); cursor: pointer; transition: transform .2s ease; }
+button.pilula:hover { transform: translateY(-1px); }
+button.pilula:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
