@@ -5,9 +5,7 @@
 O problema que o ATIVAVID resolve é o da edição que come a noite: quem precisa postar todo dia grava rápido, mas perde de 40 minutos a 2 horas editando cada vídeo, ou paga de R$ 120 a R$ 650 por Reel a um editor. O ATIVAVID faz o trabalho pesado na máquina da pessoa e deixa a timeline aberta para o ajuste fino.
 
 - [Site](https://ativavid.com/): apresentação, calculadora de economia, preços e dúvidas.
-- [Baixar](https://ativavid.com/baixar): página de download que reconhece o sistema (Windows ou Mac) e entrega o instalador certo; o teste de 7 dias começa no app.
-- [Instalador para Windows](https://ativavid.com/download/windows): Instalar.ATIVAVID.exe, pequeno; a IA baixa os componentes no primeiro uso.
-- [Instalador para Mac](https://ativavid.com/download/mac): .dmg com tudo dentro (Mac com chip Apple).
+- [Baixar o teste grátis](https://ativavid.com/): pelo botão Baixar do site; um formulário rápido libera o instalador certo (Windows 10/11 ou Mac com chip Apple). O teste de 7 dias começa no app.
 - [Preços](https://ativavid.com/#preco): planos Pro Mensal, Pro Anual e Pro Escala.
 - [Dúvidas frequentes](https://ativavid.com/#faq): respostas curtas sobre privacidade, requisitos e custo.
 - [Instagram @ativavid](https://instagram.com/ativavid): perfil oficial do produto.

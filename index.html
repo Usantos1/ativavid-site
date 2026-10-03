@@ -33,7 +33,7 @@
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/poppins-800.woff2" crossorigin>
   <link rel="preload" as="image" href="assets/ui-editor-1600.webp" imagesrcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" imagesizes="(max-width: 960px) calc(100vw - 40px), 600px" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20261003g">
+  <link rel="stylesheet" href="styles.css?v=20261003h">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -65,7 +65,7 @@
         "applicationSubCategory": "Editor de vídeo com IA",
         "operatingSystem": "Windows 10, Windows 11 (64 bits), macOS 12 ou mais novo (chip Apple)",
         "url": "https://ativavid.com/",
-        "downloadUrl": "https://ativavid.com/baixar",
+        "downloadUrl": "https://ativavid.com/",
         "image": "https://ativavid.com/assets/og.jpg",
         "screenshot": "https://ativavid.com/assets/ui-editor-1600.webp",
         "inLanguage": "pt-BR",
@@ -81,7 +81,7 @@
           "Timeline com camadas para ajuste fino"
         ],
         "offers": [
-          { "@type": "Offer", "name": "Teste grátis de 7 dias", "price": "0", "priceCurrency": "BRL", "availability": "https://schema.org/InStock", "url": "https://ativavid.com/baixar" },
+          { "@type": "Offer", "name": "Teste grátis de 7 dias", "price": "0", "priceCurrency": "BRL", "availability": "https://schema.org/InStock", "url": "https://ativavid.com/" },
           { "@type": "Offer", "name": "Pro Mensal", "price": "59.00", "priceCurrency": "BRL", "availability": "https://schema.org/InStock", "url": "https://ativavid.com/#preco",
             "priceSpecification": { "@type": "UnitPriceSpecification", "price": "59.00", "priceCurrency": "BRL", "unitCode": "MON", "referenceQuantity": { "@type": "QuantitativeValue", "value": 1, "unitCode": "MON" } } },
           { "@type": "Offer", "name": "Pro Anual", "price": "399.00", "priceCurrency": "BRL", "availability": "https://schema.org/InStock", "url": "https://ativavid.com/#preco",
@@ -147,7 +147,7 @@
       <a href="#preco">Preço</a>
       <a href="#faq">Dúvidas</a>
     </nav>
-    <a class="btn btn-primary alc-shiny btn-sm" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="nav"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar grátis</span></a>
+    <button type="button" class="btn btn-primary alc-shiny btn-sm" data-ativa-form="ativavid-864e5e" data-cta="nav"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar grátis</span></button>
   </div>
 </header>
 
@@ -165,7 +165,7 @@
         </p>
         <p class="pilula vidro"><b>Oferta de lançamento</b> R$ 59/mês <s>R$ 99,90</s></p>
         <div class="cta-linha">
-          <a class="btn btn-primary alc-shiny btn-lg" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="hero"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar e testar 7 dias grátis</span></a>
+          <button type="button" class="btn btn-primary alc-shiny btn-lg" data-ativa-form="ativavid-864e5e" data-cta="hero"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar e testar 7 dias grátis</span></button>
         </div>
         <ul class="micro" aria-label="Condições do teste">
           <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>7 dias grátis</li>
@@ -244,7 +244,7 @@
         <p class="regua-grupo">E mais</p>
         <ol>
           <li><a href="#m-1100"><b>Seu estilo</b></a></li>
-          <li><a href="#m-1200"><b>27 criativos</b></a></li>
+          <li><a href="#m-1200"><b>Multiplicador</b></a></li>
           <li><a href="#m-1500"><b>Ajuste fino</b></a></li>
           <li><a href="#m-1800"><b>A conta</b></a></li>
           <li><a href="#m-dia30"><b>No fim do mês</b></a></li>
@@ -330,12 +330,13 @@
           </figure>
         </article>
 
-        <article class="momento" id="m-1200" data-rotulo="27 criativos">
+        <article class="momento" id="m-1200" data-rotulo="Multiplicador · 27 criativos">
           <div class="momento-txt">
-            <h3>De 9 takes, <span class="nb">27 criativos</span> para anunciar.</h3>
-            <p>Grave 3 ganchos, 3 corpos e 3 CTAs. O Multiplicador monta as 27 combinações, cada uma legendada, com headline e capa. Teste, ache a vencedora, aprove.</p>
+            <h3>Multiplicador de criativos: grave 9 takes, receba <span class="nb">27 anúncios</span> prontos.</h3>
+            <p>Cada take é uma gravação curta: <b>3 jeitos de abrir</b> o vídeo (ganchos), <b>3 de apresentar</b> a oferta (corpos) e <b>3 de chamar</b> para a ação (CTAs). O Multiplicador combina todos entre si e entrega <b>27 vídeos diferentes</b>, cada um legendado, com headline e capa, prontos para subir no gerenciador de anúncios.</p>
+            <p class="dado">Segundo a Nielsen, <b>quase metade do resultado de vendas</b> de uma campanha (47%) vem do criativo. Quem testa mais variações acha o anúncio vencedor mais rápido.</p>
             <p class="para-quem"><b>Roda tráfego pago?</b> O criativo que perde custou 2 minutos de máquina, não uma tarde de edição.</p>
-            <a class="btn btn-primary alc-shiny" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="multi"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Quero multiplicar meus criativos</span></a>
+            <button type="button" class="btn btn-primary alc-shiny" data-ativa-form="ativavid-864e5e" data-cta="multi"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Quero multiplicar meus criativos</span></button>
           </div>
           <figure class="momento-media">
             <div class="janela janela-solida janela-detalhe">
@@ -473,9 +474,8 @@
                   <li>Um estilo por cliente, sem limite de marcas</li>
                   <li>Implantação e treinamento da equipe</li>
                   <li>Suporte direto com quem fez o ATIVAVID</li>
-                  <li>Nota fiscal e faturamento mensal</li>
                 </ul>
-                <a class="btn btn-vidro plan-cta" href="/baixar" data-ativa-form="ativavid-864e5e" data-ativa-params="plano=escala" data-cta="escala">Falar sobre o plano Escala</a>
+                <button type="button" class="btn btn-vidro plan-cta" data-ativa-form="ativavid-864e5e" data-ativa-params="plano=escala" data-cta="escala">Falar sobre o plano Escala</button>
               </div>
             </div>
             <div class="launch">
@@ -483,7 +483,7 @@
               <p>O ATIVAVID está em lançamento. Quando a oferta acabar, o valor passa a ser <b>R$ 99,90 por mês</b> e <b>R$ 899 por ano</b>. Quem assina agora entra pelo preço de lançamento.</p>
             </div>
             <div class="cta-center">
-              <a class="btn btn-primary alc-shiny btn-lg" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="preco"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar e começar os 7 dias grátis</span></a>
+              <button type="button" class="btn btn-primary alc-shiny btn-lg" data-ativa-form="ativavid-864e5e" data-cta="preco"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar e começar os 7 dias grátis</span></button>
               <p class="micro-line">Windows 10/11 (64 bits) ou Mac com chip Apple (macOS 12+) · a página de download escolhe o instalador certo</p>
             </div>
             <p class="garantia"><b>Zero risco:</b> 7 dias de uso completo, sem cartão. Assinou e mudou de ideia? Cancela quando quiser. Seus vídeos, projetos e estilos ficam no seu computador, porque sempre estiveram lá.</p>
@@ -512,7 +512,7 @@
         <article class="momento momento-largo momento-fim" id="m-dia30" data-rotulo="No fim do mês">
           <div class="momento-txt">
             <h3>No fim do mês, 30 vídeos postados. Sem editor.</h3>
-            <p>O ATIVAVID nasceu na Prime Camp, uma assistência de celulares que precisava de vídeo todo dia. Desde agosto de 2026, <b>mais de 300 vídeos</b> da loja passaram por ele.</p>
+            <p>O ATIVAVID nasceu na Prime Camp, uma assistência de celulares que precisava de vídeo todo dia. Desde agosto de 2026, <b>mais de 600 vídeos</b> da loja passaram por ele.</p>
           </div>
           <figure class="mes-prova">
             <div class="janela janela-solida">
@@ -560,7 +560,7 @@
             <li>Sem placa NVIDIA, funciona na CPU</li>
             <li>Instalador pequeno: a IA baixa os componentes no primeiro uso</li>
           </ul>
-          <a class="btn btn-vidro plat-btn" href="/baixar" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=windows" data-cta="plat-windows">Baixar para Windows</a>
+          <button type="button" class="btn btn-vidro plat-btn" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=windows" data-cta="plat-windows">Baixar para Windows</button>
         </article>
         <article class="plat-card">
           <h3>Mac com chip Apple</h3>
@@ -570,7 +570,7 @@
             <li>Render pelo motor de vídeo do próprio Mac</li>
             <li>Instalador completo, com tudo dentro: abre, arrasta para Aplicativos e pronto</li>
           </ul>
-          <a class="btn btn-vidro plat-btn" href="/baixar" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=mac&amp;aviso=lancamento" data-cta="plat-mac" data-mac-botao>Me avise quando sair para Mac</a>
+          <button type="button" class="btn btn-vidro plat-btn" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=mac&amp;aviso=lancamento" data-cta="plat-mac" data-mac-botao>Me avise quando sair para Mac</button>
         </article>
       </div>
       <p class="plat-nota"><span data-mac-nota>O instalador do Mac sai nos próximos dias. </span>Mac com processador Intel ainda não é compatível. <b>Uma assinatura vale para 1 computador</b>, Windows ou Mac.</p>
@@ -610,7 +610,7 @@
         </details>
         <details>
           <summary>Funciona no Mac?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
-          <p>Sim, em Mac com chip Apple (M1, M2, M3, M4 ou mais novo) e macOS 12 ou mais novo. Mac com processador Intel ainda não é compatível. A <a href="/baixar">página de download</a> reconhece o seu sistema e entrega o instalador certo.</p>
+          <p>Sim, em Mac com chip Apple (M1, M2, M3, M4 ou mais novo) e macOS 12 ou mais novo. Mac com processador Intel ainda não é compatível. A página de download reconhece o seu sistema e entrega o instalador certo.</p>
         </details>
         <details>
           <summary>Por que o instalador do Mac é maior?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
@@ -629,7 +629,7 @@
     <div class="wrap final-in">
       <h2 id="finalTit">Amanhã, às 9h, o próximo vídeo já sai editado.</h2>
       <p class="sub">Baixe hoje, arraste um vídeo e veja o resultado. Preço de lançamento enquanto durar a oferta.</p>
-      <a class="btn btn-primary alc-shiny btn-lg" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="final"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar o ATIVAVID — 7 dias grátis</span></a>
+      <button type="button" class="btn btn-primary alc-shiny btn-lg" data-ativa-form="ativavid-864e5e" data-cta="final"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar o ATIVAVID — 7 dias grátis</span></button>
       <p class="micro-line">Windows 10/11 ou Mac com chip Apple · sem cartão · desinstala quando quiser</p>
     </div>
   </section>
@@ -643,7 +643,7 @@
       <p>Editor de vídeo com IA que roda no seu computador, Windows ou Mac. Feito na rotina de uma loja que posta todo dia.</p>
     </div>
     <div class="foot-links">
-      <a href="/baixar">Baixar para Windows ou Mac</a>
+      <button type="button" class="link-botao" data-ativa-form="ativavid-864e5e" data-cta="rodape">Baixar para Windows ou Mac</button>
       <a href="https://instagram.com/ativavid" rel="noopener me" target="_blank" aria-label="@ativavid no Instagram (abre em nova aba)">@ativavid</a>
     </div>
     <p class="fine">© <span id="ano">2026</span> ATIVAVID · Prime Camp. Todos os direitos reservados.</p>
@@ -653,7 +653,7 @@
 <!-- Dock de vidro do celular: o horário em vista + o Baixar (substitui a barra fixa) -->
 <div class="dock vidro" id="dock" hidden>
   <p class="dock-rot" id="dockRot" aria-live="off">7 dias grátis · R$ 59/mês</p>
-  <a class="btn btn-primary alc-shiny btn-sm" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="sticky"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar</span></a>
+  <button type="button" class="btn btn-primary alc-shiny btn-sm" data-ativa-form="ativavid-864e5e" data-cta="sticky"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar</span></button>
 </div>
 
 <script src="https://ativavid.primecamp.com.br/embed.js?v=1.2.3" data-form="ativavid-864e5e" data-mode="modal" data-path="/" data-theme="dark" defer></script>
