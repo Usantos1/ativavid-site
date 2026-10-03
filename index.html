@@ -33,7 +33,7 @@
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/poppins-800.woff2" crossorigin>
   <link rel="preload" as="image" href="assets/ui-editor-1600.webp" imagesrcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" imagesizes="(max-width: 960px) calc(100vw - 40px), 600px" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20261003f">
+  <link rel="stylesheet" href="styles.css?v=20261003g">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -94,7 +94,7 @@
         "mainEntity": [
           { "@type": "Question", "name": "Preciso saber editar vídeo?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Arraste o vídeo e clique em Editar com IA. A timeline existe para quem quiser ajustar." } },
           { "@type": "Question", "name": "Meu vídeo vai parar em algum servidor?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Transcrição, corte e render acontecem no seu computador. Só o texto da transcrição vai para a IA que planeja o corte, e você escolhe qual IA." } },
-          { "@type": "Question", "name": "Tem custo de tokens ou créditos por vídeo?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Ele usa a sua conta de IA (inclusive as gratuitas). Transcrição e render rodam no seu computador. Você paga a assinatura e mais nada." } },
+          { "@type": "Question", "name": "Vou gastar token ou crédito por vídeo?", "acceptedAnswer": { "@type": "Answer", "text": "Não, nenhum. O roteiro do corte e a legenda do post usam a conta de IA que você já tem, paga ou gratuita. A conta gratuita tem limite de uso: se você edita muitos vídeos por dia, o plano pago que você já tenha na sua IA evita esperar. Transcrição, corte e render rodam no seu computador. Você paga o ATIVAVID e mais nada." } },
           { "@type": "Question", "name": "Roda no meu computador?", "acceptedAnswer": { "@type": "Answer", "text": "Roda em Windows 10 ou 11 (64 bits) e em Mac com chip Apple (M1 ou mais novo) com macOS 12 ou mais novo. No Windows, placa NVIDIA deixa tudo mais rápido; sem ela, funciona na CPU. O app faz o diagnóstico da máquina e diz o que esperar." } },
           { "@type": "Question", "name": "E se a IA errar uma palavra ou um corte?", "acceptedAnswer": { "@type": "Answer", "text": "Clique na legenda e corrija. Marque o trecho e escreva \"não corta aqui\". Só o que mudou é refeito." } },
           { "@type": "Question", "name": "Funciona para vídeo longo, tipo YouTube?", "acceptedAnswer": { "@type": "Answer", "text": "Sim. Horizontal sai com selo, capítulos, legenda e o .srt do CC. Vertical sai pronto para Reels, Shorts e TikTok." } },
@@ -142,7 +142,7 @@
       <img src="assets/logo-280.webp" alt="ATIVAVID" width="140" height="44" decoding="async">
     </a>
     <nav class="nav-links" aria-label="Seções">
-      <a href="#dia">O dia na loja</a>
+      <a href="#dia">Como funciona</a>
       <a href="#plataformas">Windows e Mac</a>
       <a href="#preco">Preço</a>
       <a href="#faq">Dúvidas</a>
@@ -170,7 +170,7 @@
         <ul class="micro" aria-label="Condições do teste">
           <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>7 dias grátis</li>
           <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Sem cartão</li>
-          <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Sem tokens</li>
+          <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Zero token</li>
           <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><a href="#plataformas">Windows e Mac</a></li>
         </ul>
       </div>
@@ -214,24 +214,40 @@
     </div>
   </section>
 
+  <!-- ================= ZERO TOKEN ================= -->
+  <section class="zero" aria-labelledby="zeroTit">
+    <div class="wrap zero-in">
+      <svg class="zero-ico" aria-hidden="true"><use href="#i-chave"/></svg>
+      <div class="zero-txt">
+        <h2 id="zeroTit">Sem gastar um token. A IA é a que você já tem.</h2>
+        <p>Quem planeja o corte e escreve a legenda do post é a <b>sua conta de IA</b>, paga ou gratuita. Você não compra crédito, não paga por minuto exportado e não paga por vídeo. A transcrição, o corte e o render rodam no seu computador.</p>
+        <p class="zero-ressalva">A conta gratuita tem limite de uso. Se você edita muitos vídeos por dia, o plano pago que você já tenha na sua IA evita esperar o limite renovar.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= O DIA NA LOJA ================= -->
   <section class="dia" id="dia" aria-labelledby="diaTit">
     <div class="wrap">
-      <h2 id="diaTit" class="dia-tit">Um dia na loja com o ATIVAVID</h2>
-      <p class="dia-sub">Do balcão ao post, hora a hora. Tudo o que aparece aqui é tela real do app ou dado real da Prime Camp, a assistência de celulares onde o ATIVAVID nasceu.</p>
+      <h2 id="diaTit" class="dia-tit">Do balcão ao post em 2 minutos</h2>
+      <p class="dia-sub">Primeiro, um vídeo de verdade, do bruto ao post. Depois, o que mais o ATIVAVID faz pela loja. Tudo o que aparece aqui é tela real do app ou dado real da Prime Camp, a assistência de celulares onde o ATIVAVID nasceu.</p>
     </div>
 
     <div class="wrap dia-in">
       <nav class="regua vidro" aria-label="Horários do dia" data-regua>
+        <p class="regua-grupo">Um vídeo em 2 minutos</p>
         <ol>
           <li><a href="#m-0900"><b>9h00</b><span>Grava</span></a></li>
           <li><a href="#m-0902"><b>9h02</b><span>Pronto</span></a></li>
           <li><a href="#m-0905"><b>9h05</b><span>Posta</span></a></li>
-          <li><a href="#m-1100"><b>11h</b><span>Estilo</span></a></li>
-          <li><a href="#m-1200"><b>12h</b><span>27 criativos</span></a></li>
-          <li><a href="#m-1500"><b>15h</b><span>Ajuste</span></a></li>
-          <li><a href="#m-1800"><b>18h</b><span>A conta</span></a></li>
-          <li><a href="#m-dia30"><b>Dia 30</b><span>30 vídeos</span></a></li>
+        </ol>
+        <p class="regua-grupo">E mais</p>
+        <ol>
+          <li><a href="#m-1100"><b>Seu estilo</b></a></li>
+          <li><a href="#m-1200"><b>27 criativos</b></a></li>
+          <li><a href="#m-1500"><b>Ajuste fino</b></a></li>
+          <li><a href="#m-1800"><b>A conta</b></a></li>
+          <li><a href="#m-dia30"><b>No fim do mês</b></a></li>
         </ol>
         <span class="regua-agora" aria-hidden="true"></span>
       </nav>
@@ -299,9 +315,9 @@
           </div>
         </article>
 
-        <article class="momento momento-prova" id="m-1100" data-rotulo="11h · Estilo">
+        <article class="momento momento-prova" id="m-1100" data-rotulo="Seu estilo">
           <div class="momento-txt">
-            <h3><span class="hora">11h</span> O estilo da sua loja, configurado uma vez.</h3>
+            <h3>O estilo da sua loja, configurado uma vez.</h3>
             <p>Cores, legenda, headline e hashtags. Todo vídeo sai com a sua cara, e suas fotos, takes e trilhas viram b-roll que a IA encaixa na frase certa.</p>
             <p class="para-quem"><b>Agência ou social media?</b> Um estilo por cliente. Copie o estilo e cole nos outros projetos.</p>
           </div>
@@ -314,9 +330,9 @@
           </figure>
         </article>
 
-        <article class="momento" id="m-1200" data-rotulo="12h · 27 criativos">
+        <article class="momento" id="m-1200" data-rotulo="27 criativos">
           <div class="momento-txt">
-            <h3><span class="hora">12h</span> No almoço, <span class="nb">27 criativos</span> para anunciar.</h3>
+            <h3>De 9 takes, <span class="nb">27 criativos</span> para anunciar.</h3>
             <p>Grave 3 ganchos, 3 corpos e 3 CTAs. O Multiplicador monta as 27 combinações, cada uma legendada, com headline e capa. Teste, ache a vencedora, aprove.</p>
             <p class="para-quem"><b>Roda tráfego pago?</b> O criativo que perde custou 2 minutos de máquina, não uma tarde de edição.</p>
             <a class="btn btn-primary alc-shiny" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="multi"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Quero multiplicar meus criativos</span></a>
@@ -330,9 +346,9 @@
           </figure>
         </article>
 
-        <article class="momento momento-prova" id="m-1500" data-rotulo="15h · Ajuste">
+        <article class="momento momento-prova" id="m-1500" data-rotulo="Ajuste fino">
           <div class="momento-txt">
-            <h3><span class="hora">15h</span> Quer ajustar? A timeline é sua.</h3>
+            <h3>Quer ajustar? A timeline é sua.</h3>
             <p>Vídeo, legendas, headline, trilha, efeitos e b-roll, cada um na sua faixa. Arraste, corte, reenquadre.</p>
             <ul class="saidas">
               <li><svg class="ico" aria-hidden="true"><use href="#i-legenda"/></svg>Legenda errada? Clique na palavra e digite</li>
@@ -349,9 +365,9 @@
           </figure>
         </article>
 
-        <article class="momento momento-largo" id="m-1800" data-rotulo="18h · A conta">
+        <article class="momento momento-largo" id="m-1800" data-rotulo="A conta">
           <div class="momento-txt">
-            <h3><span class="hora">18h</span> Fecha a loja e faz a conta.</h3>
+            <h3>Faça a conta da sua loja.</h3>
             <p>Um Reel editado por freelancer custa até <b>R$&nbsp;650</b> (estimativa de mercado). O ATIVAVID edita <b>todos</b> por <b class="nb">R$&nbsp;59</b>/mês.</p>
           </div>
 
@@ -493,9 +509,9 @@
           </div>
         </article>
 
-        <article class="momento momento-largo momento-fim" id="m-dia30" data-rotulo="Dia 30 · 30 vídeos">
+        <article class="momento momento-largo momento-fim" id="m-dia30" data-rotulo="No fim do mês">
           <div class="momento-txt">
-            <h3><span class="hora">Dia 30</span> No fim do mês, 30 vídeos postados. Sem editor.</h3>
+            <h3>No fim do mês, 30 vídeos postados. Sem editor.</h3>
             <p>O ATIVAVID nasceu na Prime Camp, uma assistência de celulares que precisava de vídeo todo dia. Desde agosto de 2026, <b>mais de 300 vídeos</b> da loja passaram por ele.</p>
           </div>
           <figure class="mes-prova">
@@ -510,7 +526,7 @@
             <ul class="local-lista">
               <li><svg class="ico" aria-hidden="true"><use href="#i-pc"/></svg><span><b>Transcrição, corte, legenda e render</b> na sua máquina. Funciona sem internet depois de instalado.</span></li>
               <li><svg class="ico" aria-hidden="true"><use href="#i-cadeado"/></svg><span><b>Seu vídeo não sobe</b> para servidor nenhum. Sai pronto da sua máquina.</span></li>
-              <li><svg class="ico" aria-hidden="true"><use href="#i-chave"/></svg><span><b>Sem tokens.</b> O roteiro do corte e a legenda do post usam a conta de IA que você já tem, inclusive a gratuita.</span></li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-chave"/></svg><span><b>Zero token.</b> O roteiro do corte e a legenda do post usam a conta de IA que você já tem, paga ou gratuita (a gratuita tem limite de uso).</span></li>
             </ul>
             <p class="nao-titulo">Você <b>não</b> precisa de:</p>
             <ul class="nao-lista">
@@ -577,8 +593,8 @@
           <p>Não. Transcrição, corte e render acontecem no seu computador. Só o texto da transcrição vai para a IA que planeja o corte, e você escolhe qual IA.</p>
         </details>
         <details>
-          <summary>Tem custo de tokens ou créditos por vídeo?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
-          <p>Não. Ele usa a sua conta de IA (inclusive as gratuitas). Transcrição e render rodam no seu computador. Você paga a assinatura e mais nada.</p>
+          <summary>Vou gastar token ou crédito por vídeo?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
+          <p>Não, nenhum. O roteiro do corte e a legenda do post usam a conta de IA que você já tem, paga ou gratuita. A conta gratuita tem limite de uso: se você edita muitos vídeos por dia, o plano pago que você já tenha na sua IA evita esperar. Transcrição, corte e render rodam no seu computador. Você paga o ATIVAVID e mais nada.</p>
         </details>
         <details>
           <summary>Roda no meu computador?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
@@ -641,6 +657,6 @@
 </div>
 
 <script src="https://ativavid.primecamp.com.br/embed.js?v=1.2.3" data-form="ativavid-864e5e" data-mode="modal" data-path="/" data-theme="dark" defer></script>
-<script src="main.js?v=20261003d" defer></script>
+<script src="main.js?v=20261003e" defer></script>
 </body>
 </html>

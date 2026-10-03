@@ -32,7 +32,7 @@ Etapas automáticas: transcrição local → corte inteligente → legenda no es
 ## O que roda onde
 
 - **No computador do cliente**: transcrição da fala, corte, legenda e render. Funciona sem internet depois de instalado. A trilha composta por IA roda no Windows com placa NVIDIA; em qualquer máquina dá para usar as trilhas da biblioteca.
-- **Na conta de IA do cliente** (inclusive as gratuitas): o planejamento do corte e a legenda do post. Só o texto da transcrição sai do PC. Não há custo de tokens nem créditos por vídeo.
+- **Na conta de IA que o cliente já tem**, paga ou gratuita: o planejamento do corte e a legenda do post. Só o texto da transcrição sai do PC. Nenhum token, nenhum crédito, nenhum custo por vídeo. A conta gratuita tem limite de uso; quem edita muitos vídeos por dia evita esperar com o plano pago que já tenha na própria IA.
 
 ## Recursos
 

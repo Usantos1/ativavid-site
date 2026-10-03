@@ -175,7 +175,10 @@ b, strong { font-weight: 600; }
   -webkit-mask-image: var(--alc-dots-mask); mask-image: var(--alc-dots-mask);
 }
 .alc-btn-content { position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-html.janela-parada .btn-primary.alc-shiny::before { animation-play-state: paused; }
+/* o feixe gira sempre que a página está à vista. Antes ele pausava quando
+   a janela perdia o FOCO (clicar em outro programa, outro monitor): a página
+   continuava à vista e o feixe parava. O navegador já congela animação de
+   aba escondida sozinho. */
 
 /* ---------- barra de navegação (vidro) ---------- */
 .nav { position: sticky; top: 0; z-index: 50; }
@@ -606,3 +609,21 @@ tr:last-child th, tr:last-child td { border-bottom: 0; }
 .planos h4 { font-size: clamp(24px, 2.4vw, 32px); font-weight: 800; }
 .planos-sub { color: var(--dim); font-size: 18px; margin: 12px 0 36px; max-width: 46em; }
 .planos .plans { margin-top: 8px; }
+
+/* régua em dois grupos: os 2 minutos (com hora) e o resto (sem hora) */
+.regua-grupo { padding: 10px 12px 4px 18px; font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--fine); }
+.regua-grupo + ol { margin-bottom: 6px; }
+.regua ol + .regua-grupo { margin-top: 6px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, .08); }
+.regua a b:only-child { font-size: 15px; }
+/* sem a hora grande, o título do momento sobe de tamanho */
+.momento h3:not(:has(.hora)) { font-size: clamp(28px, 3vw, 40px); }
+
+/* zero token: a faixa forte depois do herói */
+.zero { padding: 0 0 24px; }
+.zero-in { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: start; padding: 36px 40px; border-radius: 26px; background: linear-gradient(180deg, rgba(31, 209, 168, .1), rgba(31, 209, 168, .02)), var(--panel); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 0 0 1px rgba(31, 209, 168, .35); }
+.zero-ico { width: 56px; height: 56px; padding: 12px; border-radius: 18px; fill: none; stroke: var(--teal); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; background: rgba(31, 209, 168, .12); }
+.zero h2 { font-size: clamp(26px, 3vw, 40px); font-weight: 900; letter-spacing: -.03em; }
+.zero-txt > p { color: var(--dim); font-size: 18px; margin-top: 14px; max-width: 52em; }
+.zero-txt > p b { color: var(--text); }
+.zero-ressalva { font-size: 15px !important; padding-top: 14px; border-top: 1px solid var(--line); }
+@media (max-width: 560px) { .zero-in { grid-template-columns: minmax(0, 1fr); padding: 26px 22px; gap: 16px; } }

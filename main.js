@@ -263,20 +263,3 @@
   });
   render();
 })();
-
-/* O feixe dos CTAs para quando a aba não está à frente. O navegador já
-   congela animação de aba ESCONDIDA, mas não de aba visível e sem foco.
-   `blur` só vale depois que um `focus` chegou pelo menos uma vez: sem essa
-   prova o feixe poderia nascer parado e nunca girar. */
-(function () {
-  var raiz = document.documentElement;
-  var focoFunciona = document.hasFocus && document.hasFocus();
-  function aplicar() {
-    var olhando = !document.hidden && (!focoFunciona || document.hasFocus());
-    raiz.classList.toggle('janela-parada', !olhando);
-  }
-  document.addEventListener('visibilitychange', aplicar);
-  window.addEventListener('focus', function () { focoFunciona = true; aplicar(); });
-  window.addEventListener('blur', aplicar);
-  aplicar();
-})();
