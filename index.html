@@ -33,7 +33,7 @@
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/poppins-800.woff2" crossorigin>
   <link rel="preload" as="image" href="assets/ui-editor-1600.webp" imagesrcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" imagesizes="(max-width: 960px) calc(100vw - 40px), 600px" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20261003j">
+  <link rel="stylesheet" href="styles.css?v=20261003l">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -63,7 +63,7 @@
         "description": "Editor de vídeo com IA que roda no seu computador, Windows ou Mac: transcreve, corta silêncios e erros, legenda no seu estilo, cria headline, capa e a legenda do post. Reels, Shorts, TikTok e YouTube.",
         "applicationCategory": "MultimediaApplication",
         "applicationSubCategory": "Editor de vídeo com IA",
-        "operatingSystem": "Windows 10, Windows 11 (64 bits), macOS 12 ou mais novo (chip Apple)",
+        "operatingSystem": "Windows 10, Windows 11 (64 bits), macOS 12 ou mais novo (chip Apple ou Intel)",
         "url": "https://ativavid.com/",
         "downloadUrl": "https://ativavid.com/",
         "image": "https://ativavid.com/assets/og.jpg",
@@ -95,10 +95,10 @@
           { "@type": "Question", "name": "Preciso saber editar vídeo?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Arraste o vídeo e clique em Editar com IA. A timeline existe para quem quiser ajustar." } },
           { "@type": "Question", "name": "Meu vídeo vai parar em algum servidor?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Transcrição, corte e render acontecem no seu computador. Só o texto da transcrição vai para a IA que planeja o corte, e você escolhe qual IA." } },
           { "@type": "Question", "name": "Vou gastar token ou crédito por vídeo?", "acceptedAnswer": { "@type": "Answer", "text": "Não, nenhum. O roteiro do corte e a legenda do post usam a conta de IA que você já tem, paga ou gratuita. A conta gratuita tem limite de uso: se você edita muitos vídeos por dia, o plano pago que você já tenha na sua IA evita esperar. Transcrição, corte e render rodam no seu computador. Você paga o ATIVAVID e mais nada." } },
-          { "@type": "Question", "name": "Roda no meu computador?", "acceptedAnswer": { "@type": "Answer", "text": "Roda em Windows 10 ou 11 (64 bits) e em Mac com chip Apple (M1 ou mais novo) com macOS 12 ou mais novo. No Windows, placa NVIDIA deixa tudo mais rápido; sem ela, funciona na CPU. O app faz o diagnóstico da máquina e diz o que esperar." } },
+          { "@type": "Question", "name": "Roda no meu computador?", "acceptedAnswer": { "@type": "Answer", "text": "Roda em Windows 10 ou 11 (64 bits) e em Mac com chip Apple ou com processador Intel, com macOS 12 ou mais novo. No Windows, placa NVIDIA deixa tudo mais rápido; sem ela, funciona na CPU. O app faz o diagnóstico da máquina e diz o que esperar." } },
           { "@type": "Question", "name": "E se a IA errar uma palavra ou um corte?", "acceptedAnswer": { "@type": "Answer", "text": "Clique na legenda e corrija. Marque o trecho e escreva \"não corta aqui\". Só o que mudou é refeito." } },
           { "@type": "Question", "name": "Funciona para vídeo longo, tipo YouTube?", "acceptedAnswer": { "@type": "Answer", "text": "Sim. Horizontal sai com selo, capítulos, legenda e o .srt do CC. Vertical sai pronto para Reels, Shorts e TikTok." } },
-          { "@type": "Question", "name": "Funciona no Mac?", "acceptedAnswer": { "@type": "Answer", "text": "Sim, em Mac com chip Apple (M1, M2, M3, M4 ou mais novo) e macOS 12 ou mais novo. Mac com processador Intel ainda não é compatível. A página de download reconhece o seu sistema e entrega o instalador certo." } },
+          { "@type": "Question", "name": "Funciona no Mac?", "acceptedAnswer": { "@type": "Answer", "text": "Sim, nos dois tipos de Mac: com chip Apple (M1, M2, M3, M4 ou mais novo) e com processador Intel, sempre com macOS 12 ou mais novo. Cada um tem o seu instalador, e a página de download reconhece o seu Mac e entrega o certo. Para conferir o seu, abra o menu Apple › Sobre este Mac: aparece Chip (chip Apple) ou Processador (Intel)." } },
           { "@type": "Question", "name": "Por que o instalador do Mac é maior?", "acceptedAnswer": { "@type": "Answer", "text": "O do Mac é maior porque já leva tudo dentro: abre, arrasta para Aplicativos e pronto. O do Windows é pequeno e baixa os componentes da IA no primeiro uso." } },
           { "@type": "Question", "name": "O que acontece quando os 7 dias acabam?", "acceptedAnswer": { "@type": "Answer", "text": "O app mostra os planos. Se não assinar, para de editar, mas seus vídeos e projetos continuam nas suas pastas. Assinou, volta na hora." } }
         ]
@@ -484,7 +484,7 @@
             </div>
             <div class="cta-center">
               <button type="button" class="btn btn-primary alc-shiny btn-lg" data-ativa-form="ativavid-864e5e" data-cta="preco"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar e começar os 7 dias grátis</span></button>
-              <p class="micro-line">Windows 10/11 (64 bits) ou Mac com chip Apple (macOS 12+) · a página de download escolhe o instalador certo</p>
+              <p class="micro-line">Windows 10/11 (64 bits) ou Mac com chip Apple ou Intel (macOS 12+) · a página de download escolhe o instalador certo</p>
             </div>
             <p class="garantia"><b>Zero risco:</b> 7 dias de uso completo, sem cartão. Assinou e mudou de ideia? Cancela quando quiser. Seus vídeos, projetos e estilos ficam no seu computador, porque sempre estiveram lá.</p>
             </div>
@@ -563,17 +563,18 @@
           <button type="button" class="btn btn-vidro plat-btn" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=windows" data-cta="plat-windows">Baixar para Windows</button>
         </article>
         <article class="plat-card">
-          <h3>Mac com chip Apple</h3>
+          <p class="plat-tag">Novo: agora também para Mac Intel</p>
+          <h3>Mac com chip Apple ou Intel</h3>
           <ul class="ticks">
-            <li>M1, M2, M3, M4 ou mais novo</li>
+            <li>Chip Apple (M1, M2, M3, M4 ou mais novo) ou processador Intel</li>
             <li>macOS 12 (Monterey) ou mais novo</li>
             <li>Render pelo motor de vídeo do próprio Mac</li>
-            <li>Instalador completo, com tudo dentro: abre, arrasta para Aplicativos e pronto</li>
+            <li>Um instalador para cada tipo de Mac, com tudo dentro: abre, arrasta para Aplicativos e pronto</li>
           </ul>
-          <button type="button" class="btn btn-vidro plat-btn" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=mac&amp;aviso=lancamento" data-cta="plat-mac" data-mac-botao>Me avise quando sair para Mac</button>
+          <button type="button" class="btn btn-vidro plat-btn" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=mac" data-cta="plat-mac" data-mac-botao>Baixar para Mac</button>
         </article>
       </div>
-      <p class="plat-nota"><span data-mac-nota>O instalador do Mac sai nos próximos dias. </span>Mac com processador Intel ainda não é compatível. <b>Uma assinatura vale para 1 computador</b>, Windows ou Mac.</p>
+      <p class="plat-nota"><span data-mac-nota></span>Não sabe qual é o seu Mac? Menu Apple › Sobre este Mac mostra <b>Chip</b> (chip Apple) ou <b>Processador</b> (Intel). <b>Uma assinatura vale para 1 computador</b>, Windows ou Mac.</p>
     </div>
   </section>
 
@@ -598,7 +599,7 @@
         </details>
         <details>
           <summary>Roda no meu computador?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
-          <p>Roda em Windows 10 ou 11 (64 bits) e em Mac com chip Apple (M1 ou mais novo) com macOS 12 ou mais novo. No Windows, placa NVIDIA deixa tudo mais rápido; sem ela, funciona na CPU. O app faz o diagnóstico da máquina e diz o que esperar.</p>
+          <p>Roda em Windows 10 ou 11 (64 bits) e em Mac com chip Apple ou com processador Intel, com macOS 12 ou mais novo. No Windows, placa NVIDIA deixa tudo mais rápido; sem ela, funciona na CPU. O app faz o diagnóstico da máquina e diz o que esperar.</p>
         </details>
         <details>
           <summary>E se a IA errar uma palavra ou um corte?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
@@ -610,7 +611,7 @@
         </details>
         <details>
           <summary>Funciona no Mac?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
-          <p>Sim, em Mac com chip Apple (M1, M2, M3, M4 ou mais novo) e macOS 12 ou mais novo. Mac com processador Intel ainda não é compatível. A página de download reconhece o seu sistema e entrega o instalador certo.</p>
+          <p>Sim, nos dois tipos de Mac: com chip Apple (M1, M2, M3, M4 ou mais novo) e com processador Intel, sempre com macOS 12 ou mais novo. Cada um tem o seu instalador, e a página de download reconhece o seu Mac e entrega o certo. Para conferir o seu, abra o menu Apple › Sobre este Mac: aparece Chip (chip Apple) ou Processador (Intel).</p>
         </details>
         <details>
           <summary>Por que o instalador do Mac é maior?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
@@ -630,7 +631,7 @@
       <h2 id="finalTit">Amanhã, às 9h, o próximo vídeo já sai editado.</h2>
       <p class="sub">Baixe hoje, arraste um vídeo e veja o resultado. Preço de lançamento enquanto durar a oferta.</p>
       <button type="button" class="btn btn-primary alc-shiny btn-lg" data-ativa-form="ativavid-864e5e" data-cta="final"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar o ATIVAVID — 7 dias grátis</span></button>
-      <p class="micro-line">Windows 10/11 ou Mac com chip Apple · sem cartão · desinstala quando quiser</p>
+      <p class="micro-line">Windows 10/11 ou Mac (chip Apple ou Intel) · sem cartão · desinstala quando quiser</p>
     </div>
   </section>
 
@@ -657,6 +658,6 @@
 </div>
 
 <script src="https://ativavid.primecamp.com.br/embed.js?v=1.2.3" data-form="ativavid-864e5e" data-mode="modal" data-path="/" data-theme="dark" defer></script>
-<script src="main.js?v=20261003e" defer></script>
+<script src="main.js?v=20261003f" defer></script>
 </body>
 </html>

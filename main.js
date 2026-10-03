@@ -172,21 +172,21 @@
     $$('.refrata-alvo').forEach(function (el) { el.classList.add('refrata'); });
   }
 
-  /* ---------- Mac: só promete o download quando o .dmg existe ----------
-     O HTML nasce em "Me avise" (o formulário guarda o lead com sistema=mac).
-     Só quando /download/info confirma um .dmg publicado o botão vira
-     "Baixar para Mac". Se a consulta falhar, fica o aviso: nunca prometer
-     um download que não existe. */
+  /* ---------- Mac: nunca prometer um download que não existe ----------
+     Desde a 5.4.34 há .dmg para chip Apple e para Intel, e o HTML nasce em
+     "Baixar para Mac". Se /download/info responder que NENHUM dos dois está
+     publicado, o botão volta a "Me avise" (o formulário guarda o lead com
+     sistema=mac). Falha na consulta não muda nada. */
   var botaoMac = $('[data-mac-botao]');
   if (botaoMac && window.fetch) {
     fetch('/download/info', { headers: { accept: 'application/json' } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        if (!d || !d.mac) return;
-        botaoMac.textContent = 'Baixar para Mac';
-        botaoMac.setAttribute('data-ativa-params', 'sistema=mac');
+        if (!d || d.mac || d.macIntel) return;
+        botaoMac.textContent = 'Me avise quando sair para Mac';
+        botaoMac.setAttribute('data-ativa-params', 'sistema=mac&aviso=lancamento');
         var nota = $('[data-mac-nota]');
-        if (nota) nota.textContent = '';
+        if (nota) nota.textContent = 'O instalador do Mac sai nos próximos dias. ';
       })
       .catch(function () {});
   }

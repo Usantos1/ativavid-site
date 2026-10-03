@@ -3,6 +3,7 @@
 //   /download           escolhe pelo sistema de quem pede (User-Agent)
 //   /download/windows   Instalar.ATIVAVID.exe
 //   /download/mac       ATIVAVID-<versão>-mac.dmg (Mac com chip Apple)
+//   /download/mac-intel ATIVAVID-<versão>-macos-intel.dmg (Mac Intel, desde a 5.4.34)
 //   /download/info      JSON com versão e tamanho de cada um (a página
 //                       /baixar mostra o tamanho real e esconde o que não existe)
 //
@@ -13,7 +14,10 @@
 //
 // O Mac não tem nome fixo: o .dmg sai versionado e nem toda release o leva
 // (o do Windows sai mais vezes). Procura-se nas releases mais novas a
-// primeira que tenha um .dmg.
+// primeira que tenha um .dmg. Os dois .dmg se distinguem pelo nome: o da
+// Intel leva "intel"; o do chip Apple é todo .dmg sem "intel". O pedido de
+// /download sem sistema, vindo de um Mac, recebe o do chip Apple: o servidor
+// não sabe o chip, e a /baixar é quem pergunta ao navegador.
 //
 // O .dmg tem centenas de MB. O corpo vai em fluxo (origem.body), sem passar pela
 // memória da função, e o Range é repassado: download interrompido continua.
@@ -32,9 +36,13 @@ async function releases() {
   return Array.isArray(lista) ? lista.filter((x) => !x.draft && !x.prerelease) : [];
 }
 
-function acharArquivo(lista, ext) {
+const EXE = (nome) => nome.endsWith(".exe");
+const MAC_CHIP = (nome) => nome.endsWith(".dmg") && !nome.includes("intel");
+const MAC_INTEL = (nome) => nome.endsWith(".dmg") && nome.includes("intel");
+
+function acharArquivo(lista, combina) {
   for (const rel of lista) {
-    const a = (rel.assets || []).find((x) => String(x.name || "").toLowerCase().endsWith(ext));
+    const a = (rel.assets || []).find((x) => combina(String(x.name || "").toLowerCase()));
     if (a) {
       return {
         url: a.browser_download_url,
@@ -96,18 +104,19 @@ function entregar(origem, nome, tipo) {
 async function windows(cabecalhos) {
   let origem = await buscar(FIXO_WIN, cabecalhos);
   if (!serve(origem)) {
-    const exe = acharArquivo(await releases().catch(() => []), ".exe");
+    const exe = acharArquivo(await releases().catch(() => []), EXE);
     origem = exe ? await buscar(exe.url, cabecalhos) : null;
   }
   if (!serve(origem)) return indisponivel("O instalador do Windows está indisponível no momento.");
   return entregar(origem, NOME_WIN, "application/octet-stream");
 }
 
-async function mac(cabecalhos) {
-  const dmg = acharArquivo(await releases().catch(() => []), ".dmg");
-  if (!dmg) return indisponivel("O instalador do Mac ainda não foi publicado.");
+async function mac(cabecalhos, intel) {
+  const qual = intel ? "do Mac Intel" : "do Mac";
+  const dmg = acharArquivo(await releases().catch(() => []), intel ? MAC_INTEL : MAC_CHIP);
+  if (!dmg) return indisponivel(`O instalador ${qual} ainda não foi publicado.`);
   const origem = await buscar(dmg.url, cabecalhos);
-  if (!serve(origem)) return indisponivel("O instalador do Mac está indisponível no momento.");
+  if (!serve(origem)) return indisponivel(`O instalador ${qual} está indisponível no momento.`);
   return entregar(origem, dmg.nome, "application/x-apple-diskimage");
 }
 
@@ -115,7 +124,11 @@ async function info() {
   const lista = await releases().catch(() => []);
   const tira = (a) => (a ? { versao: a.versao, tamanho: a.tamanho, data: a.data } : null);
   return new Response(
-    JSON.stringify({ windows: tira(acharArquivo(lista, ".exe")), mac: tira(acharArquivo(lista, ".dmg")) }),
+    JSON.stringify({
+      windows: tira(acharArquivo(lista, EXE)),
+      mac: tira(acharArquivo(lista, MAC_CHIP)),
+      macIntel: tira(acharArquivo(lista, MAC_INTEL)),
+    }),
     { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=300" } },
   );
 }
@@ -130,6 +143,7 @@ export async function onRequestGet(context) {
   const range = req.headers.get("range");
   if (range) cabecalhos.range = range;
 
+  if (alvo === "mac-intel" || alvo === "intel") return mac(cabecalhos, true);
   const sistema = alvo === "mac" || alvo === "windows" ? alvo : sistemaDoPedido(req);
-  return sistema === "mac" ? mac(cabecalhos) : windows(cabecalhos);
+  return sistema === "mac" ? mac(cabecalhos, false) : windows(cabecalhos);
 }

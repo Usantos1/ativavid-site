@@ -1,11 +1,11 @@
 # ATIVAVID
 
-> Editor de vídeo com IA que roda no computador do cliente: Windows 10/11 (64 bits) ou Mac com chip Apple (macOS 12+). A pessoa arrasta o vídeo bruto e, em cerca de 2 minutos, recebe o vídeo cortado, legendado no estilo da marca, com headline, trilha, capa e a legenda do post, pronto para Reels, Shorts, TikTok e YouTube. O vídeo não sai do computador. Produto brasileiro, em português. 7 dias grátis, sem cartão.
+> Editor de vídeo com IA que roda no computador do cliente: Windows 10/11 (64 bits) ou Mac com chip Apple ou Intel (macOS 12+). A pessoa arrasta o vídeo bruto e, em cerca de 2 minutos, recebe o vídeo cortado, legendado no estilo da marca, com headline, trilha, capa e a legenda do post, pronto para Reels, Shorts, TikTok e YouTube. O vídeo não sai do computador. Produto brasileiro, em português. 7 dias grátis, sem cartão.
 
 O problema que o ATIVAVID resolve é o da edição que come a noite: quem precisa postar todo dia grava rápido, mas perde de 40 minutos a 2 horas editando cada vídeo, ou paga de R$ 120 a R$ 650 por Reel a um editor. O ATIVAVID faz o trabalho pesado na máquina da pessoa e deixa a timeline aberta para o ajuste fino.
 
 - [Site](https://ativavid.com/): apresentação, calculadora de economia, preços e dúvidas.
-- [Baixar o teste grátis](https://ativavid.com/): pelo botão Baixar do site; um formulário rápido libera o instalador certo (Windows 10/11 ou Mac com chip Apple). O teste de 7 dias começa no app.
+- [Baixar o teste grátis](https://ativavid.com/): pelo botão Baixar do site; um formulário rápido libera o instalador certo (Windows 10/11, Mac com chip Apple ou Mac Intel). O teste de 7 dias começa no app.
 - [Preços](https://ativavid.com/#preco): planos Pro Mensal, Pro Anual e Pro Escala.
 - [Dúvidas frequentes](https://ativavid.com/#faq): respostas curtas sobre privacidade, requisitos e custo.
 - [Instagram @ativavid](https://instagram.com/ativavid): perfil oficial do produto.
@@ -17,7 +17,7 @@ O problema que o ATIVAVID resolve é o da edição que come a noite: quem precis
 - **Agências e social media**: um estilo por cliente, aprovação em lote, pasta pronta para entregar.
 - **Gestores de tráfego pago**: criativos em volume, com variações de gancho e CTA.
 
-Não serve para Mac com processador Intel nem para Linux.
+Não serve para Linux.
 
 ## Como funciona
 
@@ -54,4 +54,4 @@ A assinatura é feita dentro do app. Cancela quando quiser; vídeos, projetos e 
 ## Requisitos
 
 - **Windows**: 10 ou 11, 64 bits. Com placa NVIDIA é mais rápido; sem ela, funciona na CPU. O instalador leva cerca de 1 minuto e a IA local baixa os componentes no primeiro uso.
-- **Mac**: chip Apple (M1, M2, M3, M4 ou mais novo) e macOS 12 ou mais novo. O .dmg já leva tudo dentro: abrir, arrastar para Aplicativos e pronto. Mac com processador Intel ainda não é compatível.
+- **Mac**: chip Apple (M1, M2, M3, M4 ou mais novo) ou processador Intel, com macOS 12 ou mais novo. Há um .dmg para cada tipo de Mac, e cada um já leva tudo dentro: abrir, arrastar para Aplicativos e pronto.

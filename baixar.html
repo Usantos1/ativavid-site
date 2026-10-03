@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Baixar o ATIVAVID — Windows e Mac</title>
-  <meta name="description" content="Baixe o ATIVAVID para Windows 10/11 ou Mac com chip Apple (macOS 12 ou mais novo). A página reconhece o seu sistema e entrega o instalador certo. 7 dias grátis, sem cartão.">
+  <meta name="description" content="Baixe o ATIVAVID para Windows 10/11 ou Mac com chip Apple ou Intel (macOS 12 ou mais novo). A página reconhece o seu sistema e entrega o instalador certo. 7 dias grátis, sem cartão.">
   <link rel="canonical" href="https://ativavid.com/baixar">
   <meta name="robots" content="noindex, follow">
   <meta name="theme-color" content="#0b0c10">
@@ -25,7 +25,7 @@
   <link rel="ai-catalog" href="/.well-known/ai-catalog.json">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/styles.css?v=20261003i">
+  <link rel="stylesheet" href="/styles.css?v=20261003l">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -78,6 +78,7 @@
           <span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content" id="dlBotaoTexto">Baixar para Windows</span>
         </a>
         <p class="micro-line" id="dlDetalhe">Windows 10/11 · 64 bits</p>
+        <p class="dl-alt" id="dlAlt" hidden><a id="dlAltLink" href="/download/mac-intel" data-cta="baixar-alt"></a></p>
       </div>
       <p class="dl-aviso" id="dlAviso" hidden></p>
     </div>
@@ -86,7 +87,7 @@
   <section class="dl-opcoes" aria-labelledby="dlOutros">
     <div class="wrap">
       <h2 id="dlOutros" class="dl-h2">Todos os instaladores</h2>
-      <div class="plat-grid">
+      <div class="plat-grid tres">
         <article class="plat-card" id="cardWindows">
           <h3>Windows 10 ou 11</h3>
           <ul class="ticks">
@@ -104,11 +105,21 @@
             <li>macOS 12 (Monterey) ou mais novo</li>
             <li>Instalador completo: abre, arrasta para Aplicativos e pronto</li>
           </ul>
-          <p class="plat-meta" data-meta="mac">ATIVAVID para Mac (.dmg), com tudo dentro</p>
-          <a class="btn btn-vidro plat-btn" href="/download/mac" data-cta="baixar-mac">Baixar para Mac</a>
+          <p class="plat-meta" data-meta="mac">ATIVAVID para Mac com chip Apple (.dmg)</p>
+          <a class="btn btn-vidro plat-btn" href="/download/mac" data-cta="baixar-mac">Baixar para chip Apple</a>
+        </article>
+        <article class="plat-card" id="cardMacIntel">
+          <h3>Mac com processador Intel</h3>
+          <ul class="ticks">
+            <li>Processador Intel (Core i5, i7, i9 e outros)</li>
+            <li>macOS 12 (Monterey) ou mais novo</li>
+            <li>Instalador completo: abre, arrasta para Aplicativos e pronto</li>
+          </ul>
+          <p class="plat-meta" data-meta="macIntel">ATIVAVID para Mac Intel (.dmg)</p>
+          <a class="btn btn-vidro plat-btn" href="/download/mac-intel" data-cta="baixar-mac-intel">Baixar para Mac Intel</a>
         </article>
       </div>
-      <p class="dl-nota">Mac com processador Intel ainda não é compatível.</p>
+      <p class="dl-nota">Não sabe qual é o seu Mac? Abra o menu Apple › <b>Sobre este Mac</b>: aparece <b>Chip</b> (chip Apple) ou <b>Processador</b> (Intel).</p>
     </div>
   </section>
 
@@ -161,6 +172,6 @@
   </div>
 </footer>
 
-<script src="/baixar.js?v=20261003b" defer></script>
+<script src="/baixar.js?v=20261003c" defer></script>
 </body>
 </html>

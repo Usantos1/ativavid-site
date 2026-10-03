@@ -643,3 +643,14 @@ button.btn-primary.alc-shiny { border: 0; }
 button.pilula { -webkit-appearance: none; appearance: none; border: 0; color: var(--text); cursor: pointer; transition: transform .2s ease; }
 button.pilula:hover { transform: translateY(-1px); }
 button.pilula:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+/* /baixar com três instaladores: Windows, Mac chip Apple, Mac Intel */
+.plat-grid.tres { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.plat-grid.tres .plat-card h3 { font-size: 23px; }
+@media (max-width: 1000px) { .plat-grid.tres { grid-template-columns: minmax(0, 1fr); } }
+.plat-card .plat-tag { margin-bottom: 8px; }
+.dl-alt { margin-top: 16px; font-size: 15px; color: var(--dim); }
+.dl-alt[hidden] { display: none; }
+.dl-alt a { color: var(--text); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--red); }
+.dl-alt a:hover { color: var(--red-ink); }
+.plat-card .plat-btn { margin-top: auto; }
