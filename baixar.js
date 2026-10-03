@@ -30,7 +30,6 @@
     texto.textContent = 'Baixar para Mac';
     detalhe.textContent = 'Mac com chip Apple · macOS 12 ou mais novo';
     detectado.textContent = 'Reconhecemos um Mac. Este é o instalador para você: 7 dias grátis, sem cartão.';
-    el('passosWindows').open = false;
   }
 
   if (mac) {
@@ -56,7 +55,6 @@
     }
   } else if (windows) {
     detectado.textContent = 'Reconhecemos um Windows. Este é o instalador para você: 7 dias grátis, sem cartão.';
-    el('passosMac').open = false;
   } else if (celular) {
     main.hidden = true;
     detectado.textContent = 'O ATIVAVID é um programa para computador.';
