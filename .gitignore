@@ -1,0 +1,3 @@
+# cache do wrangler pages dev (teste local): guarda a localizacao de quem rodou
+.wrangler/
+node_modules/
