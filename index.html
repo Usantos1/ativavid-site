@@ -32,8 +32,8 @@
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/poppins-800.woff2" crossorigin>
-  <link rel="preload" as="image" href="assets/ui-editor-1600.webp" imagesrcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" imagesizes="(max-width: 960px) calc(100vw - 40px), 560px" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=20261002a">
+  <link rel="preload" as="image" href="assets/ui-editor-1600.webp" imagesrcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" imagesizes="(max-width: 960px) calc(100vw - 40px), 600px" fetchpriority="high">
+  <link rel="stylesheet" href="styles.css?v=20261003e">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -99,7 +99,7 @@
           { "@type": "Question", "name": "E se a IA errar uma palavra ou um corte?", "acceptedAnswer": { "@type": "Answer", "text": "Clique na legenda e corrija. Marque o trecho e escreva \"não corta aqui\". Só o que mudou é refeito." } },
           { "@type": "Question", "name": "Funciona para vídeo longo, tipo YouTube?", "acceptedAnswer": { "@type": "Answer", "text": "Sim. Horizontal sai com selo, capítulos, legenda e o .srt do CC. Vertical sai pronto para Reels, Shorts e TikTok." } },
           { "@type": "Question", "name": "Funciona no Mac?", "acceptedAnswer": { "@type": "Answer", "text": "Sim, em Mac com chip Apple (M1, M2, M3, M4 ou mais novo) e macOS 12 ou mais novo. Mac com processador Intel ainda não é compatível. A página de download reconhece o seu sistema e entrega o instalador certo." } },
-          { "@type": "Question", "name": "Por que o instalador do Mac é maior?", "acceptedAnswer": { "@type": "Answer", "text": "O do Mac tem cerca de 1 GB porque já leva tudo dentro: abre, arrasta para Aplicativos e pronto. O do Windows é pequeno e baixa os componentes da IA no primeiro uso." } },
+          { "@type": "Question", "name": "Por que o instalador do Mac é maior?", "acceptedAnswer": { "@type": "Answer", "text": "O do Mac é maior porque já leva tudo dentro: abre, arrasta para Aplicativos e pronto. O do Windows é pequeno e baixa os componentes da IA no primeiro uso." } },
           { "@type": "Question", "name": "O que acontece quando os 7 dias acabam?", "acceptedAnswer": { "@type": "Answer", "text": "O app mostra os planos. Se não assinar, para de editar, mas seus vídeos e projetos continuam nas suas pastas. Assinou, volta na hora." } }
         ]
       }
@@ -108,19 +108,42 @@
   </script>
 </head>
 <body>
+  <!-- A refração do Liquid Glass (só no Chromium; o main.js liga a classe
+       .refrata). O mapa dobra a luz na borda como uma lente grossa. -->
+  <svg class="sr-svg" aria-hidden="true" focusable="false" width="0" height="0">
+    <filter id="vidro-refracao" x="0" y="0" width="1" height="1" filterUnits="objectBoundingBox" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+      <feImage href="assets/vidro-mapa.png" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="mapa"/>
+      <feDisplacementMap in="SourceGraphic" in2="mapa" scale="0.06" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-pasta" viewBox="0 0 24 24"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/></symbol>
+    <symbol id="i-filme" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7.5 5v14M16.5 5v14M3 9.5h4.5M3 14.5h4.5M16.5 9.5H21M16.5 14.5H21"/></symbol>
+    <symbol id="i-imagem" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16.5l-5-5-8.5 8"/></symbol>
+    <symbol id="i-texto" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h11M4 17.5h14"/></symbol>
+    <symbol id="i-tesoura" viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.5"/><circle cx="6" cy="17" r="2.5"/><path d="M8.2 8.4L20 18M8.2 15.6L20 6"/></symbol>
+    <symbol id="i-legenda" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M7 15h4M13.5 15H17M7 11.5h10"/></symbol>
+    <symbol id="i-titulo" viewBox="0 0 24 24"><path d="M5 6h14M12 6v13M9 19h6"/></symbol>
+    <symbol id="i-musica" viewBox="0 0 24 24"><path d="M9 17.5V6l11-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="15.5" r="2.5"/></symbol>
+    <symbol id="i-nota" viewBox="0 0 24 24"><path d="M12 3.5l2.5 5.3 5.8.6-4.3 3.9 1.2 5.7L12 16.1 6.8 19l1.2-5.7-4.3-3.9 5.8-.6z"/></symbol>
+    <symbol id="i-pc" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M8 20h8M12 16.5V20"/></symbol>
+    <symbol id="i-cadeado" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></symbol>
+    <symbol id="i-chave" viewBox="0 0 24 24"><circle cx="8" cy="15" r="3.5"/><path d="M10.5 12.5L19 4M16 7l2 2M14 9l1.5 1.5"/></symbol>
+    <symbol id="i-repetir" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></symbol>
+    <symbol id="i-seta" viewBox="0 0 24 24"><path d="M5 12h13M13 7l5 5-5 5"/></symbol>
+  </svg>
 
 <a class="skip" href="#conteudo">Ir para o conteúdo</a>
 
-<header class="nav" id="topo">
+<header class="nav vidro-barra" id="topo">
   <div class="wrap nav-in">
     <a class="brand" href="#topo" aria-label="ATIVAVID — voltar ao topo">
       <img src="assets/logo-280.webp" alt="ATIVAVID" width="140" height="44" decoding="async">
     </a>
     <nav class="nav-links" aria-label="Seções">
-      <a href="#como">Como funciona</a>
+      <a href="#dia">O dia na loja</a>
       <a href="#plataformas">Windows e Mac</a>
-      <a href="#recursos">Recursos</a>
-      <a href="#multiplicador">Multiplicador</a>
       <a href="#preco">Preço</a>
       <a href="#faq">Dúvidas</a>
     </nav>
@@ -130,165 +153,390 @@
 
 <main id="conteudo">
 
-  <!-- ================= HERO ================= -->
-  <section class="hero">
-    <div class="wrap hero-in">
-      <div class="hero-copy">
-        <p class="eyebrow"><span class="dot"></span> Editor de vídeo com IA · Windows e Mac</p>
-        <h1>Você grava.<br>O ATIVAVID <em>edita.</em></h1>
+  <!-- ================= HERÓI: 9h → 9h05 ================= -->
+  <section class="heroi" aria-labelledby="heroiTit">
+    <div class="wrap heroi-in">
+      <div class="heroi-txt">
+        <h1 id="heroiTit">Você grava.<br>O ATIVAVID <em>edita.</em></h1>
         <p class="lead">
-          Arraste o vídeo bruto. Em <strong>2 minutos</strong> ele volta cortado, legendado no seu estilo,
-          com headline e capa — pronto para postar, <strong>sem sair do seu computador</strong>.
+          Arraste o vídeo bruto. Em <strong>2 minutos</strong> o ATIVAVID devolve o vídeo cortado,
+          sem silêncio nem erro, legendado no estilo da sua loja, com headline e capa,
+          <strong>sem sair do seu computador</strong>.
         </p>
-        <p class="pill-launch"><b>Oferta de lançamento</b> R$ 59/mês <s>R$ 99,90</s></p>
-        <div class="cta-row">
+        <p class="pilula vidro"><b>Oferta de lançamento</b> R$ 59/mês <s>R$ 99,90</s></p>
+        <div class="cta-linha">
           <a class="btn btn-primary alc-shiny btn-lg" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="hero"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar e testar 7 dias grátis</span></a>
         </div>
-        <ul class="micro">
-          <li>7 dias grátis</li>
-          <li>Sem cartão</li>
-          <li>Sem tokens nem outras assinaturas</li>
-          <li>Seu vídeo não sai do computador</li>
+        <ul class="micro" aria-label="Condições do teste">
+          <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>7 dias grátis</li>
+          <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Sem cartão</li>
+          <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Sem tokens</li>
+          <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><a href="#plataformas">Windows e Mac</a></li>
         </ul>
-        <p class="os-line"><span class="os-chip">Windows 10/11</span><span class="os-chip">Mac com chip Apple</span> <a href="/baixar">ver requisitos</a></p>
       </div>
 
-      <div class="hero-visual" aria-hidden="true">
-        <div class="device">
-          <div class="device-bar"><span></span><span></span><span></span></div>
-          <img src="assets/ui-editor-1600.webp" srcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" sizes="(max-width: 960px) calc(100vw - 40px), 560px" alt="" width="1600" height="745" fetchpriority="high">
+      <figure class="heroi-visual">
+        <div class="janela vidro">
+          <div class="janela-barra" aria-hidden="true"><span></span><span></span><span></span><b>ATIVAVID</b></div>
+          <img src="assets/ui-editor-1600.webp" srcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" sizes="(max-width: 960px) calc(100vw - 40px), 600px" alt="Editor do ATIVAVID com o vídeo na timeline em camadas" width="1600" height="745" fetchpriority="high">
+          <p class="aviso vidro refrata-alvo" data-aviso><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><b>Concluído</b> <span>9h02</span></p>
         </div>
-        <div class="chip chip-a"><b>CONCLUÍDO</b> · 1:20 → 1:00 · 16 s de silêncio removidos</div>
-        <div class="chip chip-b">score <b>80</b></div>
-        <div class="chip chip-c">Legenda · Headline · Trilha · Capa</div>
-      </div>
+
+        <div class="corte vidro refrata-alvo" data-corte>
+          <div class="corte-cab">
+            <p class="corte-arq"><svg class="ico" aria-hidden="true"><use href="#i-filme"/></svg>IMG_4813.MOV</p>
+            <p class="corte-dur"><span data-corte-dur>50,2 s</span><span class="corte-depois" data-corte-depois><svg class="ico" aria-hidden="true"><use href="#i-seta"/></svg>41,0 s</span></p>
+          </div>
+          <!-- Os 10 cortes de verdade deste vídeo (corte_relatorio.json):
+               --a = início em segundos, --d = duração. 50,22 s no total. -->
+          <div class="trilha" data-trilha role="img" aria-label="Trilha do vídeo: 50,2 segundos de bruto, 10 trechos cortados (9 de silêncio e 1 de ritmo), 41,0 segundos depois do corte.">
+            <span class="tc" style="--a:0;--d:4.34"></span>
+            <span class="tc" style="--a:5.89;--d:0.46"></span>
+            <span class="tc" style="--a:9.14;--d:0.70"></span>
+            <span class="tc" style="--a:12.69;--d:0.41"></span>
+            <span class="tc" style="--a:25.56;--d:0.64"></span>
+            <span class="tc" style="--a:27.80;--d:0.27"></span>
+            <span class="tc" style="--a:31.12;--d:0.28"></span>
+            <span class="tc" style="--a:37.62;--d:0.45"></span>
+            <span class="tc tc-ritmo" style="--a:45.66;--d:0.66"></span>
+            <span class="tc" style="--a:49.19;--d:1.03"></span>
+          </div>
+          <div class="corte-saida">
+            <p class="corte-head"><span class="corte-rot">Headline</span><b>QUANDO O CLIENTE VOLTA NO DIA SEGUINTE</b></p>
+            <p class="corte-leg"><span class="corte-rot">Legenda</span><span class="leg"><span>OI,</span> <span>MOÇA,</span> <span>TUDO</span> <span>BEM?</span></span></p>
+          </div>
+          <div class="corte-pe">
+            <p class="corte-nota">Corte real de um vídeo da Prime Camp: <b>9 silêncios</b> e <b>1 “Nossa,”</b> que travava o ritmo. 9,2 s fora.</p>
+            <button type="button" class="btn-vidro btn-mini" data-corte-repetir hidden><svg class="ico" aria-hidden="true"><use href="#i-repetir"/></svg>Ver de novo</button>
+          </div>
+        </div>
+      </figure>
     </div>
   </section>
 
-  <!-- ================= QUANTO CUSTA EDITAR ================= -->
-  <section class="valor" id="valor">
+  <!-- ================= O DIA NA LOJA ================= -->
+  <section class="dia" id="dia" aria-labelledby="diaTit">
     <div class="wrap">
-      <div class="sec-head">
-        <p class="kicker">Faça a conta</p>
-        <h2>Um Reel editado custa até <b>R$&nbsp;650</b>.<br>O ATIVAVID edita <b>todos</b> por <b class="nb">R$&nbsp;59</b>/mês.</h2>
-      </div>
-
-      <p class="faixas-dica">Quanto você paga por vídeo hoje?</p>
-      <div class="faixas" id="faixas">
-        <button type="button" class="faixa" data-preco="85" data-min="50" data-max="120">
-          <span class="faixa-nome">Básica</span>
-          <span class="faixa-preco">R$ 50 <i>a</i> 120</span>
-          <span class="faixa-total" data-total></span>
-        </button>
-        <button type="button" class="faixa on" data-preco="150" data-min="120" data-max="250">
-          <span class="faixa-nome">Profissional</span>
-          <span class="faixa-preco">R$ 120 <i>a</i> 300</span>
-          <span class="faixa-total" data-total></span>
-        </button>
-        <button type="button" class="faixa" data-preco="375" data-min="250" data-max="600">
-          <span class="faixa-tag">nível ATIVAVID</span>
-          <span class="faixa-nome">Legendas + B-roll + som</span>
-          <span class="faixa-preco">R$ 250 <i>a</i> 500<sup>+</sup></span>
-          <span class="faixa-total" data-total></span>
-        </button>
-        <button type="button" class="faixa" data-preco="600" data-min="600" data-max="100000">
-          <span class="faixa-nome">Premium</span>
-          <span class="faixa-preco">R$ 600<sup>+</sup></span>
-          <span class="faixa-total" data-total></span>
-        </button>
-      </div>
-      <p class="faixas-nota">Mediana do mercado: <b>R$ 200 por vídeo</b>.</p>
-
-      <div class="calc" id="calc">
-        <div class="calc-in">
-          <p class="calc-title">Faça a conta da sua empresa</p>
-          <label class="calc-field">
-            <span>Vídeos por mês <output id="calcVideosOut">30</output></span>
-            <input type="range" id="calcVideos" min="4" max="300" step="1" value="30" aria-label="Vídeos por mês">
-          </label>
-          <div class="calc-presets" role="group" aria-label="Atalhos">
-            <button type="button" data-v="10">10 / mês</button>
-            <button type="button" data-v="30" class="on">1 por dia</button>
-            <button type="button" data-v="90">3 por dia</button>
-            <button type="button" data-v="300">10 por dia</button>
-          </div>
-          <label class="calc-field">
-            <span>Quanto você pagaria por edição <output id="calcPrecoOut">R$ 150</output></span>
-            <input type="range" id="calcPreco" min="50" max="600" step="10" value="150" aria-label="Preço por edição">
-          </label>
-        </div>
-        <div class="calc-out">
-          <div class="calc-row">
-            <p class="calc-lab">Editando fora, por mês</p>
-            <p class="calc-num" id="calcFora">R$ 4.500</p>
-            <p class="calc-sub" id="calcForaAno">R$ 54.000 por ano</p>
-          </div>
-          <div class="calc-row calc-row-hl">
-            <p class="calc-lab">Com o ATIVAVID, por mês</p>
-            <p class="calc-num">R$ 59</p>
-            <p class="calc-sub" id="calcPorVideo">R$ 1,97 por vídeo</p>
-          </div>
-          <div class="calc-row calc-row-sobra">
-            <p class="calc-lab">Sobra no seu caixa</p>
-            <p class="calc-num" id="calcSobra">R$ 4.441 <span>/mês</span></p>
-            <p class="calc-sub" id="calcVezes">76 vezes o valor da assinatura</p>
-          </div>
-        </div>
-      </div>
+      <h2 id="diaTit" class="dia-tit">Um dia na loja com o ATIVAVID</h2>
+      <p class="dia-sub">Do balcão ao post, hora a hora. Tudo o que aparece aqui é tela real do app ou dado real da Prime Camp, a assistência de celulares onde o ATIVAVID nasceu.</p>
     </div>
-  </section>
 
-  <!-- ================= COMO FUNCIONA ================= -->
-  <section class="how" id="como">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="kicker">Como funciona</p>
-        <h2>Três gestos. O resto é o ATIVAVID.</h2>
-      </div>
-      <ol class="steps">
-        <li class="step">
-          <span class="n">1</span>
-          <h3>Arraste o vídeo</h3>
-          <p>Um arquivo, uma pasta ou vários takes. Clique em <b>Editar com IA</b>.</p>
-        </li>
-        <li class="step">
-          <span class="n">2</span>
-          <h3>A IA edita no seu computador</h3>
-          <p>Tira silêncios e erros, escolhe o corte, aplica legenda, headline, trilha e capa.</p>
-        </li>
-        <li class="step">
-          <span class="n">3</span>
-          <h3>Aprove e poste</h3>
-          <p>Ajuste se quiser, marque <b>Aprovado</b> e receba a pasta pronta: vídeo, capa e legenda do post.</p>
-        </li>
-      </ol>
+    <div class="wrap dia-in">
+      <nav class="regua vidro" aria-label="Horários do dia" data-regua>
+        <ol>
+          <li><a href="#m-0900"><b>9h00</b><span>Grava</span></a></li>
+          <li><a href="#m-0902"><b>9h02</b><span>Pronto</span></a></li>
+          <li><a href="#m-0905"><b>9h05</b><span>Posta</span></a></li>
+          <li><a href="#m-1100"><b>11h</b><span>Estilo</span></a></li>
+          <li><a href="#m-1200"><b>12h</b><span>27 criativos</span></a></li>
+          <li><a href="#m-1500"><b>15h</b><span>Ajuste</span></a></li>
+          <li><a href="#m-1800"><b>18h</b><span>A conta</span></a></li>
+          <li><a href="#m-dia30"><b>Dia 30</b><span>30 vídeos</span></a></li>
+        </ol>
+        <span class="regua-agora" aria-hidden="true"></span>
+      </nav>
 
-      <div class="pipeline" aria-label="Etapas automáticas">
-        <span>Transcrição local</span><i></i>
-        <span>Corte inteligente</span><i></i>
-        <span>Legenda no seu estilo</span><i></i>
-        <span>Headline</span><i></i>
-        <span>Trilha por IA</span><i></i>
-        <span>Capa</span><i></i>
-        <span>Legenda do post</span>
-      </div>
-      <div class="cta-center cta-meio">
-        <a class="btn btn-primary alc-shiny" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="como"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Testar com o meu vídeo — grátis</span></a>
+      <div class="momentos">
+
+        <article class="momento" id="m-0900" data-rotulo="9h00 · Grava">
+          <div class="momento-txt">
+            <h3><span class="hora">9h00</span> Grava no balcão e arrasta para o ATIVAVID.</h3>
+            <p>Um vídeo, uma pasta ou vários takes do celular. O 4K HDR do iPhone entra direto. Clique em <b>Editar com IA</b> e volte para o cliente.</p>
+          </div>
+          <div class="momento-media">
+            <div class="soltar" aria-hidden="true">
+              <div class="soltar-area">
+                <p class="arquivo vidro"><svg class="ico"><use href="#i-filme"/></svg><span><b>IMG_4813.MOV</b><i>50 s · gravado no celular</i></span></p>
+                <p class="soltar-dica">Arraste o vídeo aqui</p>
+              </div>
+              <p class="soltar-botao">Editar com IA</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="momento momento-prova" id="m-0902" data-rotulo="9h02 · Pronto">
+          <div class="momento-txt">
+            <h3><span class="hora">9h02</span> Pronto: cortado, legendado, com headline e capa.</h3>
+            <p>A IA tira o silêncio e o erro, escolhe o corte e aplica tudo no estilo da sua loja. Num vídeo típico da Prime Camp, <b>18% do bruto</b> sai no corte.</p>
+            <ul class="saidas">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-tesoura"/></svg>Corte sem silêncio e sem erro</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-legenda"/></svg>Legenda no estilo da sua marca</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-titulo"/></svg>Headline no topo do vídeo</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-imagem"/></svg>Capa pronta, ou o quadro que você escolher</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-musica"/></svg>Trilha: composta por IA no Windows com placa NVIDIA, ou da sua biblioteca</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-nota"/></svg>Nota do corte, com o que dá para melhorar</li>
+            </ul>
+          </div>
+          <figure class="momento-media">
+            <div class="janela janela-solida janela-detalhe">
+              <div class="janela-barra" aria-hidden="true"><span></span><span></span><span></span></div>
+              <img src="assets/det-0902-fichas.webp" style="--w:651" alt="Duas fichas reais da tela Concluídos: vídeo original de 23 s e 17 s, editado em 17 s e 15 s, com a nota do corte" loading="lazy" decoding="async" width="651" height="290">
+            </div>
+            <figcaption>Fichas reais da Prime Camp: <b>início 13:26, final 13:27</b>. Cada vídeo com a duração antes e depois e a nota do corte.</figcaption>
+          </figure>
+        </article>
+
+        <article class="momento" id="m-0905" data-rotulo="9h05 · Posta">
+          <div class="momento-txt">
+            <h3><span class="hora">9h05</span> Você posta. Está tudo na pasta.</h3>
+            <p>Vídeo, capa e a legenda do post com hashtags, prontos para copiar. Vertical para Reels, Shorts e TikTok. Horizontal para o YouTube, com capítulos e o .srt do CC, sem exportar duas vezes.</p>
+          </div>
+          <div class="momento-media">
+            <div class="pasta vidro">
+              <p class="pasta-tit"><svg class="ico" aria-hidden="true"><use href="#i-pasta"/></svg>✅ QUANDO O CLIENTE VOLTA NO DIA SEGUINTE</p>
+              <ul class="pasta-lista">
+                <li><svg class="ico" aria-hidden="true"><use href="#i-filme"/></svg>✅ QUANDO O CLIENTE VOLTA NO DIA SEGUINTE.mp4</li>
+                <li><svg class="ico" aria-hidden="true"><use href="#i-imagem"/></svg>capa.jpg</li>
+                <li><svg class="ico" aria-hidden="true"><use href="#i-texto"/></svg>legenda.txt</li>
+              </ul>
+              <blockquote class="post">
+                <p>Aquele susto que todo técnico leva quando o cliente volta no dia seguinte! 😂</p>
+                <p>Mas calma: dessa vez foi só para indicar a família…</p>
+                <p class="post-tags">#PrimeCamp #AssistenciaTecnica #ConsertoDeCelular #TrocaDeTela</p>
+              </blockquote>
+              <p class="pasta-nota">A pasta e a legenda que o ATIVAVID entregou para esse vídeo.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="momento momento-prova" id="m-1100" data-rotulo="11h · Estilo">
+          <div class="momento-txt">
+            <h3><span class="hora">11h</span> O estilo da sua loja, configurado uma vez.</h3>
+            <p>Cores, legenda, headline e hashtags. Todo vídeo sai com a sua cara, e suas fotos, takes e trilhas viram b-roll que a IA encaixa na frase certa.</p>
+            <p class="para-quem"><b>Agência ou social media?</b> Um estilo por cliente. Copie o estilo e cole nos outros projetos.</p>
+          </div>
+          <figure class="momento-media">
+            <div class="janela janela-solida janela-detalhe">
+              <div class="janela-barra" aria-hidden="true"><span></span><span></span><span></span></div>
+              <img src="assets/det-1100-estilo.webp" style="--w:805" alt="Tela de Estilos da Prime Camp: cor da headline #FF0004, cor de ênfase, cor da legenda e os estilos de headline Contorno, Cartão, Realce, Misto e Sombra dura" loading="lazy" decoding="async" width="805" height="350">
+            </div>
+            <figcaption>O estilo base da Prime Camp: as cores da marca e o estilo de headline <b>Realce</b>, que vale para todo vídeo.</figcaption>
+          </figure>
+        </article>
+
+        <article class="momento" id="m-1200" data-rotulo="12h · 27 criativos">
+          <div class="momento-txt">
+            <h3><span class="hora">12h</span> No almoço, <span class="nb">27 criativos</span> para anunciar.</h3>
+            <p>Grave 3 ganchos, 3 corpos e 3 CTAs. O Multiplicador monta as 27 combinações, cada uma legendada, com headline e capa. Teste, ache a vencedora, aprove.</p>
+            <p class="para-quem"><b>Roda tráfego pago?</b> O criativo que perde custou 2 minutos de máquina, não uma tarde de edição.</p>
+            <a class="btn btn-primary alc-shiny" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="multi"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Quero multiplicar meus criativos</span></a>
+          </div>
+          <figure class="momento-media">
+            <div class="janela janela-solida janela-detalhe">
+              <div class="janela-barra" aria-hidden="true"><span></span><span></span><span></span></div>
+              <img src="assets/det-1200-multiplicador.webp" style="--w:633" alt="Janela Multiplicador de criativos: caixas de Ganchos, Corpos e CTAs e o botão Criar combinações" loading="lazy" decoding="async" width="633" height="358">
+            </div>
+            <figcaption>A janela real do Multiplicador: 3 ganchos × 3 corpos × 3 CTAs = <b>27 criativos</b> na fila.</figcaption>
+          </figure>
+        </article>
+
+        <article class="momento momento-prova" id="m-1500" data-rotulo="15h · Ajuste">
+          <div class="momento-txt">
+            <h3><span class="hora">15h</span> Quer ajustar? A timeline é sua.</h3>
+            <p>Vídeo, legendas, headline, trilha, efeitos e b-roll, cada um na sua faixa. Arraste, corte, reenquadre.</p>
+            <ul class="saidas">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-legenda"/></svg>Legenda errada? Clique na palavra e digite</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-tesoura"/></svg>Marque um trecho e escreva “não corta aqui”: só o que mudou é refeito</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-repetir"/></svg>Reabra dias depois e continue de onde parou</li>
+            </ul>
+          </div>
+          <figure class="momento-media">
+            <div class="janela janela-solida janela-detalhe">
+              <div class="janela-barra" aria-hidden="true"><span></span><span></span><span></span></div>
+              <img src="assets/det-1500-timeline.webp" style="--w:917" alt="Timeline do editor: legendas palavra por palavra, os takes mantidos, a headline, a trilha e a onda do áudio, cada um na sua faixa" loading="lazy" decoding="async" width="917" height="360">
+            </div>
+            <figcaption>A timeline real: legenda palavra por palavra, takes, headline, trilha e áudio, cada um na sua faixa.</figcaption>
+          </figure>
+        </article>
+
+        <article class="momento momento-largo" id="m-1800" data-rotulo="18h · A conta">
+          <div class="momento-txt">
+            <h3><span class="hora">18h</span> Fecha a loja e faz a conta.</h3>
+            <p>Um Reel editado por freelancer custa até <b>R$&nbsp;650</b> (estimativa de mercado). O ATIVAVID edita <b>todos</b> por <b class="nb">R$&nbsp;59</b>/mês.</p>
+          </div>
+
+          <div class="conta">
+            <p class="faixas-dica" id="faixasDica">Quanto você paga por vídeo hoje?</p>
+            <div class="faixas" id="faixas" role="group" aria-labelledby="faixasDica">
+              <button type="button" class="faixa" data-preco="85" data-min="50" data-max="120">
+                <span class="faixa-nome">Básica</span>
+                <span class="faixa-preco">R$ 50 <i>a</i> 120</span>
+                <span class="faixa-total" data-total></span>
+              </button>
+              <button type="button" class="faixa on" data-preco="150" data-min="120" data-max="250">
+                <span class="faixa-nome">Profissional</span>
+                <span class="faixa-preco">R$ 120 <i>a</i> 300</span>
+                <span class="faixa-total" data-total></span>
+              </button>
+              <button type="button" class="faixa" data-preco="375" data-min="250" data-max="600">
+                <span class="faixa-nome">Legendas + B-roll + som</span>
+                <span class="faixa-preco">R$ 250 <i>a</i> 500<sup>+</sup></span>
+                <span class="faixa-total" data-total></span>
+              </button>
+              <button type="button" class="faixa" data-preco="600" data-min="600" data-max="100000">
+                <span class="faixa-nome">Premium</span>
+                <span class="faixa-preco">R$ 600<sup>+</sup></span>
+                <span class="faixa-total" data-total></span>
+              </button>
+            </div>
+            <p class="faixas-nota">Faixas estimadas de preço de edição de Reel no Brasil; mediana estimada de <b>R$ 200 por vídeo</b>.</p>
+
+            <div class="calc" id="calc">
+              <div class="calc-in">
+                <p class="calc-title">A conta da sua loja</p>
+                <label class="calc-field">
+                  <span>Vídeos por mês <output id="calcVideosOut">30</output></span>
+                  <input type="range" id="calcVideos" min="4" max="300" step="1" value="30" aria-label="Vídeos por mês">
+                </label>
+                <div class="calc-presets vidro-seg" role="group" aria-label="Atalhos de vídeos por mês">
+                  <button type="button" data-v="10">10 / mês</button>
+                  <button type="button" data-v="30" class="on">1 por dia</button>
+                  <button type="button" data-v="90">3 por dia</button>
+                  <button type="button" data-v="300">10 por dia</button>
+                </div>
+                <label class="calc-field">
+                  <span>Quanto você pagaria por edição <output id="calcPrecoOut">R$ 150</output></span>
+                  <input type="range" id="calcPreco" min="50" max="600" step="10" value="150" aria-label="Preço por edição">
+                </label>
+              </div>
+              <div class="calc-out">
+                <div class="calc-row">
+                  <p class="calc-lab">Editando fora, por mês</p>
+                  <p class="calc-num" id="calcFora">R$ 4.500</p>
+                  <p class="calc-sub" id="calcForaAno">R$ 54.000 por ano</p>
+                </div>
+                <div class="calc-row calc-row-hl">
+                  <p class="calc-lab">Com o ATIVAVID, por mês</p>
+                  <p class="calc-num">R$ 59</p>
+                  <p class="calc-sub" id="calcPorVideo">R$ 1,97 por vídeo</p>
+                </div>
+                <div class="calc-row calc-row-sobra">
+                  <p class="calc-lab">Sobra no seu caixa</p>
+                  <p class="calc-num" id="calcSobra">R$ 4.441 <span>/mês</span></p>
+                  <p class="calc-sub" id="calcVezes">76 vezes o valor da assinatura</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="planos" id="preco" aria-labelledby="precoTit">
+              <h4 id="precoTit">Fechou a conta? Escolha o plano.</h4>
+              <p class="planos-sub">7 dias grátis, sem cartão. Depois, menos que meio Reel de freelancer por mês. Você assina dentro do app.</p>
+            <div class="plans">
+              <div class="plan">
+                <p class="plan-name">Pro Mensal <span class="tag-launch">Oferta de lançamento</span></p>
+                <p class="price-de">de <s>R$ 99,90</s> por</p>
+                <p class="price"><small>R$</small>59<span>/mês</span></p>
+                <p class="plan-note">Menos de <b>R$ 2 por vídeo</b> se você posta um por dia.</p>
+                <ul class="ticks">
+                  <li><b>1 computador</b>, Windows ou Mac — vídeos ilimitados</li>
+                  <li>Todos os recursos, incluindo o Multiplicador</li>
+                  <li>Atualizações automáticas</li>
+                  <li>Cancela quando quiser</li>
+                </ul>
+              </div>
+              <div class="plan plan-best">
+                <p class="badge">Mais econômico</p>
+                <p class="plan-name">Pro Anual <span class="tag-launch">Oferta de lançamento</span></p>
+                <p class="price-de">de <s>R$ 899</s> por</p>
+                <p class="price"><small>R$</small>399<span>/ano</span></p>
+                <p class="plan-note">Sai por <b>R$ 33,25 por mês</b> — o que um editor cobra por um quarto de Reel.</p>
+                <ul class="ticks">
+                  <li><b>1 computador</b> — tudo do mensal</li>
+                  <li>R$ 500 abaixo do valor cheio de R$ 899</li>
+                  <li>Economize R$ 309 em relação ao mensal</li>
+                  <li>Um pagamento, um ano sem pensar nisso</li>
+                </ul>
+              </div>
+              <div class="plan plan-escala">
+                <p class="plan-name">Pro Escala</p>
+                <p class="price-de">a partir de 2 computadores · agências e operações de tráfego</p>
+                <p class="price price-consulta">Sob consulta</p>
+                <p class="plan-note">Vários computadores editando ao mesmo tempo, várias marcas, centenas de vídeos por mês.</p>
+                <ul class="ticks">
+                  <li>Licença para várias máquinas</li>
+                  <li>Um estilo por cliente, sem limite de marcas</li>
+                  <li>Implantação e treinamento da equipe</li>
+                  <li>Suporte direto com quem fez o ATIVAVID</li>
+                  <li>Nota fiscal e faturamento mensal</li>
+                </ul>
+                <a class="btn btn-vidro plan-cta" href="/baixar" data-ativa-form="ativavid-864e5e" data-ativa-params="plano=escala" data-cta="escala">Falar sobre o plano Escala</a>
+              </div>
+            </div>
+            <div class="launch">
+              <p class="launch-tag">Oferta de lançamento</p>
+              <p>O ATIVAVID está em lançamento. Quando a oferta acabar, o valor passa a ser <b>R$ 99,90 por mês</b> e <b>R$ 899 por ano</b>. Quem assina agora entra pelo preço de lançamento.</p>
+            </div>
+            <div class="cta-center">
+              <a class="btn btn-primary alc-shiny btn-lg" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="preco"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar e começar os 7 dias grátis</span></a>
+              <p class="micro-line">Windows 10/11 (64 bits) ou Mac com chip Apple (macOS 12+) · a página de download escolhe o instalador certo</p>
+            </div>
+            <p class="garantia"><b>Zero risco:</b> 7 dias de uso completo, sem cartão. Assinou e mudou de ideia? Cancela quando quiser. Seus vídeos, projetos e estilos ficam no seu computador, porque sempre estiveram lá.</p>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <caption>Por que trocar</caption>
+                <thead>
+                  <tr><th scope="col"><span class="sr-only">Comparação</span></th><th scope="col">Editar na mão<small>CapCut / Premiere</small></th><th scope="col">Ferramentas na nuvem</th><th scope="col" class="hl">ATIVAVID</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Tempo por vídeo curto</th><td data-col="Editar na mão">40 min a 2 h</td><td data-col="Ferramentas na nuvem">10–20 min + upload</td><td class="hl" data-col="ATIVAVID">~2 min</td></tr>
+                  <tr><th scope="row">Custo por vídeo</th><td data-col="Editar na mão">seu tempo, ou R$ 120–650 por Reel (estimativa)</td><td data-col="Ferramentas na nuvem">créditos por minuto</td><td class="hl" data-col="ATIVAVID">zero, roda no seu computador</td></tr>
+                  <tr><th scope="row">Seu vídeo sai da máquina?</th><td data-col="Editar na mão">não</td><td data-col="Ferramentas na nuvem">sim, sempre</td><td class="hl" data-col="ATIVAVID">não</td></tr>
+                  <tr><th scope="row">Estilo da marca fixo</th><td data-col="Editar na mão">copiar projeto a projeto</td><td data-col="Ferramentas na nuvem">templates genéricos</td><td class="hl" data-col="ATIVAVID">um estilo, todos os vídeos</td></tr>
+                  <tr><th scope="row">Variações para tráfego</th><td data-col="Editar na mão">uma por uma</td><td data-col="Ferramentas na nuvem">uma por uma</td><td class="hl" data-col="ATIVAVID">27 de uma vez</td></tr>
+                  <tr><th scope="row">Ajuste fino depois</th><td data-col="Editar na mão">sim</td><td data-col="Ferramentas na nuvem">limitado</td><td class="hl" data-col="ATIVAVID">timeline completa</td></tr>
+                  <tr><th scope="row">Funciona offline</th><td data-col="Editar na mão">sim</td><td data-col="Ferramentas na nuvem">não</td><td class="hl" data-col="ATIVAVID">sim, depois de instalado</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </article>
+
+        <article class="momento momento-largo momento-fim" id="m-dia30" data-rotulo="Dia 30 · 30 vídeos">
+          <div class="momento-txt">
+            <h3><span class="hora">Dia 30</span> No fim do mês, 30 vídeos postados. Sem editor.</h3>
+            <p>O ATIVAVID nasceu na Prime Camp, uma assistência de celulares que precisava de vídeo todo dia. Desde agosto de 2026, <b>mais de 300 vídeos</b> da loja passaram por ele.</p>
+          </div>
+          <figure class="mes-prova">
+            <div class="janela janela-solida">
+              <div class="janela-barra" aria-hidden="true"><span></span><span></span><span></span></div>
+              <img src="assets/ui-concluidos-1600.webp" srcset="assets/ui-concluidos-800.webp 800w, assets/ui-concluidos-1200.webp 1200w, assets/ui-concluidos-1600.webp 1600w" sizes="(max-width: 1100px) calc(100vw - 40px), 950px" alt="Tela Projetos do ATIVAVID na Prime Camp, com o contador 227 concluídos e as fichas de cada vídeo" loading="lazy" decoding="async" width="1600" height="745">
+            </div>
+            <figcaption>Tela real da Prime Camp em 2 de setembro de 2026: <b>227 vídeos concluídos</b> no contador do app.</figcaption>
+          </figure>
+          <div class="local">
+            <h4>O que roda no seu computador</h4>
+            <ul class="local-lista">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-pc"/></svg><span><b>Transcrição, corte, legenda e render</b> na sua máquina. Funciona sem internet depois de instalado.</span></li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-cadeado"/></svg><span><b>Seu vídeo não sobe</b> para servidor nenhum. Sai pronto da sua máquina.</span></li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-chave"/></svg><span><b>Sem tokens.</b> O roteiro do corte e a legenda do post usam a conta de IA que você já tem, inclusive a gratuita.</span></li>
+            </ul>
+            <p class="nao-titulo">Você <b>não</b> precisa de:</p>
+            <ul class="nao-lista">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>app de legenda</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>créditos por minuto</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>tokens de API</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>banco de trilha pago</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>upload para a nuvem</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>editor por vídeo</li>
+            </ul>
+          </div>
+        </article>
+
       </div>
     </div>
   </section>
 
   <!-- ================= WINDOWS E MAC ================= -->
-  <section class="plataformas" id="plataformas">
+  <section class="plataformas" id="plataformas" aria-labelledby="platTit">
     <div class="wrap">
       <div class="sec-head">
-        <p class="kicker">Windows e Mac</p>
-        <h2>O mesmo ATIVAVID no seu Windows ou no seu Mac</h2>
+        <h2 id="platTit">O mesmo ATIVAVID no seu Windows ou no seu Mac</h2>
         <p class="sub">Mesmo editor, mesmos estilos, mesma assinatura. A página de download reconhece o seu computador e entrega o instalador certo.</p>
       </div>
       <div class="plat-grid">
         <article class="plat-card">
-          <p class="plat-tag">Windows</p>
           <h3>Windows 10 ou 11</h3>
           <ul class="ticks">
             <li>64 bits</li>
@@ -296,320 +544,75 @@
             <li>Sem placa NVIDIA, funciona na CPU</li>
             <li>Instalador pequeno: a IA baixa os componentes no primeiro uso</li>
           </ul>
-          <a class="btn btn-ghost plat-btn" href="/baixar" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=windows" data-cta="plat-windows">Baixar para Windows</a>
+          <a class="btn btn-vidro plat-btn" href="/baixar" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=windows" data-cta="plat-windows">Baixar para Windows</a>
         </article>
         <article class="plat-card">
-          <p class="plat-tag">Mac</p>
           <h3>Mac com chip Apple</h3>
           <ul class="ticks">
             <li>M1, M2, M3, M4 ou mais novo</li>
             <li>macOS 12 (Monterey) ou mais novo</li>
             <li>Render pelo motor de vídeo do próprio Mac</li>
-            <li>Instalador completo, cerca de 1 GB: abre, arrasta para Aplicativos e pronto</li>
+            <li>Instalador completo, com tudo dentro: abre, arrasta para Aplicativos e pronto</li>
           </ul>
-          <a class="btn btn-ghost plat-btn" href="/baixar" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=mac" data-cta="plat-mac">Baixar para Mac</a>
+          <a class="btn btn-vidro plat-btn" href="/baixar" data-ativa-form="ativavid-864e5e" data-ativa-params="sistema=mac&amp;aviso=lancamento" data-cta="plat-mac" data-mac-botao>Me avise quando sair para Mac</a>
         </article>
       </div>
-      <p class="plat-nota">Mac com processador Intel ainda não é compatível. <b>Uma assinatura vale para 1 computador</b>, Windows ou Mac.</p>
+      <p class="plat-nota"><span data-mac-nota>O instalador do Mac sai nos próximos dias. </span>Mac com processador Intel ainda não é compatível. <b>Uma assinatura vale para 1 computador</b>, Windows ou Mac.</p>
     </div>
   </section>
 
-  <!-- ================= IA LOCAL ================= -->
-  <section class="local" id="ialocal">
+  <!-- ================= DÚVIDAS ================= -->
+  <section class="faq" id="faq" aria-labelledby="faqTit">
     <div class="wrap">
       <div class="sec-head">
-        <p class="kicker">IA local</p>
-        <h2>A IA roda no seu computador.<br>Sem tokens, sem outras assinaturas.</h2>
-        <p class="sub">Você paga o ATIVAVID e mais nada. Nenhuma ferramenta extra para contratar, nenhum crédito para repor.</p>
-      </div>
-
-      <div class="local-grid">
-        <div class="local-card">
-          <span class="local-ico">Local</span>
-          <h3>Transcrição na sua máquina</h3>
-          <p>A fala vira texto no seu Windows ou Mac. Funciona sem internet depois de instalado.</p>
-        </div>
-        <div class="local-card">
-          <span class="local-ico">Local</span>
-          <h3>Trilha composta na sua máquina</h3>
-          <p>No Windows com placa NVIDIA, a música do vídeo é gerada na sua placa. Em qualquer máquina, use as trilhas da sua biblioteca.</p>
-        </div>
-        <div class="local-card">
-          <span class="local-ico">Local</span>
-          <h3>Corte, legenda e render na sua máquina</h3>
-          <p>Seu vídeo não sobe para servidor nenhum. Sai pronto da sua máquina.</p>
-        </div>
-        <div class="local-card">
-          <span class="local-ico">0</span>
-          <h3>Planejamento pela sua conta de IA</h3>
-          <p>O roteiro do corte e a legenda do post usam a conta de IA que você já tem, inclusive a gratuita. Zero tokens.</p>
-        </div>
-      </div>
-
-      <div class="nao-precisa">
-        <p class="nao-titulo">Com o ATIVAVID você <b>não</b> precisa de:</p>
-        <ul>
-          <li>Assinatura de app de legenda</li>
-          <li>Créditos por minuto exportado</li>
-          <li>Tokens de API de IA</li>
-          <li>Banco de trilha pago</li>
-          <li>Upload do vídeo para a nuvem</li>
-          <li>Editor freelancer por vídeo</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= RECURSOS ================= -->
-  <section class="features" id="recursos">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="kicker">Recursos</p>
-        <h2>Um editor de verdade. A IA faz o pesado.</h2>
-        <p class="sub">É a sua gravação, editada como um profissional editaria. Você segue no controle.</p>
-      </div>
-
-      <article class="feat feat-wide">
-        <div class="feat-copy">
-          <h3>Timeline com camadas, como você já conhece</h3>
-          <p>Vídeo, legendas, headline, trilha, efeitos e b-roll, cada um na sua faixa. Arraste, corte, reenquadre.</p>
-          <ul class="ticks">
-            <li>Corrigir a legenda: clique na palavra e digite</li>
-            <li>Marcou um trecho? Sai do corte. Volta quando quiser</li>
-            <li>Reabra dias depois e continue de onde parou</li>
-          </ul>
-        </div>
-        <figure class="feat-shot"><img src="assets/ui-editor-1600.webp" srcset="assets/ui-editor-800.webp 800w, assets/ui-editor-1200.webp 1200w, assets/ui-editor-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 640px" alt="Editor do ATIVAVID com timeline em camadas" loading="lazy" decoding="async" width="1600" height="745"></figure>
-      </article>
-
-      <div class="feat-grid">
-        <article class="feat">
-          <figure class="feat-shot"><img src="assets/ui-estilos-1200.webp" srcset="assets/ui-estilos-800.webp 800w, assets/ui-estilos-1200.webp 1200w, assets/ui-estilos-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 580px" alt="Tela de Estilos com 18 estilos de headline" loading="lazy" decoding="async" width="1600" height="745"></figure>
-          <div class="feat-copy">
-            <h3>O estilo da sua marca, uma vez</h3>
-            <p>Cores, legenda, headline e hashtags configurados uma vez. Todo vídeo sai com a sua cara. <b>Copie o estilo</b> e cole nos outros.</p>
-          </div>
-        </article>
-        <article class="feat">
-          <figure class="feat-shot"><img src="assets/ui-biblioteca-1200.webp" srcset="assets/ui-biblioteca-800.webp 800w, assets/ui-biblioteca-1200.webp 1200w, assets/ui-biblioteca-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 580px" alt="Biblioteca de imagens, vídeos, trilhas e efeitos" loading="lazy" decoding="async" width="1600" height="745"></figure>
-          <div class="feat-copy">
-            <h3>Sua biblioteca vira b-roll</h3>
-            <p>Fotos, takes e trilhas suas. A IA encaixa o b-roll na frase certa; você ajusta na timeline se quiser.</p>
-          </div>
-        </article>
-        <article class="feat">
-          <figure class="feat-shot"><img src="assets/ui-concluidos-1200.webp" srcset="assets/ui-concluidos-800.webp 800w, assets/ui-concluidos-1200.webp 1200w, assets/ui-concluidos-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 580px" alt="Concluídos: cada vídeo com sua ficha" loading="lazy" decoding="async" width="1600" height="745"></figure>
-          <div class="feat-copy">
-            <h3>Cada vídeo com a sua ficha</h3>
-            <p>Duração antes e depois, o que saiu, nota do corte, trilha usada. Sem caixa-preta.</p>
-          </div>
-        </article>
-        <article class="feat">
-          <figure class="feat-shot"><img src="assets/ui-multiplicador-1200.webp" srcset="assets/ui-multiplicador-800.webp 800w, assets/ui-multiplicador-1200.webp 1200w, assets/ui-multiplicador-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 40px), 580px" alt="Multiplicador de criativos: ganchos, corpos e CTAs" loading="lazy" decoding="async" width="1600" height="745"></figure>
-          <div class="feat-copy">
-            <h3>Reels 9:16 e YouTube 16:9</h3>
-            <p>Vertical para Reels, Shorts e TikTok. Horizontal para o YouTube, com capítulos e o .srt do CC. Sem exportar duas vezes.</p>
-          </div>
-        </article>
-      </div>
-
-      <ul class="mini-feats">
-        <li><b>Transcrição local</b> — sem internet depois de instalado</li>
-        <li><b>Trilha por IA</b> no Windows com NVIDIA — ou da sua biblioteca</li>
-        <li><b>Capa automática</b> — ou o quadro que você escolher</li>
-        <li><b>Legenda do post</b> com SEO local e hashtags</li>
-        <li><b>5 versões</b> do mesmo vídeo para testar</li>
-        <li><b>Clipes de podcast</b> — um episódio, vários cortes</li>
-        <li><b>Correção por marcação</b> — marque e escreva o que quer</li>
-        <li><b>4K HDR do iPhone</b> entra direto</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- ================= MULTIPLICADOR ================= -->
-  <section class="multi" id="multiplicador">
-    <div class="wrap multi-in">
-      <div class="multi-copy">
-        <p class="kicker">Para quem roda tráfego pago</p>
-        <h2>Grave 9 takes.<br>Receba <span class="big" data-count="27">27</span> criativos.</h2>
-        <p class="sub">3 ganchos × 3 corpos × 3 CTAs = <b>27 vídeos prontos</b>, cada um legendado, com headline e capa. Teste, ache o vencedor, aprove.</p>
-        <p class="sub">O criativo que perde custou 2 minutos de máquina, não uma tarde de edição.</p>
-        <a class="btn btn-primary alc-shiny" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="multi"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Quero multiplicar meus criativos</span></a>
-      </div>
-      <div class="combo" aria-hidden="true">
-        <div class="col"><span class="lab">Ganchos</span><i>G1</i><i>G2</i><i>G3</i></div>
-        <div class="x">×</div>
-        <div class="col"><span class="lab">Corpos</span><i>C1</i><i>C2</i><i>C3</i></div>
-        <div class="x">×</div>
-        <div class="col"><span class="lab">CTAs</span><i>CTA1</i><i>CTA2</i><i>CTA3</i></div>
-        <div class="eq">=</div>
-        <div class="grid27"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= PARA QUEM ================= -->
-  <section class="who">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="kicker">Para quem é</p>
-        <h2>Feito para quem precisa postar todo dia</h2>
-      </div>
-      <div class="who-grid">
-        <div class="who-card"><h3>Lojas e assistências</h3><p>Nasceu numa assistência de celulares que precisava de vídeo diário. Hoje ela edita centenas por mês.</p></div>
-        <div class="who-card"><h3>Criadores e especialistas</h3><p>Você grava rápido, mas a edição come a noite. Aqui ela leva 2 minutos.</p></div>
-        <div class="who-card"><h3>Agências e social media</h3><p>Um estilo por cliente. Aprove em lote e entregue a pasta pronta.</p></div>
-        <div class="who-card"><h3>Gestores de tráfego</h3><p>Criativos em volume, com variações de gancho e CTA, sem depender de editor.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= COMPARAÇÃO ================= -->
-  <section class="compare">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="kicker">Comparação</p>
-        <h2>Por que trocar</h2>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th></th><th>Editar na mão<br><small>CapCut / Premiere</small></th><th>Ferramentas na nuvem</th><th class="hl">ATIVAVID</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Tempo por vídeo curto</td><td>40 min a 2 h</td><td>10–20 min + upload</td><td class="hl">~2 min</td></tr>
-            <tr><td>Custo por vídeo</td><td>seu tempo, ou R$ 120–650 por Reel</td><td>créditos por minuto</td><td class="hl">zero, roda no seu computador</td></tr>
-            <tr><td>Seu vídeo sai da máquina?</td><td>não</td><td>sim, sempre</td><td class="hl">não</td></tr>
-            <tr><td>Estilo da marca fixo</td><td>copiar projeto a projeto</td><td>templates genéricos</td><td class="hl">um estilo, todos os vídeos</td></tr>
-            <tr><td>Variações para tráfego</td><td>uma por uma</td><td>uma por uma</td><td class="hl">27 de uma vez</td></tr>
-            <tr><td>Ajuste fino depois</td><td>sim</td><td>limitado</td><td class="hl">timeline completa</td></tr>
-            <tr><td>Funciona offline</td><td>sim</td><td>não</td><td class="hl">sim, depois de instalado</td></tr>
-            <tr><td>Windows e Mac</td><td>depende do programa</td><td>no navegador</td><td class="hl">sim, instalador para cada um</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= PREÇO ================= -->
-  <section class="pricing" id="preco">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="kicker">Preço</p>
-        <h2>7 dias grátis. Depois, menos que meio Reel de freelancer por mês.</h2>
-        <p class="sub">Sem cartão para testar. Se fizer sentido, você assina dentro do app.</p>
-      </div>
-      <div class="plans">
-        <div class="plan">
-          <p class="plan-name">Pro Mensal <span class="tag-launch">Oferta de lançamento</span></p>
-          <p class="price-de">de <s>R$ 99,90</s> por</p>
-          <p class="price"><small>R$</small>59<span>/mês</span></p>
-          <p class="plan-note">Menos de <b>R$ 2 por vídeo</b> se você posta um por dia.</p>
-          <ul class="ticks">
-            <li><b>1 computador</b>, Windows ou Mac — vídeos ilimitados</li>
-            <li>Todos os recursos, incluindo o Multiplicador</li>
-            <li>Atualizações automáticas</li>
-            <li>Cancela quando quiser</li>
-          </ul>
-        </div>
-        <div class="plan plan-best">
-          <p class="badge">Mais escolhido</p>
-          <p class="plan-name">Pro Anual <span class="tag-launch">Oferta de lançamento</span></p>
-          <p class="price-de">de <s>R$ 899</s> por</p>
-          <p class="price"><small>R$</small>399<span>/ano</span></p>
-          <p class="plan-note">Sai por <b>R$ 33,25 por mês</b> — o que um editor cobra por um quarto de Reel.</p>
-          <ul class="ticks">
-            <li><b>1 computador</b> — tudo do mensal</li>
-            <li>R$ 500 abaixo do valor cheio de R$ 899</li>
-            <li>Economize R$ 309 em relação ao mensal</li>
-            <li>Um pagamento, um ano sem pensar nisso</li>
-          </ul>
-        </div>
-        <div class="plan plan-escala">
-          <p class="plan-name">Pro Escala</p>
-          <p class="price-de">a partir de 2 computadores · agências e operações de tráfego</p>
-          <p class="price price-consulta">Sob consulta</p>
-          <p class="plan-note">Vários computadores editando ao mesmo tempo, várias marcas, centenas de vídeos por mês.</p>
-          <ul class="ticks">
-            <li>Licença para várias máquinas</li>
-            <li>Um estilo por cliente, sem limite de marcas</li>
-            <li>Implantação e treinamento da equipe</li>
-            <li>Suporte direto com quem fez o ATIVAVID</li>
-            <li>Nota fiscal e faturamento mensal</li>
-          </ul>
-          <a class="btn btn-ghost plan-cta" href="/baixar" data-ativa-form="ativavid-864e5e" data-ativa-params="plano=escala" data-cta="escala">Falar sobre o plano Escala</a>
-        </div>
-      </div>
-      <div class="launch launch-planos">
-        <span class="launch-tag">Oferta de lançamento</span>
-        <p>O ATIVAVID está em lançamento. Quando a oferta acabar, o valor passa a ser <b>R$ 99,90 por mês</b> e <b>R$ 899 por ano</b>. Quem assina agora entra pelo preço de lançamento.</p>
-      </div>
-      <div class="cta-center">
-        <a class="btn btn-primary alc-shiny btn-lg" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="preco"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar e começar os 7 dias grátis</span></a>
-        <p class="micro-line">Windows 10/11 (64 bits) ou Mac com chip Apple (macOS 12+) · a página de download escolhe o instalador certo</p>
-      </div>
-      <div class="guarantee">
-        <div>
-          <h3>Zero risco</h3>
-          <p>7 dias de uso completo, sem cartão. Assinou e mudou de ideia? Cancela quando quiser. Seus vídeos, projetos e estilos ficam no seu computador, porque sempre estiveram lá.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= FAQ ================= -->
-  <section class="faq" id="faq">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="kicker">Dúvidas diretas</p>
-        <h2>O que as pessoas perguntam antes de instalar</h2>
+        <h2 id="faqTit">O que as pessoas perguntam antes de instalar</h2>
       </div>
       <div class="acc">
         <details open>
-          <summary>Preciso saber editar vídeo?</summary>
+          <summary>Preciso saber editar vídeo?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
           <p>Não. Arraste o vídeo e clique em Editar com IA. A timeline existe para quem quiser ajustar.</p>
         </details>
         <details>
-          <summary>Meu vídeo vai parar em algum servidor?</summary>
+          <summary>Meu vídeo vai parar em algum servidor?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
           <p>Não. Transcrição, corte e render acontecem no seu computador. Só o texto da transcrição vai para a IA que planeja o corte, e você escolhe qual IA.</p>
         </details>
         <details>
-          <summary>Tem custo de tokens ou créditos por vídeo?</summary>
+          <summary>Tem custo de tokens ou créditos por vídeo?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
           <p>Não. Ele usa a sua conta de IA (inclusive as gratuitas). Transcrição e render rodam no seu computador. Você paga a assinatura e mais nada.</p>
         </details>
         <details>
-          <summary>Roda no meu computador?</summary>
+          <summary>Roda no meu computador?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
           <p>Roda em Windows 10 ou 11 (64 bits) e em Mac com chip Apple (M1 ou mais novo) com macOS 12 ou mais novo. No Windows, placa NVIDIA deixa tudo mais rápido; sem ela, funciona na CPU. O app faz o diagnóstico da máquina e diz o que esperar.</p>
         </details>
         <details>
-          <summary>E se a IA errar uma palavra ou um corte?</summary>
+          <summary>E se a IA errar uma palavra ou um corte?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
           <p>Clique na legenda e corrija. Marque o trecho e escreva "não corta aqui". Só o que mudou é refeito.</p>
         </details>
         <details>
-          <summary>Funciona para vídeo longo, tipo YouTube?</summary>
+          <summary>Funciona para vídeo longo, tipo YouTube?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
           <p>Sim. Horizontal sai com selo, capítulos, legenda e o .srt do CC. Vertical sai pronto para Reels, Shorts e TikTok.</p>
         </details>
         <details>
-          <summary>Funciona no Mac?</summary>
+          <summary>Funciona no Mac?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
           <p>Sim, em Mac com chip Apple (M1, M2, M3, M4 ou mais novo) e macOS 12 ou mais novo. Mac com processador Intel ainda não é compatível. A <a href="/baixar">página de download</a> reconhece o seu sistema e entrega o instalador certo.</p>
         </details>
         <details>
-          <summary>Por que o instalador do Mac é maior?</summary>
-          <p>O do Mac tem cerca de 1 GB porque já leva tudo dentro: abre, arrasta para Aplicativos e pronto. O do Windows é pequeno e baixa os componentes da IA no primeiro uso.</p>
+          <summary>Por que o instalador do Mac é maior?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
+          <p>O do Mac é maior porque já leva tudo dentro: abre, arrasta para Aplicativos e pronto. O do Windows é pequeno e baixa os componentes da IA no primeiro uso.</p>
         </details>
         <details>
-          <summary>O que acontece quando os 7 dias acabam?</summary>
+          <summary>O que acontece quando os 7 dias acabam?<svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></summary>
           <p>O app mostra os planos. Se não assinar, para de editar, mas seus vídeos e projetos continuam nas suas pastas. Assinou, volta na hora.</p>
         </details>
       </div>
     </div>
   </section>
 
-  <!-- ================= CTA FINAL ================= -->
-  <section class="final">
+  <!-- ================= FECHO ================= -->
+  <section class="final" aria-labelledby="finalTit">
     <div class="wrap final-in">
-      <h2>O próximo vídeo que você gravar já pode sair editado.</h2>
-      <p class="sub">Baixe, arraste um vídeo e veja o resultado. Preço de lançamento enquanto durar a oferta.</p>
+      <h2 id="finalTit">Amanhã, às 9h, o próximo vídeo já sai editado.</h2>
+      <p class="sub">Baixe hoje, arraste um vídeo e veja o resultado. Preço de lançamento enquanto durar a oferta.</p>
       <a class="btn btn-primary alc-shiny btn-lg" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="final"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar o ATIVAVID — 7 dias grátis</span></a>
       <p class="micro-line">Windows 10/11 ou Mac com chip Apple · sem cartão · desinstala quando quiser</p>
     </div>
@@ -631,12 +634,13 @@
   </div>
 </footer>
 
-<div class="sticky-cta" id="stickyCta" hidden>
-  <span>7 dias grátis · R$ 59/mês no lançamento</span>
+<!-- Dock de vidro do celular: o horário em vista + o Baixar (substitui a barra fixa) -->
+<div class="dock vidro" id="dock" hidden>
+  <p class="dock-rot" id="dockRot" aria-live="off">7 dias grátis · R$ 59/mês</p>
   <a class="btn btn-primary alc-shiny btn-sm" href="/baixar" data-ativa-form="ativavid-864e5e" data-cta="sticky"><span class="alc-dots" aria-hidden="true"></span><span class="alc-btn-content">Baixar</span></a>
 </div>
 
 <script src="https://ativavid.primecamp.com.br/embed.js?v=1.2.3" data-form="ativavid-864e5e" data-mode="modal" data-path="/" data-theme="dark" defer></script>
-  <script src="main.js?v=20261002a" defer></script>
+<script src="main.js?v=20261003c" defer></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 //   /download/windows   Instalar.ATIVAVID.exe
 //   /download/mac       ATIVAVID-<versão>-mac.dmg (Mac com chip Apple)
 //   /download/info      JSON com versão e tamanho de cada um (a página
-//                       /baixar mostra "1,0 GB" e esconde o que não existe)
+//                       /baixar mostra o tamanho real e esconde o que não existe)
 //
 // A ordem do Windows continua a de 06/09: PRIMEIRO o nome fixo, que é um
 // redirecionamento simples e não gasta cota de API; se ele faltar, a API.
@@ -15,7 +15,7 @@
 // (o do Windows sai mais vezes). Procura-se nas releases mais novas a
 // primeira que tenha um .dmg.
 //
-// O .dmg tem ~1 GB. O corpo vai em fluxo (origem.body), sem passar pela
+// O .dmg tem centenas de MB. O corpo vai em fluxo (origem.body), sem passar pela
 // memória da função, e o Range é repassado: download interrompido continua.
 const REPO = "Usantos1/Ativavid-Instalador";
 const FIXO_WIN = `https://github.com/${REPO}/releases/latest/download/Instalar.ATIVAVID.exe`;
@@ -40,8 +40,10 @@ function acharArquivo(lista, ext) {
         url: a.browser_download_url,
         nome: a.name,
         tamanho: a.size,
-        versao: String(rel.tag_name || "").replace(/^v/, ""),
-        data: rel.published_at,
+        // A versão vem do NOME do arquivo quando ele traz uma: em 03/10 o
+        // ATIVAVID-5.4.29-mac.dmg foi anexado à release v5.4.19, e a tag mentiria.
+        versao: (String(a.name).match(/(\d+\.\d+\.\d+)/) || [])[1] || String(rel.tag_name || "").replace(/^v/, ""),
+        data: a.updated_at || rel.published_at,
       };
     }
   }

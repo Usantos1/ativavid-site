@@ -1,3 +1,8 @@
 # cache do wrangler pages dev (teste local): guarda a localizacao de quem rodou
 .wrangler/
 node_modules/
+
+# notas de design (impeccable): ficam so nesta maquina, o repositorio e publico
+PRODUCT.md
+DESIGN.md
+.impeccable/

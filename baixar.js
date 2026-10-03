@@ -29,7 +29,7 @@
     botao.dataset.cta = 'baixar-principal-mac';
     texto.textContent = 'Baixar para Mac';
     detalhe.textContent = 'Mac com chip Apple · macOS 12 ou mais novo';
-    detectado.textContent = 'Reconhecemos um Mac. Este é o instalador para você.';
+    detectado.textContent = 'Reconhecemos um Mac. Este é o instalador para você: 7 dias grátis, sem cartão.';
     el('passosWindows').open = false;
   }
 
@@ -55,7 +55,7 @@
       } catch (e) { /* sem WebGL: sem palpite */ }
     }
   } else if (windows) {
-    detectado.textContent = 'Reconhecemos um Windows. Este é o instalador para você.';
+    detectado.textContent = 'Reconhecemos um Windows. Este é o instalador para você: 7 dias grátis, sem cartão.';
     el('passosMac').open = false;
   } else if (celular) {
     main.hidden = true;

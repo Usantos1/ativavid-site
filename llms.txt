@@ -7,7 +7,7 @@ O problema que o ATIVAVID resolve é o da edição que come a noite: quem precis
 - [Site](https://ativavid.com/): apresentação, calculadora de economia, preços e dúvidas.
 - [Baixar](https://ativavid.com/baixar): página de download que reconhece o sistema (Windows ou Mac) e entrega o instalador certo; o teste de 7 dias começa no app.
 - [Instalador para Windows](https://ativavid.com/download/windows): Instalar.ATIVAVID.exe, pequeno; a IA baixa os componentes no primeiro uso.
-- [Instalador para Mac](https://ativavid.com/download/mac): .dmg de cerca de 1 GB, já com tudo dentro (Mac com chip Apple).
+- [Instalador para Mac](https://ativavid.com/download/mac): .dmg com tudo dentro (Mac com chip Apple).
 - [Preços](https://ativavid.com/#preco): planos Pro Mensal, Pro Anual e Pro Escala.
 - [Dúvidas frequentes](https://ativavid.com/#faq): respostas curtas sobre privacidade, requisitos e custo.
 - [Instagram @ativavid](https://instagram.com/ativavid): perfil oficial do produto.
@@ -56,4 +56,4 @@ A assinatura é feita dentro do app. Cancela quando quiser; vídeos, projetos e 
 ## Requisitos
 
 - **Windows**: 10 ou 11, 64 bits. Com placa NVIDIA é mais rápido; sem ela, funciona na CPU. O instalador leva cerca de 1 minuto e a IA local baixa os componentes no primeiro uso.
-- **Mac**: chip Apple (M1, M2, M3, M4 ou mais novo) e macOS 12 ou mais novo. O .dmg tem cerca de 1 GB: abrir, arrastar para Aplicativos e pronto. Mac com processador Intel ainda não é compatível.
+- **Mac**: chip Apple (M1, M2, M3, M4 ou mais novo) e macOS 12 ou mais novo. O .dmg já leva tudo dentro: abrir, arrastar para Aplicativos e pronto. Mac com processador Intel ainda não é compatível.
