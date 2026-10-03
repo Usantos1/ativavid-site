@@ -144,22 +144,6 @@
     }, { threshold: 0.05 }).observe(heroi);
   }
 
-  /* ---------- 3 x 3 x 3 = 27 e o mês de 30 vídeos ---------- */
-  var grid = $('.grid27');
-  if (grid) {
-    for (var i = 0; i < 27; i++) {
-      var s = document.createElement('span');
-      s.style.animationDelay = (i * 0.04) + 's';
-      grid.appendChild(s);
-    }
-    if (!reduz) quandoVisivel(grid, function () { grid.classList.add('estoura'); }, 0.5);
-  }
-  var mes = $('[data-mes]');
-  if (mes) {
-    $$('span', mes).forEach(function (d, n) { d.style.setProperty('--i', n); });
-    if (!reduz) quandoVisivel(mes, function () { mes.classList.add('carimba'); }, 0.35);
-  }
-
   /* ---------- Liquid Glass: brilho que segue o ponteiro + refração ---------- */
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reduz) {
     $$('.vidro').forEach(function (el) {

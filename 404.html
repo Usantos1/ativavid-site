@@ -7,11 +7,13 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0b0c10">
   <link rel="icon" href="/assets/icon-64.png" type="image/png" sizes="64x64">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <style>
+    @font-face { font-family: "Poppins"; font-weight: 900; font-display: swap; src: url("/assets/fonts/poppins-900.woff2") format("woff2"); }
     :root { color-scheme: dark; }
     body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0b0c10; color: #eef1f5;
       font: 17px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
-    h1 { font-size: 30px; margin: 18px 0 8px; line-height: 1.15; }
+    h1 { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 900; letter-spacing: -.02em; font-size: 30px; margin: 18px 0 8px; line-height: 1.15; }
     p { color: #a3abb6; margin: 0 0 26px; }
     a { display: inline-block; background: #e60004; color: #fff; text-decoration: none; font-weight: 700; padding: 13px 24px; border-radius: 999px; }
     a:focus-visible { outline: 3px solid #1fd1a8; outline-offset: 3px; }
