@@ -654,3 +654,14 @@ button.pilula:focus-visible { outline: 2px solid var(--red); outline-offset: 3px
 .dl-alt a { color: var(--text); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--red); }
 .dl-alt a:hover { color: var(--red-ink); }
 .plat-card .plat-btn { margin-top: auto; }
+
+/* iPhone "em breve" (06/10): quarto cartão no /baixar, terceiro na home */
+.plat-grid.quatro { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.plat-grid.quatro .plat-card { padding: 26px; }
+.plat-grid.quatro .plat-card h3 { font-size: 22px; }
+@media (max-width: 1180px) { .plat-grid.quatro { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .plat-grid.quatro { grid-template-columns: minmax(0, 1fr); } }
+.plat-card-breve { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), inset 0 0 0 1px rgba(255, 255, 255, .05), inset 0 0 0 1px rgba(31, 209, 168, .18); }
+.btn-breve { display: inline-flex; align-items: center; justify-content: center; gap: 10px; cursor: default; opacity: .78; }
+.btn-breve:hover { transform: none; }
+.ico-maca { width: 18px; height: 18px; fill: currentColor; flex: none; margin-top: -2px; }
