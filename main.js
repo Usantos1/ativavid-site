@@ -183,7 +183,8 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (!d || d.mac || d.macIntel) return;
-        botaoMac.textContent = 'Me avise quando sair para Mac';
+        var rotulo = $('[data-mac-rotulo]') || botaoMac;
+        rotulo.textContent = 'Me avise quando sair para Mac';
         botaoMac.setAttribute('data-ativa-params', 'sistema=mac&aviso=lancamento');
         var nota = $('[data-mac-nota]');
         if (nota) nota.textContent = 'O instalador do Mac sai nos próximos dias. ';

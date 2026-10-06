@@ -665,3 +665,8 @@ button.pilula:focus-visible { outline: 2px solid var(--red); outline-offset: 3px
 .btn-breve { display: inline-flex; align-items: center; justify-content: center; gap: 10px; cursor: default; opacity: .78; }
 .btn-breve:hover { transform: none; }
 .ico-maca { width: 18px; height: 18px; fill: currentColor; flex: none; margin-top: -2px; }
+
+/* ícone do sistema nos botões de download (bandeira do Windows, maçã) */
+.ico-so { width: 17px; height: 17px; fill: currentColor; flex: none; }
+.ico-so[viewBox] path { fill: currentColor; }
+.plat-btn .ico-so { margin-top: -2px; }

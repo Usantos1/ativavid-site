@@ -55,4 +55,4 @@ A assinatura é feita dentro do app. Cancela quando quiser; vídeos, projetos e 
 
 - **Windows**: 10 ou 11, 64 bits. Com placa NVIDIA é mais rápido; sem ela, funciona na CPU. O instalador leva cerca de 1 minuto e a IA local baixa os componentes no primeiro uso.
 - **Mac**: chip Apple (M1, M2, M3, M4 ou mais novo) ou processador Intel, com macOS 12 ou mais novo. Há um .dmg para cada tipo de Mac, e cada um já leva tudo dentro: abrir, arrastar para Aplicativos e pronto.
-- **iPhone**: app em análise na App Store, ainda sem data de lançamento.
+- **iPhone**: iOS 17 ou mais novo (iPhone XS, XR e mais novos). App em análise na App Store, ainda sem data de lançamento.

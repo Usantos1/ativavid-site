@@ -117,7 +117,7 @@
         } else {
           meta.textContent = 'Este instalador sai nos próximos dias.';
           var b = document.querySelector('#' + c.card + ' .plat-btn');
-          if (b) { b.removeAttribute('href'); b.setAttribute('aria-disabled', 'true'); b.textContent = c.breve; }
+          if (b) { b.removeAttribute('href'); b.setAttribute('aria-disabled', 'true'); (b.querySelector('span') || b).textContent = c.breve; }
         }
       });
       if (mac) oferecerMac();
