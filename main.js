@@ -209,7 +209,7 @@
   var v = document.getElementById('calcVideos');
   var p = document.getElementById('calcPreco');
   if (!v || !p) return;
-  var ASSINATURA = 59;
+  var ASSINATURA = 79.9;
   var brl = function (n, cents) { return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0 }); };
   var el = function (id) { return document.getElementById(id); };
   var presets = Array.prototype.slice.call(document.querySelectorAll('.calc-presets button'));

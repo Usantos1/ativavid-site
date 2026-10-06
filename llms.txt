@@ -45,8 +45,8 @@ Etapas automáticas: transcrição local → corte inteligente → legenda no es
 ## Preços (oferta de lançamento, em reais)
 
 - **Teste grátis**: 7 dias com todos os recursos, sem cartão.
-- **Pro Mensal**: R$ 59/mês (valor cheio R$ 99,90). 1 computador (Windows ou Mac), vídeos ilimitados.
-- **Pro Anual**: R$ 399/ano (valor cheio R$ 899), cerca de R$ 33,25 por mês. 1 computador.
+- **Pro Mensal**: R$ 79,90/mês (valor cheio R$ 99,90). 1 computador (Windows ou Mac), vídeos ilimitados.
+- **Pro Anual**: R$ 799/ano (valor cheio R$ 899), cerca de R$ 66,58 por mês. 1 computador.
 - **Pro Escala**: sob consulta, a partir de 2 computadores, para agências e operações de tráfego.
 
 A assinatura é feita dentro do app. Cancela quando quiser; vídeos, projetos e estilos ficam no computador do cliente.
