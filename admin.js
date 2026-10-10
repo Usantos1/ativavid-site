@@ -606,7 +606,53 @@
 
   // ============================================================ visão geral
 
+  // Receita recorrente ESTIMADA: plano de cada cliente ativo x tabela de preços
+  // atual. As vendas antigas não gravaram o valor pago (licenses.amount_cents
+  // vazio), então o valor exato só existe na Stripe.
+  const PRECO_ANUAL_CENTAVOS = 79900;
+  const PRECO_MENSAL_CENTAVOS = 7990;
+  const brl = (centavos) => (centavos / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  function desenharReceita() {
+    const ativos = estado.clientes.filter((c) => c.status !== "revoked" && diasAte(c.validoAte) >= 0);
+    let anuais = 0;
+    let mensais = 0;
+    let avulsos = 0;
+    for (const c of ativos) {
+      const p = planoDe(c).nome;
+      if (p === "Anual") anuais += 1;
+      else if (p === "Mensal") mensais += 1;
+      else avulsos += 1;
+    }
+    const arr = anuais * PRECO_ANUAL_CENTAVOS + mensais * PRECO_MENSAL_CENTAVOS * 12;
+
+    const alvo = $("receita");
+    alvo.innerHTML = "";
+    const cab = el("div", "adm-receita-cab");
+    const titulo = el("div", "");
+    titulo.append(
+      el("h2", "adm-receita-titulo", "Receita recorrente"),
+      el("p", "adm-ajuda", `Estimada pelos clientes ativos e pela tabela de preços atual (anual ${brl(PRECO_ANUAL_CENTAVOS)} · mensal ${brl(PRECO_MENSAL_CENTAVOS)}). O valor exato está na Stripe.`),
+    );
+    cab.append(titulo);
+    const grade = el("div", "adm-receita-grade");
+    const itens = [
+      ["ARR", brl(arr), "por ano", "ok", true],
+      ["MRR", brl(Math.round(arr / 12)), "por mês", "neutro", false],
+      ["Anuais", anuais, `${brl(anuais * PRECO_ANUAL_CENTAVOS)} por ano`, "neutro", false],
+      ["Mensais", mensais, `${brl(mensais * PRECO_MENSAL_CENTAVOS)} por mês`, "neutro", false],
+      ["Fora da conta", avulsos, "prazo avulso ou cortesia", "neutro", false],
+    ];
+    for (const [rot, n, sub, tom, destaque] of itens) {
+      const k = el("div", `adm-kpi adm-kpi-${tom}${destaque ? " adm-receita-arr" : ""}`);
+      k.append(el("span", "adm-kpi-rot", rot), el("strong", "adm-kpi-n", n), el("span", "adm-kpi-sub", sub));
+      grade.append(k);
+    }
+    alvo.append(cab, grade);
+  }
+
   function desenharVisao() {
+    desenharReceita();
     const cs = estado.clientes;
     const comLogin = cs.filter((c) => c.temLogin && c.status !== "revoked");
     const vencidos = comLogin.filter((c) => diasAte(c.validoAte) < 0);

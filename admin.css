@@ -1970,3 +1970,36 @@ html.adm-sem-rolagem body { overflow: hidden; }
 .adm-sup-aba > span { overflow: visible; text-overflow: clip; white-space: nowrap; }
 .adm-sup-aba { font-size: 13px; padding: 8px 10px; }
 .adm-sup-subabas .adm-sup-aba { font-size: 12.5px; }
+
+/* receita recorrente no topo da visão geral */
+.adm-receita { display: grid; gap: 16px; margin-bottom: 16px; padding: 22px; border-radius: 26px; }
+.adm-receita-cab { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.adm-receita-titulo { margin: 0 0 4px; font-family: var(--display); font-size: 19px; font-weight: 800; }
+.adm-receita-cab .adm-ajuda { margin: 0; max-width: 80ch; }
+.adm-receita-grade { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.adm-receita-grade .adm-kpi { background: var(--campo); border: 1px solid var(--borda); box-shadow: none; }
+.adm-receita-arr .adm-kpi-n { color: var(--verde); }
+
+/* degradê do topo: o fundo sólido do topo cobria só a coluna do conteúdo e
+ * deixava uma faixa clara ao lado da barra lateral. Agora é um degradê curto,
+ * de ponta a ponta, com desfoque, atrás da barra lateral e da superior. */
+.adm-topo { background: none; padding-bottom: 12px; margin-bottom: 0; }
+#painel::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 96px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 100%);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  -webkit-mask-image: linear-gradient(180deg, #000 40%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 40%, transparent 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* a barra lateral fica acima da superior: a dica "Recolher menu" do botão
+ * aparecia por trás da barra superior */
+.adm-side { z-index: 50; }

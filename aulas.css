@@ -16,7 +16,7 @@
   pointer-events: none;
   z-index: 3;
 }
-#menuLateral { z-index: 4; }
+#menuLateral { z-index: 50; }
 
 .aulas-saudacao {
   margin: 0;
