@@ -12,8 +12,8 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261010q">
-  <link rel="stylesheet" href="/aulas.css?v=20261010l">
+  <link rel="stylesheet" href="/admin.css?v=20261010r">
+  <link rel="stylesheet" href="/aulas.css?v=20261010m">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -178,23 +178,70 @@
         <div id="aulaDescricao" class="aulas-descricao"></div>
       </section>
 
-      <!-- SUPORTE -->
+      <!-- SUPORTE: lista de chamados, novo chamado e a conversa de um chamado -->
       <section id="secSuporte" class="adm-secao" aria-labelledby="tituloSecao" hidden>
-        <article class="adm-vidro adm-painel">
-          <h2 class="adm-painel-titulo">Abrir um chamado</h2>
-          <form id="formChamado" class="aulas-form">
-            <label class="adm-campo">
-              <span>Assunto</span>
-              <input id="chamadoAssunto" type="text" maxlength="120" placeholder="Ex.: não consigo ativar no segundo computador">
-            </label>
-            <label class="adm-campo">
-              <span>Mensagem</span>
-              <textarea id="chamadoTexto" rows="5" placeholder="Conte o que aconteceu e o que você já tentou."></textarea>
-            </label>
-            <div><button id="btEnviarChamado" class="adm-bt adm-bt-forte" type="submit">Enviar chamado</button></div>
-          </form>
-        </article>
-        <div id="listaChamados" class="aulas-chamados"></div>
+
+        <div id="suporteLista" class="aulas-suporte" hidden>
+          <div class="aulas-suporte-topo">
+            <p class="adm-ajuda" id="resumoChamados"></p>
+            <a class="adm-bt adm-bt-forte adm-bt-sm" href="#suporte/novo">Novo chamado</a>
+          </div>
+          <div id="listaChamados" class="aulas-tickets"></div>
+        </div>
+
+        <div id="suporteNovo" class="aulas-suporte" hidden>
+          <a class="adm-link aulas-voltar" href="#suporte">← Meus chamados</a>
+          <article class="adm-vidro aulas-painel-form">
+            <h2 class="aulas-titulo-bloco">Descreva o problema</h2>
+            <form id="formChamado" class="aulas-form">
+              <label class="adm-campo">
+                <span>Assunto</span>
+                <input id="chamadoAssunto" type="text" maxlength="120" placeholder="Ex.: erro ao exportar no segundo computador">
+              </label>
+              <label class="adm-campo">
+                <span>Mensagem</span>
+                <textarea id="chamadoTexto" rows="6" placeholder="Conte o que aconteceu, em que etapa, e o que você já tentou."></textarea>
+              </label>
+              <div class="aulas-anexos">
+                <label class="adm-bt adm-bt-fraco adm-bt-sm aulas-anexar">Anexar print
+                  <input id="chamadoArquivos" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+                </label>
+                <ul id="chamadoAnexos" class="aulas-anexos-lista"></ul>
+              </div>
+              <div class="aulas-form-acoes">
+                <button id="btEnviarChamado" class="adm-bt adm-bt-forte" type="submit">Enviar chamado</button>
+              </div>
+            </form>
+          </article>
+        </div>
+
+        <div id="suporteChamado" class="aulas-suporte" hidden>
+          <a class="adm-link aulas-voltar" href="#suporte">← Meus chamados</a>
+          <article class="adm-vidro aulas-painel-form">
+            <header class="aulas-ticket-cab">
+              <span id="ticketNumero" class="aulas-ticket-num"></span>
+              <h2 id="ticketAssunto" class="aulas-titulo-bloco"></h2>
+              <span id="ticketStatus" class="adm-chip"></span>
+            </header>
+            <p class="adm-msg-hora" id="ticketData"></p>
+            <div id="ticketConversa" class="aulas-conversa"></div>
+            <form id="formResposta" class="aulas-form aulas-resposta">
+              <label class="adm-campo">
+                <span>Responder</span>
+                <textarea id="respostaTexto" rows="3" placeholder="Escreva a sua resposta"></textarea>
+              </label>
+              <div class="aulas-anexos">
+                <label class="adm-bt adm-bt-fraco adm-bt-sm aulas-anexar">Anexar print
+                  <input id="respostaArquivos" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+                </label>
+                <ul id="respostaAnexos" class="aulas-anexos-lista"></ul>
+              </div>
+              <div class="aulas-form-acoes">
+                <button id="btResponder" class="adm-bt adm-bt-forte" type="submit">Responder</button>
+              </div>
+            </form>
+          </article>
+        </div>
       </section>
 
       <!-- CONTA -->
@@ -210,6 +257,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/aulas.js?v=20261010h"></script>
+<script src="/aulas.js?v=20261010m"></script>
 </body>
 </html>

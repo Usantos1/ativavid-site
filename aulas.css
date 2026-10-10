@@ -305,3 +305,74 @@
   -webkit-mask-image: linear-gradient(180deg, #000 40%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 40%, transparent 100%);
 }
+
+/* ==========================================================================
+ * Suporte: lista em linhas, chamado em página própria, anexos de print.
+ * ========================================================================== */
+
+.aulas-suporte { display: grid; gap: 18px; }
+.aulas-suporte-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.aulas-tickets { display: grid; gap: 12px; }
+
+.aulas-ticket-linha {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 26px;
+  color: inherit;
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease;
+}
+.aulas-ticket-linha:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--azul) 45%, transparent); }
+.aulas-ticket-linha:focus-visible { outline: 3px solid color-mix(in srgb, var(--azul) 60%, transparent); outline-offset: 3px; }
+
+.aulas-ticket-num {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--azul);
+  font-variant-numeric: tabular-nums;
+  min-width: 56px;
+}
+.aulas-ticket-info { display: grid; gap: 3px; min-width: 0; }
+.aulas-ticket-info strong { font-size: 16px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aulas-ticket-previa { font-size: 14px; color: var(--texto-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aulas-ticket-data { white-space: nowrap; }
+
+.aulas-painel-form { padding: 26px; display: grid; gap: 18px; }
+.aulas-titulo-bloco { margin: 0; font-family: var(--display); font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
+.aulas-form-acoes { display: flex; justify-content: flex-end; }
+.aulas-resposta { margin-top: 6px; }
+
+.aulas-ticket-cab { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.aulas-ticket-cab .aulas-titulo-bloco { margin-right: auto; }
+
+.aulas-anexos { display: grid; gap: 10px; justify-items: start; }
+.aulas-anexar { cursor: pointer; }
+.aulas-anexos-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.aulas-anexo-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 14px;
+  border-radius: 999px;
+  background: var(--campo);
+  border: 1px solid var(--borda);
+  font-size: 13.5px;
+  max-width: 100%;
+}
+.aulas-anexo-item > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+.aulas-anexo-x { font: inherit; font-size: 12.5px; font-weight: 700; color: var(--vermelho); background: none; border: 0; cursor: pointer; padding: 4px 8px; }
+
+.aulas-anexos-msg { display: flex; flex-wrap: wrap; gap: 10px; }
+.aulas-anexo-foto { display: block; width: 200px; max-width: 100%; border-radius: 18px; overflow: hidden; border: 1px solid var(--borda); background: var(--campo); }
+.aulas-anexo-foto img { display: block; width: 100%; height: auto; min-height: 90px; object-fit: cover; }
+
+@media (max-width: 640px) {
+  .aulas-ticket-linha { grid-template-columns: auto minmax(0, 1fr); gap: 10px 14px; }
+  .aulas-ticket-linha .adm-chip, .aulas-ticket-data { justify-self: start; grid-column: 2; }
+  .aulas-painel-form { padding: 20px; }
+  .aulas-anexo-foto { width: 100%; }
+}

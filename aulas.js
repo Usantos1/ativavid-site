@@ -159,6 +159,7 @@
   async function abrirArea() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return mostrarEntrada();
+    estado.uid = session.user.id;
     let ok;
     try {
       ok = await carregar();
@@ -494,80 +495,166 @@
 
   /* ---------- suporte ---------- */
 
+  const ANEXO_TIPOS = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+  const ANEXO_MAX_BYTES = 8 * 1024 * 1024;
+  const ANEXO_MAX_QTD = 4;
+  const anexos = { novo: [], resposta: [] };
+
   async function carregarChamados() {
     const { data, error } = await sb.rpc("ativavid_aluno_chamados");
-    if (error || !data || !data.ok) return recado("Não consegui carregar os seus chamados.", "erro");
+    if (error || !data || !data.ok) throw new Error("Não consegui carregar os seus chamados.");
     estado.chamados = data.chamados || [];
-    desenharChamados();
   }
 
   function situacaoChamado(c) {
     if (c.status === "resolvido") return { rot: "Resolvido", tom: "ok" };
+    if (c.status === "em_analise") return { rot: "Em análise", tom: "atencao" };
     const ult = c.mensagens[c.mensagens.length - 1];
     if (ult && ult.autor === "admin") return { rot: "Respondido", tom: "atencao" };
     return { rot: "Aguardando a equipe", tom: "espera" };
   }
 
-  function desenharChamados() {
+  function resumo(texto) {
+    const t = String(texto || "").replace(/\s+/g, " ").trim();
+    return t.length > 80 ? `${t.slice(0, 80)}…` : t;
+  }
+
+  function desenharListaChamados() {
     const alvo = $("listaChamados");
     alvo.replaceChildren();
-    if (!estado.chamados.length) {
+    const lista = estado.chamados;
+    $("resumoChamados").textContent = lista.length
+      ? `${lista.length} chamado${lista.length === 1 ? "" : "s"}`
+      : "";
+    if (!lista.length) {
       alvo.append(el("p", "adm-ajuda", "Você ainda não abriu nenhum chamado."));
       return;
     }
-    for (const c of estado.chamados) alvo.append(cartaoChamado(c));
-  }
-
-  function cartaoChamado(c) {
-    const s = situacaoChamado(c);
-    const aberto = estado.chamadoAberto === c.id;
-    const card = el("article", "adm-vidro adm-painel aulas-chamado");
-    const cab = el("button", "aulas-chamado-cab");
-    cab.type = "button";
-    cab.setAttribute("aria-expanded", aberto ? "true" : "false");
-    cab.append(
-      el("strong", "", c.assunto),
-      el("span", `adm-chip adm-chip-${s.tom}`, s.rot),
-      el("span", "adm-msg-hora", `Aberto em ${dia(c.criadoEm)}`),
-    );
-    cab.addEventListener("click", () => {
-      estado.chamadoAberto = aberto ? null : c.id;
-      desenharChamados();
-    });
-    card.append(cab);
-    if (!aberto) return card;
-
-    const conversa = el("div", "aulas-conversa");
-    for (const m of c.mensagens) {
-      const eu = m.autor === "cliente";
-      const linha = el("div", `adm-msg adm-msg-${eu ? "eu" : "cliente"}`);
-      linha.append(
-        el("p", "adm-msg-texto", m.texto),
-        el("span", "adm-msg-hora", `${eu ? "Você" : "Equipe ATIVAVID"} · ${hora(m.criadoEm)}`),
+    for (const c of lista) {
+      const s = situacaoChamado(c);
+      const ult = c.mensagens[c.mensagens.length - 1];
+      const link = el("a", "adm-vidro aulas-ticket-linha");
+      link.href = `#suporte/${c.id}`;
+      const info = el("div", "aulas-ticket-info");
+      info.append(
+        el("strong", "", c.assunto),
+        el("span", "aulas-ticket-previa", ult ? `${ult.autor === "admin" ? "Equipe" : "Você"}: ${resumo(ult.texto)}` : ""),
       );
-      conversa.append(linha);
+      link.append(
+        el("span", "aulas-ticket-num", `#${c.id}`),
+        info,
+        el("span", `adm-chip adm-chip-${s.tom}`, s.rot),
+        el("span", "adm-msg-hora aulas-ticket-data", dia(c.atualizadoEm)),
+      );
+      alvo.append(link);
     }
-    const form = el("form", "aulas-form");
-    const area = document.createElement("textarea");
-    area.rows = 3;
-    area.placeholder = "Escreva a sua resposta";
-    const bt = el("button", "adm-bt adm-bt-forte adm-bt-sm", "Responder");
-    bt.type = "submit";
-    form.append(area, bt);
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const texto = area.value.trim();
-      if (!texto) return recado("Escreva a sua resposta antes de enviar.", "atencao");
-      await ocupado(bt, async () => {
-        const { data, error } = await sb.rpc("ativavid_aluno_responder", { p_id: c.id, p_texto: texto });
-        if (error || !data || !data.ok) throw new Error((data && data.message) || "Não consegui enviar. Tente de novo.");
-        await carregarChamados();
-        recado("Resposta enviada.", "ok");
-      });
-    });
-    card.append(conversa, form);
-    return card;
   }
+
+  function bolhaMensagem(m) {
+    const eu = m.autor === "cliente";
+    const linha = el("div", `adm-msg adm-msg-${eu ? "eu" : "cliente"}`);
+    linha.append(el("p", "adm-msg-texto", m.texto));
+    if (m.anexos && m.anexos.length) {
+      const grade = el("div", "aulas-anexos-msg");
+      for (const a of m.anexos) {
+        const link = el("a", "aulas-anexo-foto");
+        link.target = "_blank";
+        link.rel = "noopener";
+        const img = document.createElement("img");
+        img.alt = a.nome || "Print";
+        img.loading = "lazy";
+        link.append(img);
+        grade.append(link);
+        carregarImagem(a.path, img, link);
+      }
+      linha.append(grade);
+    }
+    linha.append(el("span", "adm-msg-hora", `${eu ? "Você" : "Equipe ATIVAVID"} · ${hora(m.criadoEm)}`));
+    return linha;
+  }
+
+  // Imagens do bucket privado: link assinado, válido por 1 hora.
+  async function carregarImagem(path, img, link) {
+    const { data, error } = await sb.storage.from("chamados").createSignedUrl(path, 3600);
+    if (error || !data) { img.alt = "Imagem indisponível"; return; }
+    img.src = data.signedUrl;
+    link.href = data.signedUrl;
+  }
+
+  function abrirChamadoDetalhe(id) {
+    const c = estado.chamados.find((x) => String(x.id) === String(id));
+    if (!c) return false;
+    const s = situacaoChamado(c);
+    $("tituloSecao").textContent = `Chamado #${c.id}`;
+    $("subSecao").textContent = c.assunto;
+    $("ticketNumero").textContent = `#${c.id}`;
+    $("ticketAssunto").textContent = c.assunto;
+    const chip = $("ticketStatus");
+    chip.textContent = s.rot;
+    chip.className = `adm-chip adm-chip-${s.tom}`;
+    $("ticketData").textContent = `Aberto em ${dia(c.criadoEm)}`;
+    const conversa = $("ticketConversa");
+    conversa.replaceChildren();
+    for (const m of c.mensagens) conversa.append(bolhaMensagem(m));
+    $("formResposta").dataset.chamado = String(c.id);
+    anexos.resposta = [];
+    desenharAnexos("resposta");
+    return true;
+  }
+
+  function adicionarAnexos(tipo, arquivos) {
+    for (const f of Array.from(arquivos)) {
+      if (!ANEXO_TIPOS.includes(f.type)) return recado(`"${f.name}" não é imagem. Envie PNG, JPG, WebP ou GIF.`, "atencao");
+      if (f.size > ANEXO_MAX_BYTES) return recado(`"${f.name}" passa de 8 MB.`, "atencao");
+      if (anexos[tipo].length >= ANEXO_MAX_QTD) return recado("No máximo 4 imagens por mensagem.", "atencao");
+      anexos[tipo].push(f);
+    }
+    desenharAnexos(tipo);
+  }
+
+  function desenharAnexos(tipo) {
+    const ul = $(tipo === "novo" ? "chamadoAnexos" : "respostaAnexos");
+    ul.replaceChildren();
+    anexos[tipo].forEach((f, i) => {
+      const item = el("li", "aulas-anexo-item");
+      const tirar = el("button", "aulas-anexo-x", "Remover");
+      tirar.type = "button";
+      tirar.addEventListener("click", () => {
+        anexos[tipo].splice(i, 1);
+        desenharAnexos(tipo);
+      });
+      item.append(el("span", "", f.name), tirar);
+      ul.append(item);
+    });
+  }
+
+  // Sobe cada print para a pasta de quem envia e registra o vínculo com a mensagem.
+  async function enviarAnexos(chamadoId, mensagemId, arquivos) {
+    for (const f of arquivos) {
+      const seguro = f.name.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.-]+/g, "_").slice(-80) || "print.png";
+      const caminho = `${estado.uid}/${chamadoId}/${Date.now()}-${seguro}`;
+      const { error } = await sb.storage.from("chamados").upload(caminho, f, { contentType: f.type, upsert: false });
+      if (error) throw new Error(`Não consegui enviar "${f.name}". Tente de novo.`);
+      const { data, error: e2 } = await sb.rpc("ativavid_aluno_anexar", {
+        p_chamado_id: chamadoId,
+        p_mensagem_id: mensagemId,
+        p_path: caminho,
+        p_nome: f.name,
+        p_tipo: f.type,
+        p_tamanho: f.size,
+      });
+      if (e2 || !data || !data.ok) throw new Error((data && data.message) || "Não consegui registrar a imagem.");
+    }
+  }
+
+  $("chamadoArquivos").addEventListener("change", (e) => {
+    adicionarAnexos("novo", e.target.files);
+    e.target.value = "";
+  });
+  $("respostaArquivos").addEventListener("change", (e) => {
+    adicionarAnexos("resposta", e.target.files);
+    e.target.value = "";
+  });
 
   $("formChamado").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -576,10 +663,31 @@
     await ocupado($("btEnviarChamado"), async () => {
       const { data, error } = await sb.rpc("ativavid_aluno_abrir_chamado", { p_assunto: assunto, p_texto: texto });
       if (error || !data || !data.ok) throw new Error((data && data.message) || "Não consegui abrir o chamado. Tente de novo.");
+      await enviarAnexos(data.id, data.mensagemId, anexos.novo);
       $("formChamado").reset();
-      estado.chamadoAberto = data.id;
+      anexos.novo = [];
+      desenharAnexos("novo");
       await carregarChamados();
       recado("Chamado enviado. A equipe responde por aqui.", "ok");
+      location.hash = `#suporte/${data.id}`;
+    });
+  });
+
+  $("formResposta").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = Number($("formResposta").dataset.chamado);
+    const texto = $("respostaTexto").value.trim();
+    if (!texto) return recado("Escreva a sua resposta antes de enviar.", "atencao");
+    await ocupado($("btResponder"), async () => {
+      const { data, error } = await sb.rpc("ativavid_aluno_responder", { p_id: id, p_texto: texto });
+      if (error || !data || !data.ok) throw new Error((data && data.message) || "Não consegui enviar. Tente de novo.");
+      await enviarAnexos(id, data.mensagemId, anexos.resposta);
+      $("respostaTexto").value = "";
+      anexos.resposta = [];
+      desenharAnexos("resposta");
+      await carregarChamados();
+      abrirChamadoDetalhe(id);
+      recado("Resposta enviada.", "ok");
     });
   });
 
@@ -626,13 +734,38 @@
     if (aula) {
       abrirAulaPagina(aula);
       document.title = `${aula.titulo || "Aula"} — Área do aluno ATIVAVID`;
+    } else if (chave === "suporte") {
+      rotearSuporte(id);
     } else {
       $("tituloSecao").textContent = TITULOS[chave].titulo;
       $("subSecao").textContent = TITULOS[chave].sub;
       document.title = `${TITULOS[chave].titulo} — Área do aluno ATIVAVID`;
     }
-    if (chave === "suporte") carregarChamados().catch((e) => recado(e.message, "erro"));
     window.scrollTo(0, 0);
+  }
+
+  // Suporte tem três telas: a lista (#suporte), um chamado novo (#suporte/novo)
+  // e a conversa de um chamado (#suporte/<número>).
+  function rotearSuporte(id) {
+    const modo = !id ? "lista" : id === "novo" ? "novo" : "chamado";
+    $("suporteLista").hidden = modo !== "lista";
+    $("suporteNovo").hidden = modo !== "novo";
+    $("suporteChamado").hidden = modo !== "chamado";
+    if (modo === "novo") {
+      $("tituloSecao").textContent = "Novo chamado";
+      $("subSecao").textContent = "Conte o que aconteceu. Um print ajuda muito.";
+      document.title = "Novo chamado — Área do aluno ATIVAVID";
+    } else {
+      $("tituloSecao").textContent = "Suporte";
+      $("subSecao").textContent = "Abra um chamado e acompanhe a resposta da equipe.";
+      document.title = "Suporte — Área do aluno ATIVAVID";
+    }
+    carregarChamados()
+      .then(() => {
+        if (modo === "lista") return desenharListaChamados();
+        if (modo === "chamado" && !abrirChamadoDetalhe(id)) location.hash = "#suporte";
+      })
+      .catch((e) => recado(e.message, "erro"));
   }
 
   /* ---------- ligar ---------- */

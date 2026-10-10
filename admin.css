@@ -1589,3 +1589,10 @@
 /* Academy: a área do aluno, dentro do painel, com a sessão de quem está logado */
 .adm-academy { display: block; width: 100%; height: calc(100vh - 150px); min-height: 640px; border: 0; border-radius: 26px; background: transparent; }
 @media (max-width: 959px) { .adm-academy { height: calc(100vh - 180px); min-height: 560px; } }
+
+/* prints que o cliente anexou ao chamado */
+.adm-anexos-bloco { display: grid; gap: 10px; margin-top: 12px; }
+.adm-anexos-grade { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.adm-anexo-foto { display: grid; gap: 6px; border-radius: 18px; overflow: hidden; border: 1px solid var(--borda); background: var(--campo); text-decoration: none; color: inherit; }
+.adm-anexo-foto img { display: block; width: 100%; height: 120px; object-fit: cover; background: var(--campo); }
+.adm-anexo-nome { padding: 0 10px 10px; font-size: 12.5px; color: var(--texto-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

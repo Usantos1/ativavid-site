@@ -1347,6 +1347,35 @@
       linha.append(el("p", "adm-msg-texto", m.texto), el("span", "adm-msg-hora", `${m.autor === "admin" ? "Equipe" : "Cliente"} · ${hora(m.criado_em)}`));
       msgs.appendChild(linha);
     }
+    try {
+      const anexosR = await rpc("ativavid_admin_anexos", { p_chamado_id: id });
+      const lista = (anexosR && anexosR.anexos) || [];
+      if (lista.length) {
+        const bloco = el("div", "adm-anexos-bloco");
+        bloco.append(el("span", "adm-msg-hora", `Prints enviados pelo cliente (${lista.length})`));
+        const grade = el("div", "adm-anexos-grade");
+        lista.forEach((a, i) => {
+          const link = el("a", "adm-anexo-foto");
+          link.target = "_blank";
+          link.rel = "noopener";
+          const img = document.createElement("img");
+          img.alt = a.nome || `Print ${i + 1}`;
+          img.loading = "lazy";
+          link.append(img, el("span", "adm-anexo-nome", a.nome || `Print ${i + 1}`));
+          grade.append(link);
+          // Imagem do bucket privado: link assinado, válido por 1 hora.
+          sb.storage.from("chamados").createSignedUrl(a.path, 3600).then(({ data }) => {
+            if (!data) return;
+            img.src = data.signedUrl;
+            link.href = data.signedUrl;
+          });
+        });
+        bloco.append(grade);
+        msgs.appendChild(bloco);
+      }
+    } catch (e) {
+      recado(`Não consegui carregar os prints: ${(e && e.message) || e}`, "erro");
+    }
     msgs.scrollTop = msgs.scrollHeight;
     $("statusResposta").value = ch.status === "resolvido" ? "resolvido" : "respondido";
     $("textoResposta").value = "";
