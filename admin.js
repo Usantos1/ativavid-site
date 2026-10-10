@@ -1226,15 +1226,20 @@
   // ============================================================ suporte
 
   // Abas fixas em cima da lista; o resto fica no botão Filtros.
+  // Em cima: aberto ou resolvido. Dentro de "Em aberto": com quem está a vez.
   const ABAS_CHAMADO = [
     ["ativos", "Em aberto"],
-    ["em_analise", "Em atendimento"],
     ["resolvido", "Resolvidos"],
   ];
+  const SUBABAS_CHAMADO = [
+    ["equipe", "Com a equipe", "Novos e em atendimento: a equipe precisa agir"],
+    ["cliente", "Com o cliente", "Aguardando a resposta do cliente"],
+  ];
+  const DENTRO_DE_ABERTO = ["ativos", "equipe", "cliente"];
   const MAIS_FILTROS = [
     ["todos", "Todos"],
     ["aberto", "Novos"],
-    ["aguardando_cliente", "Aguardando cliente"],
+    ["em_analise", "Em atendimento"],
   ];
   const ANEXO_TIPOS = ["image/png", "image/jpeg", "image/webp", "image/gif"];
   const ANEXO_MAX_BYTES = 8 * 1024 * 1024;
@@ -1280,18 +1285,23 @@
     const f = estado.filtroChamado;
     const termo = String(estado.buscaChamado || "").trim().toLowerCase().replace(/^#/, "");
     return estado.chamados.filter((x) => {
-      if (f === "ativos" && x.status === "resolvido") return false;
-      if (f !== "todos" && f !== "ativos" && x.status !== f) return false;
+      if (!casaFiltro(x, f)) return false;
       if (!termo) return true;
       return [String(x.id), x.email, x.assunto, x.descricao, nomeDoCliente(x.email)]
         .some((v) => String(v || "").toLowerCase().includes(termo));
     }).sort((a, b) => ms(b.atualizado_em) - ms(a.atualizado_em));
   }
 
+  function casaFiltro(x, f) {
+    if (f === "todos") return true;
+    if (f === "ativos") return x.status !== "resolvido";
+    if (f === "equipe") return x.status === "aberto" || x.status === "em_analise";
+    if (f === "cliente") return x.status === "aguardando_cliente";
+    return x.status === f;
+  }
+
   function contaFiltro(k) {
-    if (k === "todos") return estado.chamados.length;
-    if (k === "ativos") return estado.chamados.filter((x) => x.status !== "resolvido").length;
-    return estado.chamados.filter((x) => x.status === k).length;
+    return estado.chamados.filter((x) => casaFiltro(x, k)).length;
   }
 
   // Nome legível a partir do e-mail (o chamado só guarda o e-mail).
@@ -1303,12 +1313,30 @@
   function desenharSuporte() {
     const filtros = $("filtrosSuporte");
     filtros.innerHTML = "";
+    const f = estado.filtroChamado;
+    const linha1 = el("div", "adm-sup-abas");
     for (const [k, rot] of ABAS_CHAMADO) {
-      const b = botao("", "adm-sup-aba", () => { estado.filtroChamado = k; desenharSuporte(); });
+      const on = k === "ativos" ? DENTRO_DE_ABERTO.includes(f) : f === k;
+      const b = botao("", `adm-sup-aba${on ? " is-on" : ""}`, () => { estado.filtroChamado = k; desenharSuporte(); });
       b.append(el("span", "", rot), el("em", "adm-sup-n", contaFiltro(k)));
-      b.setAttribute("aria-pressed", estado.filtroChamado === k ? "true" : "false");
-      if (estado.filtroChamado === k) b.classList.add("is-on");
-      filtros.appendChild(b);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      linha1.appendChild(b);
+    }
+    filtros.appendChild(linha1);
+    if (DENTRO_DE_ABERTO.includes(f)) {
+      const linha2 = el("div", "adm-sup-abas adm-sup-subabas");
+      for (const [k, rot, dica] of SUBABAS_CHAMADO) {
+        // clicar de novo na mesma volta para "todos em aberto"
+        const b = botao("", `adm-sup-aba${f === k ? " is-on" : ""}`, () => {
+          estado.filtroChamado = estado.filtroChamado === k ? "ativos" : k;
+          desenharSuporte();
+        });
+        b.title = dica;
+        b.append(el("span", "", rot), el("em", "adm-sup-n", contaFiltro(k)));
+        b.setAttribute("aria-pressed", f === k ? "true" : "false");
+        linha2.appendChild(b);
+      }
+      filtros.appendChild(linha2);
     }
     // botão Filtros: abre os filtros que não têm aba
     const extra = MAIS_FILTROS.find(([k]) => k === estado.filtroChamado);

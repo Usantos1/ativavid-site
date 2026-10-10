@@ -1959,3 +1959,9 @@ html.adm-sem-rolagem body { overflow: hidden; }
 .adm-sup-busca-linha .adm-sup-busca { flex: 1; margin: 0; min-width: 0; }
 .adm-sup-busca-linha .adm-sup-filtrar { flex: none; height: 40px; padding: 0 12px; background: var(--campo); border-color: var(--borda); }
 .adm-sup-busca-linha .adm-sup-filtrar.is-on { background: var(--azul-fundo); border-color: color-mix(in srgb, var(--azul) 35%, transparent); }
+
+/* duas linhas de abas: Em aberto / Resolvidos e, dentro de aberto, com quem está a vez */
+.adm-sup-filtros { display: grid; gap: 6px; }
+.adm-sup-abas { display: flex; gap: 4px; }
+.adm-sup-subabas .adm-sup-aba { font-size: 12px; font-weight: 600; padding: 6px; }
+.adm-sup-subabas .adm-sup-aba.is-on { background: var(--campo); color: var(--tinta); border-color: var(--borda); }
