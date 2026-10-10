@@ -180,6 +180,7 @@
     desenharAulas();
     desenharConta();
     rotear();
+    ouvirSuporte();
   }
 
   function mostrarEntrada() {
@@ -602,7 +603,7 @@
     return b;
   }
 
-  function abrirChamadoDetalhe(id) {
+  function abrirChamadoDetalhe(id, aoVivo = false) {
     const c = estado.chamados.find((x) => String(x.id) === String(id));
     if (!c) return false;
     const s = situacaoChamado(c);
@@ -615,6 +616,7 @@
     chip.textContent = s.rot;
     chip.className = `adm-chip adm-chip-${s.tom}`;
     const conversa = $("ticketConversa");
+    const pertoDoFim = conversa.scrollHeight - conversa.scrollTop - conversa.clientHeight < 120;
     conversa.replaceChildren();
     let diaAnterior = "";
     for (const m of c.mensagens) {
@@ -626,9 +628,12 @@
       conversa.append(bolhaMensagem(m));
     }
     $("formResposta").dataset.chamado = String(c.id);
-    anexos.resposta = [];
-    desenharAnexos("resposta");
-    conversa.scrollTop = conversa.scrollHeight;
+    if (!aoVivo) {
+      anexos.resposta = [];
+      desenharAnexos("resposta");
+    }
+    // ao vivo: só desce se já estava no fim (não atrapalha quem está lendo o começo)
+    if (!aoVivo || pertoDoFim) conversa.scrollTop = conversa.scrollHeight;
     return true;
   }
 
@@ -705,6 +710,45 @@
     adicionarAnexos("resposta", e.target.files);
     e.target.value = "";
   });
+
+  // Tempo real: o banco avisa quando um chamado, uma mensagem ou um print muda.
+  // Vários avisos seguidos viram uma atualização só.
+  let suporteAoVivo = null;
+  let suporteAtualizando = null;
+
+  function ouvirSuporte() {
+    if (suporteAoVivo) return;
+    const quando = { event: "*", schema: "public" };
+    suporteAoVivo = sb.channel("suporte-aluno")
+      .on("postgres_changes", { ...quando, table: "chamados" }, agendarAtualizacaoSuporte)
+      .on("postgres_changes", { ...quando, table: "chamados_mensagens" }, agendarAtualizacaoSuporte)
+      .on("postgres_changes", { ...quando, table: "chamados_anexos" }, agendarAtualizacaoSuporte)
+      .subscribe();
+  }
+
+  function agendarAtualizacaoSuporte() {
+    clearTimeout(suporteAtualizando);
+    suporteAtualizando = setTimeout(atualizarSuporte, 300);
+  }
+
+  async function atualizarSuporte() {
+    const contaAdmin = (lista) => lista.reduce((n, c) => n + c.mensagens.filter((m) => m.autor === "admin").length, 0);
+    const adminAntes = contaAdmin(estado.chamados);
+    try {
+      await carregarChamados();
+    } catch {
+      return;
+    }
+    if (contaAdmin(estado.chamados) > adminAntes) recado("Nova resposta da equipe.", "ok");
+    if (!$("suporteLista").hidden) desenharListaChamados();
+    const id = idChamadoDaRota();
+    if (id && !$("suporteChamado").hidden) abrirChamadoDetalhe(id, true);
+  }
+
+  function idChamadoDaRota() {
+    const [secao, id] = (location.hash || "").replace("#", "").split("/");
+    return secao === "suporte" && id && id !== "novo" ? id : null;
+  }
 
   $("formChamado").addEventListener("submit", async (e) => {
     e.preventDefault();
