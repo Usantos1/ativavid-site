@@ -207,6 +207,7 @@
 
   function fecharModal() {
     $("modal").hidden = true;
+    $("modal").querySelector(".adm-modal-caixa").classList.remove("adm-modal-largo");
     $("modalCorpo").innerHTML = "";
     document.body.classList.remove("adm-travado");
   }
@@ -1533,46 +1534,172 @@
   }
 
   async function carregarAulas() {
-    const r = await rpc("ativavid_admin_aulas", { p_action: "list" });
+    const [r, m] = await Promise.all([
+      rpc("ativavid_admin_aulas", { p_action: "list" }),
+      rpc("ativavid_admin_modulos", { p_action: "list" }),
+    ]);
     estado.aulas = Array.isArray(r.aulas) ? r.aulas : [];
+    estado.modulos = Array.isArray(m.modulos) ? m.modulos : [];
     desenharAulas();
   }
 
+  // ---------------------------------------------------------------- módulos
+
+  async function operarModulo(args, ok) {
+    await rpc("ativavid_admin_modulos", args);
+    await carregarAulas();
+    if (ok) recado(ok, "ok");
+  }
+
+  function desenharModulos() {
+    const alvo = $("painelModulos");
+    alvo.innerHTML = "";
+    const cab = el("div", "adm-modulos-cab");
+    const titulo = el("div", "");
+    titulo.append(el("h3", "adm-modulos-titulo", "Módulos"), el("p", "adm-ajuda", "Organizam as aulas. O cliente vê os módulos nesta ordem, de cima para baixo."));
+    const novo = botao("Novo módulo", "adm-bt adm-bt-forte adm-bt-sm", () => abrirNomeModulo("Novo módulo", "", (nome) => operarModulo({ p_action: "create", p_nome: nome }, "Módulo criado.")));
+    cab.append(titulo, novo);
+    alvo.appendChild(cab);
+
+    if (!estado.modulos.length) {
+      alvo.appendChild(el("p", "adm-vazio", "Nenhum módulo ainda. Crie o primeiro para organizar as aulas."));
+      return;
+    }
+    const lista = el("div", "adm-modulos-lista");
+    estado.modulos.forEach((m, i) => {
+      const linha = el("div", "adm-modulo");
+      const info = el("div", "adm-modulo-info");
+      info.append(el("span", "adm-modulo-posicao", String(i + 1)), el("strong", "adm-modulo-nome", m.nome), el("span", "adm-modulo-n", plural(m.aulas, "aula", "aulas")));
+      const acoes = el("div", "adm-acoes");
+      const subir = botao("↑", "adm-bt adm-bt-fraco adm-bt-sm", () => operarModulo({ p_action: "move", p_nome: m.nome, p_direcao: "cima" }, ""));
+      const descer = botao("↓", "adm-bt adm-bt-fraco adm-bt-sm", () => operarModulo({ p_action: "move", p_nome: m.nome, p_direcao: "baixo" }, ""));
+      subir.setAttribute("aria-label", `Subir ${m.nome}`);
+      descer.setAttribute("aria-label", `Descer ${m.nome}`);
+      subir.disabled = i === 0;
+      descer.disabled = i === estado.modulos.length - 1;
+      const renomear = botao("Renomear", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirNomeModulo("Renomear módulo", m.nome, (nome) => operarModulo({ p_action: "rename", p_nome: m.nome, p_novo_nome: nome }, "Módulo renomeado.")));
+      const excluir = botao("Excluir", "adm-bt adm-bt-perigo adm-bt-sm", null);
+      excluir.addEventListener("click", () => doisToques(excluir, () => excluirModulo(m)));
+      acoes.append(subir, descer, renomear, excluir);
+      linha.append(info, acoes);
+      lista.appendChild(linha);
+    });
+    alvo.appendChild(lista);
+  }
+
+  function abrirNomeModulo(titulo, valor, onSalvar) {
+    const form = el("form", "adm-form-modal");
+    const input = entrada("text", valor, { maxlength: "60", required: "required", placeholder: "Ex.: Começando, Edição, Conta" });
+    const salvar = botao("Salvar", "adm-bt adm-bt-forte", null);
+    salvar.type = "submit";
+    form.append(
+      campo("Nome do módulo", input, "É como o cliente vê o módulo na área de aulas."),
+      botoes(salvar, botao("Cancelar", "adm-bt adm-bt-fraco", () => fecharModal())),
+    );
+    form.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const nome = input.value.trim();
+      if (!nome) return recado("Dê um nome ao módulo.", "erro");
+      ocupado(salvar, async () => {
+        await onSalvar(nome);
+        fecharModal();
+      });
+    });
+    abrirModal(titulo, form);
+  }
+
+  function excluirModulo(m) {
+    if (m.aulas > 0) return abrirExcluirComDestino(m);
+    return operarModulo({ p_action: "delete", p_nome: m.nome }, "Módulo excluído.");
+  }
+
+  // Módulo com aulas: as aulas precisam ir para outro módulo antes de sair.
+  function abrirExcluirComDestino(m) {
+    const outros = estado.modulos.filter((x) => x.nome !== m.nome);
+    if (!outros.length) return recado("Crie outro módulo antes: as aulas desse precisam de para onde ir.", "atencao");
+    const form = el("form", "adm-form-modal");
+    form.append(el("p", "adm-ajuda", `O módulo “${m.nome}” tem ${plural(m.aulas, "aula", "aulas")}. Escolha para qual módulo elas vão. Depois o módulo é excluído.`));
+    const sel = document.createElement("select");
+    for (const x of outros) {
+      const op = el("option", "", x.nome);
+      op.value = x.nome;
+      sel.appendChild(op);
+    }
+    const confirmar = botao("Mover aulas e excluir", "adm-bt adm-bt-perigo", null);
+    confirmar.type = "submit";
+    form.append(
+      campo("Mover as aulas para", sel),
+      botoes(confirmar, botao("Cancelar", "adm-bt adm-bt-fraco", () => fecharModal())),
+    );
+    form.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      ocupado(confirmar, async () => {
+        await rpc("ativavid_admin_modulos", { p_action: "delete", p_nome: m.nome, p_destino: sel.value });
+        fecharModal();
+        await carregarAulas();
+        recado(`Módulo excluído. As aulas foram para “${sel.value}”.`, "ok");
+      });
+    });
+    abrirModal("Excluir módulo", form);
+  }
+
+  // ---------------------------------------------------------------- aulas
+
   function desenharAulas() {
+    desenharModulos();
     const alvo = $("listaAulas");
     alvo.innerHTML = "";
     if (!estado.aulas.length) {
       alvo.appendChild(el("p", "adm-vazio", "Nenhuma aula cadastrada ainda. Use “Nova aula” para começar."));
       return;
     }
-    const ordenadas = estado.aulas.slice().sort((a, b) => (a.ordem ?? 100) - (b.ordem ?? 100));
-    for (const a of ordenadas) {
-      const linha = el("article", `adm-vidro adm-aula ${a.ativo === false ? "is-oculta" : ""}`);
-      const capa = el("div", "adm-aula-capa");
-      if (a.youtubeId) {
-        const img = document.createElement("img");
-        img.src = `https://i.ytimg.com/vi/${encodeURIComponent(a.youtubeId)}/mqdefault.jpg`;
-        img.alt = "";
-        img.loading = "lazy";
-        capa.appendChild(img);
-      }
-      const corpo = el("div", "adm-aula-corpo");
-      corpo.append(el("span", "adm-aula-secao", a.secao || "Geral"));
-      corpo.append(el("h3", "", a.titulo || "Sem título"));
-      if (a.descricao) corpo.append(el("p", "", a.descricao));
-      const meta = el("p", "adm-aula-meta");
-      meta.append(el("span", "", `Posição ${a.ordem ?? 100}`));
-      meta.append(el("span", a.ativo === false ? "adm-aula-oculta" : "adm-aula-visivel", a.ativo === false ? "Oculta: o cliente não vê" : "Visível para o cliente"));
-      corpo.appendChild(meta);
-      const acoes = el("div", "adm-acoes");
-      acoes.append(
-        botao("Editar", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirFormAula(a)),
-        botao("Ver como o cliente vê", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirPreviaAula(a)),
-      );
-      corpo.appendChild(acoes);
-      linha.append(capa, corpo);
-      alvo.appendChild(linha);
+    // aulas agrupadas pelo módulo, na ordem dos módulos
+    const grupos = new Map(estado.modulos.map((m) => [m.nome, []]));
+    const soltas = [];
+    for (const a of estado.aulas) {
+      const k = a.secao || "Geral";
+      if (grupos.has(k)) grupos.get(k).push(a);
+      else soltas.push(a);
     }
+    const porOrdem = (x, y) => (x.ordem ?? 100) - (y.ordem ?? 100);
+    for (const m of estado.modulos) {
+      alvo.appendChild(el("h3", "adm-aulas-modulo", m.nome));
+      const itens = grupos.get(m.nome).sort(porOrdem);
+      if (!itens.length) alvo.appendChild(el("p", "adm-ajuda", "Nenhuma aula neste módulo ainda."));
+      for (const a of itens) alvo.appendChild(cartaoAulaAdmin(a));
+    }
+    if (soltas.length) {
+      alvo.appendChild(el("h3", "adm-aulas-modulo", "Sem módulo"));
+      for (const a of soltas.sort(porOrdem)) alvo.appendChild(cartaoAulaAdmin(a));
+    }
+  }
+
+  function cartaoAulaAdmin(a) {
+    const linha = el("article", `adm-vidro adm-aula ${a.ativo === false ? "is-oculta" : ""}`);
+    const capa = el("div", "adm-aula-capa");
+    if (a.youtubeId) {
+      const img = document.createElement("img");
+      img.src = `https://i.ytimg.com/vi/${encodeURIComponent(a.youtubeId)}/mqdefault.jpg`;
+      img.alt = "";
+      img.loading = "lazy";
+      capa.appendChild(img);
+    }
+    const corpo = el("div", "adm-aula-corpo");
+    corpo.append(el("span", "adm-aula-secao", a.secao || "Geral"));
+    corpo.append(el("h3", "", a.titulo || "Sem título"));
+    if (a.descricao) corpo.append(el("p", "", a.descricao));
+    const meta = el("p", "adm-aula-meta");
+    meta.append(el("span", "", `Posição ${a.ordem ?? 100}`));
+    meta.append(el("span", a.ativo === false ? "adm-aula-oculta" : "adm-aula-visivel", a.ativo === false ? "Oculta: o cliente não vê" : "Visível para o cliente"));
+    corpo.appendChild(meta);
+    const acoes = el("div", "adm-acoes");
+    acoes.append(
+      botao("Editar", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirFormAula(a)),
+      botao("Ver como o cliente vê", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirPreviaAula(a)),
+    );
+    corpo.appendChild(acoes);
+    linha.append(capa, corpo);
+    return linha;
   }
 
   function abrirPreviaAula(a) {
@@ -1588,13 +1715,27 @@
     const form = el("form", "adm-aula-form");
     const titulo = entrada("text", a ? a.titulo || "" : "", { maxlength: "120", required: "required", placeholder: "Como importar do YouTube" });
     const link = entrada("text", a && a.youtubeId ? `https://youtu.be/${a.youtubeId}` : "", { placeholder: "https://youtu.be/…", autocapitalize: "off", spellcheck: "false" });
-    const secao = entrada("text", a ? a.secao || "" : "Começando", { maxlength: "60", list: "secoesAulas", placeholder: "Começando" });
-    const lista = document.createElement("datalist");
-    lista.id = "secoesAulas";
-    [...new Set(estado.aulas.map((x) => x.secao).filter(Boolean))].forEach((s) => { const o = document.createElement("option"); o.value = s; lista.appendChild(o); });
+
+    // módulo: escolhido da lista (o da aula, mesmo que tenha sumido, continua aparecendo)
+    const modulo = document.createElement("select");
+    const nomes = estado.modulos.map((m) => m.nome);
+    const atual = a ? a.secao || "" : (nomes[0] || "");
+    if (atual && !nomes.includes(atual)) nomes.unshift(atual);
+    for (const n of nomes) {
+      const op = el("option", "", n);
+      op.value = n;
+      modulo.appendChild(op);
+    }
+    modulo.value = atual;
+    if (!nomes.length) {
+      const op = el("option", "", "Crie um módulo antes");
+      op.value = "";
+      modulo.appendChild(op);
+    }
+
     const ordem = entrada("number", a ? String(a.ordem ?? 100) : "100", { min: "0", max: "9999", inputmode: "numeric" });
     const desc = el("textarea");
-    desc.rows = 3;
+    desc.rows = 5;
     desc.maxLength = 600;
     desc.placeholder = "O que a pessoa aprende nesta aula.";
     desc.value = a ? a.descricao || "" : "";
@@ -1636,13 +1777,18 @@
       acoes
     );
     const grade = form.querySelector(".adm-grade-2");
-    grade.append(campo("Seção", secao, "Agrupa as aulas. Ex.: Começando, Edição, Conta."), campo("Posição", ordem, "Menor aparece primeiro."));
-    form.insertBefore(lista, grade);
+    grade.append(campo("Módulo", modulo, "Agrupa as aulas. Os módulos se criam e se ordenam na lista de cima."), campo("Posição", ordem, "Menor aparece primeiro, dentro do módulo."));
+    corpo.append(form, previa);
+
+    const caixa = $("modal").querySelector(".adm-modal-caixa");
+    caixa.classList.add("adm-modal-largo");
+
     form.addEventListener("submit", (ev) => {
       ev.preventDefault();
       const yt = youtubeId(link.value) || (a ? a.youtubeId : "");
       if (!titulo.value.trim()) return recado("A aula precisa de título.", "erro");
       if (!yt) return recado("Não achei o código do YouTube nesse link. Cole o link inteiro.", "erro");
+      if (!modulo.value) return recado("Crie um módulo antes de salvar a aula.", "erro");
       ocupado(salvar, async () => {
         await rpc("ativavid_admin_aulas", {
           p_action: "upsert",
@@ -1650,7 +1796,7 @@
           p_titulo: titulo.value.trim(),
           p_descricao: desc.value.trim(),
           p_youtube: yt,
-          p_secao: secao.value.trim() || "Geral",
+          p_secao: modulo.value,
           p_ordem: Math.max(0, Math.min(9999, parseInt(ordem.value, 10) || 100)),
           p_ativo: visivel.checked,
         });
@@ -1660,11 +1806,10 @@
       });
     });
 
-    corpo.append(form, previa);
     abrirModal(editando ? "Editar aula" : "Nova aula", corpo);
   }
 
-  // ============================================================ busca global
+  // ============================================================ busca global  // ============================================================ busca global
 
   function buscaGlobal(ev) {
     if (!ev.target.value.trim()) return;

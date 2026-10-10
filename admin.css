@@ -1596,3 +1596,57 @@
 .adm-anexo-foto { display: grid; gap: 6px; border-radius: 18px; overflow: hidden; border: 1px solid var(--borda); background: var(--campo); text-decoration: none; color: inherit; }
 .adm-anexo-foto img { display: block; width: 100%; height: 120px; object-fit: cover; background: var(--campo); }
 .adm-anexo-nome { padding: 0 10px 10px; font-size: 12.5px; color: var(--texto-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ==========================================================================
+ * Aulas: editor largo com prévia ao lado, e painel de módulos.
+ * ========================================================================== */
+
+.adm-modal-caixa.adm-modal-largo { width: min(1140px, 100%); }
+@media (min-width: 960px) {
+  .adm-aula-editor { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+}
+.adm-campo select {
+  font: inherit;
+  font-size: 16px;
+  color: var(--tinta);
+  background: var(--campo);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  padding: 12px 14px;
+  min-height: 46px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.adm-modulos { display: grid; gap: 14px; margin-bottom: 26px; padding: 22px; }
+.adm-modulos-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.adm-modulos-titulo { margin: 0 0 4px; font-family: var(--display); font-size: 19px; font-weight: 800; }
+.adm-modulos-cab p { margin: 0; }
+.adm-modulos-lista { display: grid; gap: 10px; }
+.adm-modulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-radius: 20px;
+  background: var(--campo);
+  border: 1px solid var(--borda);
+}
+.adm-modulo-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.adm-modulo-posicao {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 13px; font-weight: 800; background: var(--azul-fundo); color: var(--azul); flex: none;
+}
+.adm-modulo-nome { font-size: 16px; font-weight: 700; }
+.adm-modulo-n { font-size: 13px; color: var(--texto-3); }
+.adm-modulo .adm-acoes { display: flex; gap: 6px; flex-wrap: wrap; }
+.adm-modulo .adm-bt[disabled] { opacity: .35; cursor: default; }
+
+.adm-aulas-modulo {
+  margin: 24px 4px 10px;
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 800;
+}
