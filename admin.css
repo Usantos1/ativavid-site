@@ -1174,3 +1174,7 @@
     scroll-behavior: auto !important;
   }
 }
+
+.adm-logo-icone { display: none !important; }
+.adm-app--fechado .adm-side-logo img:not(.adm-logo-icone) { display: none !important; }
+.adm-app--fechado .adm-logo-icone { display: block !important; width: 40px; height: 40px; margin: 0 auto; }
