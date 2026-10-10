@@ -220,3 +220,9 @@
 .alu-embutido .adm-topo,
 .alu-embutido .adm-cab { display: none; }
 .alu-embutido .adm-principal { padding-top: 8px; }
+
+/* o botão de concluir fica sempre no meio, mesmo sem anterior ou próxima */
+.aulas-aula-barra #btConcluir {
+  grid-column: 2;
+  justify-self: center;
+}
