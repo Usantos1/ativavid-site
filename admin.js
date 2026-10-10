@@ -35,8 +35,8 @@
 
   const STATUS_CHAMADO = {
     aberto: { rot: "Novo", tom: "mal" },
-    em_analise: { rot: "Em análise", tom: "atencao" },
-    respondido: { rot: "Aguardando cliente", tom: "neutro" },
+    em_analise: { rot: "Em atendimento", tom: "atencao" },
+    aguardando_cliente: { rot: "Aguardando cliente", tom: "neutro" },
     resolvido: { rot: "Resolvido", tom: "ok" },
   };
 
@@ -1224,8 +1224,8 @@
   const FILTROS_CHAMADO = [
     ["ativos", "Em aberto"],
     ["aberto", "Novos"],
-    ["em_analise", "Em análise"],
-    ["respondido", "Aguardando cliente"],
+    ["em_analise", "Em atendimento"],
+    ["aguardando_cliente", "Aguardando cliente"],
     ["resolvido", "Resolvidos"],
     ["todos", "Todos"],
   ];
@@ -1269,7 +1269,7 @@
     const f = estado.filtroChamado;
     return estado.chamados.filter((x) => {
       if (f === "todos") return true;
-      if (f === "ativos") return x.status === "aberto" || x.status === "em_analise";
+      if (f === "ativos") return x.status !== "resolvido";
       return x.status === f;
     }).sort((a, b) => ms(b.atualizado_em) - ms(a.atualizado_em));
   }
@@ -1280,8 +1280,8 @@
     const conta = (s) => estado.chamados.filter((x) => x.status === s).length;
     const itens = [
       ["aberto", "Novos", conta("aberto"), "mal", "Ninguém respondeu ainda"],
-      ["em_analise", "Em análise", conta("em_analise"), "atencao", "Você já começou a responder"],
-      ["respondido", "Aguardando cliente", conta("respondido"), "neutro", "A bola está com o cliente"],
+      ["em_analise", "Em atendimento", conta("em_analise"), "atencao", "A equipe está trabalhando nele"],
+      ["aguardando_cliente", "Aguardando cliente", conta("aguardando_cliente"), "neutro", "A bola está com o cliente"],
       ["resolvido", "Resolvidos", conta("resolvido"), "ok", "Encerrados"],
     ];
     for (const [chave, rot, n, tom, sub] of itens) {
@@ -1378,7 +1378,7 @@
       recado(`Não consegui carregar os prints: ${(e && e.message) || e}`, "erro");
     }
     msgs.scrollTop = msgs.scrollHeight;
-    $("statusResposta").value = ch.status === "resolvido" ? "resolvido" : "respondido";
+    $("statusResposta").value = ch.status;
     $("textoResposta").value = "";
     conv.dataset.id = String(id);
   }
@@ -1390,15 +1390,34 @@
     desenharSuporte();
   }
 
+  // Status é ação própria: muda na hora, com ou sem mensagem.
+  async function mudarStatus(ev) {
+    const id = Number($("conversa").dataset.id);
+    const sel = ev.target;
+    if (!id) return;
+    const rascunho = $("textoResposta").value;
+    sel.disabled = true;
+    try {
+      await rpc("ativavid_admin_status", { p_id: id, p_status: sel.value });
+      await carregarChamados(true);
+      await abrirChamado(id);
+      $("textoResposta").value = rascunho;
+      recado(`Status alterado para “${STATUS_CHAMADO[sel.value].rot}”. O cliente vê na conta dele.`, "ok");
+    } catch (e) {
+      recado((e && e.message) || "Não consegui mudar o status.", "erro");
+    } finally {
+      sel.disabled = false;
+    }
+  }
+
   async function responder(ev) {
     ev.preventDefault();
     const id = Number($("conversa").dataset.id);
     const texto = $("textoResposta").value.trim();
-    const status = $("statusResposta").value;
     if (!id) return;
     if (!texto) return recado("Escreva a resposta antes de enviar.", "erro");
     await ocupado($("btResponder"), async () => {
-      await rpc("ativavid_admin_responder", { p_id: id, p_texto: texto, p_status: status });
+      await rpc("ativavid_admin_responder", { p_id: id, p_texto: texto });
       recado("Resposta enviada. O cliente vê na conta dele.", "ok");
       await carregarChamados(true);
       await abrirChamado(id);
@@ -1845,6 +1864,7 @@
   $("btNovaAula").addEventListener("click", () => abrirFormAula(null));
   $("btFecharConversa").addEventListener("click", fecharConversa);
   $("formResposta").addEventListener("submit", responder);
+  $("statusResposta").addEventListener("change", mudarStatus);
   $("btNovoMembro").addEventListener("click", abrirNovoMembro);
   $("btVerSuporte").addEventListener("click", () => { fecharMenus(); location.hash = "suporte"; });
   $("btPerfil").addEventListener("click", (e) => {

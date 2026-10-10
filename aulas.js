@@ -513,12 +513,16 @@
     estado.chamados = data.chamados || [];
   }
 
+  // Status vindo direto da equipe. "Aguardando você" pede resposta do cliente.
+  const STATUS_CLIENTE = {
+    aberto: { rot: "Aguardando a equipe", tom: "espera" },
+    em_analise: { rot: "Em atendimento", tom: "atencao" },
+    aguardando_cliente: { rot: "Aguardando você", tom: "atencao" },
+    resolvido: { rot: "Resolvido", tom: "ok" },
+  };
+
   function situacaoChamado(c) {
-    if (c.status === "resolvido") return { rot: "Resolvido", tom: "ok" };
-    if (c.status === "em_analise") return { rot: "Em análise", tom: "atencao" };
-    const ult = c.mensagens[c.mensagens.length - 1];
-    if (ult && ult.autor === "admin") return { rot: "Respondido", tom: "atencao" };
-    return { rot: "Aguardando a equipe", tom: "espera" };
+    return STATUS_CLIENTE[c.status] || { rot: c.status, tom: "neutro" };
   }
 
   function resumo(texto) {
@@ -605,7 +609,8 @@
     $("tituloSecao").textContent = `Chamado #${c.id}`;
     $("subSecao").textContent = c.assunto;
     $("ticketAssunto").textContent = c.assunto;
-    $("ticketMeta").textContent = `#${c.id} · aberto em ${dia(c.criadoEm)}`;
+    $("ticketMeta").textContent = `#${c.id} · aberto em ${dia(c.criadoEm)}` +
+      (c.status === "aguardando_cliente" ? " · a equipe aguarda a sua resposta" : "");
     const chip = $("ticketStatus");
     chip.textContent = s.rot;
     chip.className = `adm-chip adm-chip-${s.tom}`;
