@@ -1582,3 +1582,6 @@
 /* janela do link de assinatura */
 .adm-link-linha { display: flex; gap: 8px; align-items: center; }
 .adm-link-caixa { flex: 1; min-width: 0; font-size: 13px !important; }
+
+/* opções da lista nativa: sem isto o texto herda a cor clara do tema escuro sobre fundo branco */
+.adm-campo select option { background: var(--painel-opaco); color: var(--tinta); }
