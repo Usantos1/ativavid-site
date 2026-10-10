@@ -1,0 +1,339 @@
+/* Painel do dono — tela de ferramenta, não de venda.
+   Pensada primeiro para o celular: é onde o suporte acontece. */
+
+.adm {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  margin: 0;
+  min-height: 100dvh;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ---------- entrar ---------- */
+
+.adm-entrar {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.adm-cartao {
+  width: 100%;
+  max-width: 380px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px 22px;
+  box-shadow: var(--sombra);
+}
+
+.adm-marca {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: .14em;
+  color: var(--red-2);
+  margin: 0;
+  text-align: center;
+}
+
+.adm-sub {
+  margin: 6px 0 22px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 15px;
+}
+
+/* ---------- campos ---------- */
+
+.adm-campo {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+}
+
+.adm-campo small {
+  font-weight: 400;
+  color: var(--fine);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.adm-campo input {
+  font: inherit;
+  font-weight: 400;
+  font-size: 16px; /* 16px evita o zoom automático do iOS ao focar */
+  color: var(--text);
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  min-height: 46px;
+}
+
+.adm-campo input:focus-visible,
+.adm-busca input:focus-visible {
+  outline: 2px solid var(--red-2);
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+/* ---------- botões ---------- */
+
+.adm-bt {
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 11px 16px;
+  min-height: 44px;
+  cursor: pointer;
+  transition: filter .15s var(--ease), background .15s var(--ease);
+}
+
+.adm-bt:focus-visible { outline: 2px solid var(--red-2); outline-offset: 2px; }
+.adm-bt:disabled { opacity: .5; cursor: progress; }
+
+.adm-bt-forte {
+  width: 100%;
+  background: var(--red-deep);
+  color: #fff;
+}
+.adm-bt-forte:hover:not(:disabled) { filter: brightness(1.12); }
+
+.adm-bt-fraco {
+  background: var(--panel-2);
+  color: var(--text);
+  border-color: var(--line-2);
+}
+.adm-bt-fraco:hover:not(:disabled) { background: var(--line); }
+
+/* verbo na linha: pequeno, mas ainda com alvo de toque decente */
+.adm-verbo {
+  font: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  padding: 8px 12px;
+  min-height: 38px;
+  cursor: pointer;
+}
+.adm-verbo:hover:not(:disabled) { background: var(--line); }
+.adm-verbo:focus-visible { outline: 2px solid var(--red-2); outline-offset: 2px; }
+.adm-verbo:disabled { opacity: .5; cursor: progress; }
+.adm-verbo-perigo { color: var(--red-ink); border-color: #4a2227; }
+.adm-verbo-perigo:hover:not(:disabled) { background: #2a171a; }
+
+/* ---------- topo e abas ---------- */
+
+.adm-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.adm-marca-pq {
+  font-family: var(--display);
+  font-weight: 900;
+  letter-spacing: .12em;
+  font-size: 13px;
+  color: var(--red-2);
+  display: block;
+}
+
+.adm-quem { font-size: 12px; color: var(--fine); }
+
+.adm-abas {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px 0;
+  max-width: var(--wrap);
+  margin: 0 auto;
+}
+
+.adm-aba {
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  flex: 1;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--dim);
+  padding: 10px 6px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.adm-aba.is-on { color: var(--text); border-bottom-color: var(--red); }
+.adm-aba:focus-visible { outline: 2px solid var(--red-2); outline-offset: -2px; }
+
+.adm-busca {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  max-width: var(--wrap);
+  margin: 0 auto;
+}
+
+.adm-busca input {
+  font: inherit;
+  font-size: 16px;
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  padding: 11px 14px;
+  min-height: 44px;
+}
+
+.adm-busca .adm-bt { flex: none; }
+
+/* ---------- recados ---------- */
+
+.adm-recado,
+.adm-erro {
+  max-width: var(--wrap);
+  margin: 0 auto 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.adm-recado {
+  background: #11231f;
+  border: 1px solid #1d4a3e;
+  color: #9fe8d2;
+}
+.adm-recado[data-tom="atencao"] {
+  background: #2a2113;
+  border-color: #5a4420;
+  color: #f0cc8a;
+}
+.adm-recado[data-tom="erro"] {
+  background: #2a171a;
+  border-color: #5a2a30;
+  color: #ffb3b8;
+}
+
+.adm-erro {
+  margin: 4px 0 0;
+  background: #2a171a;
+  border: 1px solid #5a2a30;
+  color: #ffb3b8;
+  font-size: 13px;
+}
+
+/* ---------- listas ---------- */
+
+.adm-aba-conteudo {
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+
+.adm-lista { display: grid; gap: 10px; }
+
+.adm-linha {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.adm-linha-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adm-nome {
+  font-weight: 700;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.adm-dado {
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.5;
+}
+.adm-dado b { color: var(--text); font-weight: 600; }
+
+.adm-verbos { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* pastilha de situação */
+.adm-selo {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.adm-selo-ok     { background: #10322a; color: #4fe0bd; }
+.adm-selo-mal    { background: #3a1a1e; color: #ff8d95; }
+.adm-selo-espera { background: #332814; color: #f5c069; }
+
+.adm-vazio {
+  color: var(--fine);
+  font-size: 14px;
+  text-align: center;
+  padding: 32px 12px;
+}
+
+/* ---------- criar cliente ---------- */
+
+.adm-novo {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  margin-bottom: 14px;
+}
+
+.adm-novo summary {
+  cursor: pointer;
+  padding: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  list-style: none;
+}
+.adm-novo summary::-webkit-details-marker { display: none; }
+.adm-novo summary::after { content: " +"; color: var(--red-2); }
+.adm-novo[open] summary::after { content: " −"; }
+.adm-novo summary:focus-visible { outline: 2px solid var(--red-2); outline-offset: -2px; }
+
+.adm-novo-corpo { padding: 0 14px 14px; }
+
+@media (min-width: 700px) {
+  .adm-abas { padding-top: 16px; }
+  .adm-linha { grid-template-columns: 1fr auto; align-items: center; }
+  .adm-linha .adm-verbos { justify-content: flex-end; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-bt { transition: none; }
+}
