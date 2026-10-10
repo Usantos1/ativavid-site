@@ -13,7 +13,7 @@
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="stylesheet" href="/admin.css?v=20261010r">
-  <link rel="stylesheet" href="/aulas.css?v=20261010n">
+  <link rel="stylesheet" href="/aulas.css?v=20261010o">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -215,29 +215,30 @@
           </article>
         </div>
 
-        <div id="suporteChamado" class="aulas-suporte" hidden>
+        <div id="suporteChamado" class="aulas-chat-wrap" hidden>
           <a class="adm-link aulas-voltar" href="#suporte">← Meus chamados</a>
-          <article class="adm-vidro aulas-painel-form">
-            <header class="aulas-ticket-cab">
-              <span id="ticketNumero" class="aulas-ticket-num"></span>
-              <h2 id="ticketAssunto" class="aulas-titulo-bloco"></h2>
+          <article class="adm-vidro aulas-chat">
+            <header class="aulas-chat-cab">
+              <img class="aulas-chat-avatar" src="/assets/icon.png" alt="" width="42" height="42">
+              <div class="aulas-chat-titulo">
+                <strong id="ticketAssunto"></strong>
+                <span id="ticketMeta"></span>
+              </div>
               <span id="ticketStatus" class="adm-chip"></span>
             </header>
-            <p class="adm-msg-hora" id="ticketData"></p>
-            <div id="ticketConversa" class="aulas-conversa"></div>
-            <form id="formResposta" class="aulas-form aulas-resposta">
-              <label class="adm-campo">
-                <span>Responder</span>
-                <textarea id="respostaTexto" rows="3" placeholder="Escreva a sua resposta"></textarea>
-              </label>
-              <div class="aulas-anexos">
-                <label class="adm-bt adm-bt-fraco adm-bt-sm aulas-anexar">Anexar print
+            <div id="ticketConversa" class="aulas-chat-msgs" aria-live="polite"></div>
+            <form id="formResposta" class="aulas-chat-composer">
+              <ul id="respostaAnexos" class="aulas-chat-anexos"></ul>
+              <div class="aulas-chat-linha">
+                <label class="aulas-chat-clip" title="Anexar print">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.6 19.9a5.2 5.2 0 0 1-7.4-7.4l8.5-8.5a3.5 3.5 0 0 1 5 5l-8.5 8.5a1.8 1.8 0 0 1-2.5-2.5l7.8-7.8"/></svg>
+                  <span class="adm-sr">Anexar print</span>
                   <input id="respostaArquivos" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
                 </label>
-                <ul id="respostaAnexos" class="aulas-anexos-lista"></ul>
-              </div>
-              <div class="aulas-form-acoes">
-                <button id="btResponder" class="adm-bt adm-bt-forte" type="submit">Responder</button>
+                <textarea id="respostaTexto" rows="1" placeholder="Escreva uma mensagem" aria-label="Mensagem"></textarea>
+                <button id="btResponder" class="aulas-chat-enviar" type="submit" aria-label="Enviar">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-4 16-4-6.5z"/></svg>
+                </button>
               </div>
             </form>
           </article>
@@ -257,6 +258,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/aulas.js?v=20261010m"></script>
+<script src="/aulas.js?v=20261010n"></script>
 </body>
 </html>

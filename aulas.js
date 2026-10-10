@@ -87,7 +87,7 @@
 
   async function ocupado(bt, tarefa, onde) {
     if (!bt || bt.disabled) return;
-    const antes = bt.textContent;
+    const antes = bt.innerHTML;
     bt.disabled = true;
     bt.setAttribute("aria-busy", "true");
     bt.textContent = "…";
@@ -99,7 +99,7 @@
     } finally {
       bt.disabled = false;
       bt.removeAttribute("aria-busy");
-      bt.textContent = antes;
+      bt.innerHTML = antes;
     }
   }
 
@@ -550,35 +550,45 @@
     }
   }
 
+  function horaCurta(iso) {
+    const t = ms(iso);
+    if (!t) return "";
+    return new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  // "Hoje", "Ontem" ou a data, para separar os dias na conversa.
+  function rotuloDia(iso) {
+    const d = new Date(ms(iso));
+    const hoje = new Date();
+    const ontem = new Date(Date.now() - DIA);
+    const igual = (a, b) => a.toDateString() === b.toDateString();
+    if (igual(d, hoje)) return "Hoje";
+    if (igual(d, ontem)) return "Ontem";
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+  }
+
   function bolhaMensagem(m) {
     const eu = m.autor === "cliente";
-    const linha = el("div", `adm-msg adm-msg-${eu ? "eu" : "cliente"}`);
-    linha.append(el("p", "adm-msg-texto", m.texto));
+    const b = el("div", `aulas-bolha ${eu ? "is-eu" : "is-equipe"}`);
+    if (!eu) b.append(el("span", "aulas-bolha-autor", "Equipe ATIVAVID"));
     if (m.anexos && m.anexos.length) {
-      const grade = el("div", "aulas-anexos-msg");
+      const fotos = el("div", "aulas-bolha-fotos");
       for (const a of m.anexos) {
-        const link = el("a", "aulas-anexo-foto");
+        const link = el("a", "aulas-bolha-foto");
         link.target = "_blank";
         link.rel = "noopener";
         const img = document.createElement("img");
         img.alt = a.nome || "Print";
         img.loading = "lazy";
         link.append(img);
-        grade.append(link);
+        fotos.append(link);
         carregarImagem(a.path, img, link);
       }
-      linha.append(grade);
+      b.append(fotos);
     }
-    linha.append(el("span", "adm-msg-hora", `${eu ? "Você" : "Equipe ATIVAVID"} · ${hora(m.criadoEm)}`));
-    return linha;
-  }
-
-  // Imagens do bucket privado: link assinado, válido por 1 hora.
-  async function carregarImagem(path, img, link) {
-    const { data, error } = await sb.storage.from("chamados").createSignedUrl(path, 3600);
-    if (error || !data) { img.alt = "Imagem indisponível"; return; }
-    img.src = data.signedUrl;
-    link.href = data.signedUrl;
+    if (m.texto) b.append(el("p", "aulas-bolha-texto", m.texto));
+    b.append(el("span", "aulas-bolha-hora", horaCurta(m.criadoEm)));
+    return b;
   }
 
   function abrirChamadoDetalhe(id) {
@@ -587,19 +597,47 @@
     const s = situacaoChamado(c);
     $("tituloSecao").textContent = `Chamado #${c.id}`;
     $("subSecao").textContent = c.assunto;
-    $("ticketNumero").textContent = `#${c.id}`;
     $("ticketAssunto").textContent = c.assunto;
+    $("ticketMeta").textContent = `#${c.id} · aberto em ${dia(c.criadoEm)}`;
     const chip = $("ticketStatus");
     chip.textContent = s.rot;
     chip.className = `adm-chip adm-chip-${s.tom}`;
-    $("ticketData").textContent = `Aberto em ${dia(c.criadoEm)}`;
     const conversa = $("ticketConversa");
     conversa.replaceChildren();
-    for (const m of c.mensagens) conversa.append(bolhaMensagem(m));
+    let diaAnterior = "";
+    for (const m of c.mensagens) {
+      const rotulo = rotuloDia(m.criadoEm);
+      if (rotulo !== diaAnterior) {
+        conversa.append(el("div", "aulas-dia", rotulo));
+        diaAnterior = rotulo;
+      }
+      conversa.append(bolhaMensagem(m));
+    }
     $("formResposta").dataset.chamado = String(c.id);
     anexos.resposta = [];
     desenharAnexos("resposta");
+    conversa.scrollTop = conversa.scrollHeight;
     return true;
+  }
+
+  // Enter envia; Shift+Enter quebra a linha. O campo cresce com o texto.
+  $("respostaTexto").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      $("formResposta").requestSubmit();
+    }
+  });
+  $("respostaTexto").addEventListener("input", (e) => {
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 140)}px`;
+  });
+
+  // Imagens do bucket privado: link assinado, válido por 1 hora.
+  async function carregarImagem(path, img, link) {
+    const { data, error } = await sb.storage.from("chamados").createSignedUrl(path, 3600);
+    if (error || !data) { img.alt = "Imagem indisponível"; return; }
+    img.src = data.signedUrl;
+    link.href = data.signedUrl;
   }
 
   function adicionarAnexos(tipo, arquivos) {
