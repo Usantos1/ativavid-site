@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Painel admin — ATIVAVID</title>
-  <meta name="description" content="Painel admin do ATIVAVID: assinaturas e computadores dos clientes.">
+  <meta name="description" content="Painel admin do ATIVAVID: clientes, computadores, uso e aulas.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0b0c10">
   <meta name="color-scheme" content="dark">
@@ -13,15 +13,15 @@
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css?v=20261006b">
-  <link rel="stylesheet" href="/admin.css?v=20261010d">
+  <link rel="stylesheet" href="/admin.css?v=20261010e">
 </head>
 <body class="adm">
 
-<!-- Entrar. É a única coisa visível enquanto o servidor não confirmar quem é.
-     Mesma conta do aplicativo: o Windows, o Mac e o iPhone entram por aqui. -->
+<!-- ENTRAR. Mesma conta do aplicativo: Windows, Mac e iPhone entram por aqui. -->
 <main id="telaEntrar" class="adm-entrar">
 
   <form id="formEntrar" class="adm-cartao" autocomplete="on">
+    <div class="adm-logo" aria-hidden="true"></div>
     <h1 class="adm-marca">ATIVAVID</h1>
     <p class="adm-sub">Painel admin</p>
     <label class="adm-campo">
@@ -34,15 +34,15 @@
       <input id="senha" type="password" name="password" autocomplete="current-password" required
              placeholder="Sua senha">
     </label>
-    <button id="btEntrar" class="adm-bt adm-bt-forte" type="submit">Entrar</button>
+    <button id="btEntrar" class="adm-bt adm-bt-forte adm-bt-cheio" type="submit">Entrar</button>
     <button id="btEsqueci" class="adm-link" type="button">Esqueci minha senha</button>
     <p id="erroEntrar" class="adm-aviso" role="alert" hidden></p>
     <p class="adm-rodape">A mesma conta que você usa no ATIVAVID do computador e do iPhone.</p>
   </form>
 
-  <!-- Trocar a senha: o MESMO caminho do app (código no e-mail, senha nova
-       aqui) — /auth/v1/recover e depois verify com type=recovery. -->
+  <!-- TROCAR A SENHA: o mesmo caminho do aplicativo (código no e-mail → senha nova). -->
   <form id="formTrocar" class="adm-cartao" autocomplete="off" hidden>
+    <div class="adm-logo" aria-hidden="true"></div>
     <h1 class="adm-marca">ATIVAVID</h1>
     <p class="adm-sub">Trocar a senha</p>
 
@@ -52,7 +52,7 @@
         <input id="emailTrocar" type="email" autocomplete="username" inputmode="email"
                autocapitalize="off" spellcheck="false" placeholder="voce@ativavid.com">
       </label>
-      <button id="btPedirCodigo" class="adm-bt adm-bt-forte" type="button">Mandar o código</button>
+      <button id="btPedirCodigo" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Mandar o código</button>
     </div>
 
     <div id="passoCodigo" hidden>
@@ -63,10 +63,9 @@
       </label>
       <label class="adm-campo">
         <span>Senha nova</span>
-        <input id="senhaNova" type="password" autocomplete="new-password"
-               placeholder="mínimo 6 caracteres">
+        <input id="senhaNova" type="password" autocomplete="new-password" placeholder="mínimo 6 caracteres">
       </label>
-      <button id="btTrocar" class="adm-bt adm-bt-forte" type="button">Trocar a senha e entrar</button>
+      <button id="btTrocar" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Trocar a senha e entrar</button>
       <button id="btReenviar" class="adm-link" type="button">Mandar o código de novo</button>
     </div>
 
@@ -76,61 +75,139 @@
 
 </main>
 
-<!-- O painel nasce escondido. Quem o mostra é a resposta do servidor, nunca o
-     navegador: privilégio lido de cache local é palpite, não fato. -->
+<!-- PAINEL. Nasce escondido; quem o mostra é a resposta do servidor (whoami). -->
 <div id="painel" hidden>
+
   <header class="adm-topo">
-    <div>
-      <strong class="adm-marca-pq">ATIVAVID</strong>
-      <span id="quem" class="adm-quem"></span>
+    <div class="adm-topo-marca">
+      <span class="adm-logo-mini" aria-hidden="true"></span>
+      <div>
+        <strong class="adm-marca-pq">ATIVAVID</strong>
+        <span class="adm-tag">Painel admin</span>
+      </div>
     </div>
-    <button id="btSair" class="adm-bt adm-bt-fraco" type="button">Sair</button>
+    <div class="adm-topo-dir">
+      <span id="quem" class="adm-quem"></span>
+      <button id="btSair" class="adm-bt adm-bt-fraco adm-bt-sm" type="button">Sair</button>
+    </div>
   </header>
 
-  <nav class="adm-abas" role="tablist">
-    <button class="adm-aba is-on" type="button" role="tab" data-aba="assinaturas" aria-selected="true">Assinaturas</button>
-    <button class="adm-aba" type="button" role="tab" data-aba="computadores" aria-selected="false">Computadores</button>
+  <nav class="adm-abas" role="tablist" aria-label="Seções">
+    <button class="adm-aba is-on" type="button" role="tab" data-aba="clientes" aria-selected="true">Clientes</button>
+    <button class="adm-aba" type="button" role="tab" data-aba="aulas" aria-selected="false">Aulas</button>
   </nav>
-
-  <div class="adm-busca">
-    <input id="busca" type="search" placeholder="Filtrar por e-mail…" autocapitalize="off" spellcheck="false">
-    <button id="btRecarregar" class="adm-bt adm-bt-fraco" type="button" title="Recarregar">Recarregar</button>
-  </div>
 
   <p id="recado" class="adm-recado" role="status" hidden></p>
 
-  <!-- ASSINATURAS: a unidade que se cobra -->
-  <section id="abaAssinaturas" class="adm-aba-conteudo">
+  <!-- ============================ CLIENTES ============================ -->
+  <section id="abaClientes" class="adm-secao" role="tabpanel">
+
+    <div class="adm-kpis" id="kpis"></div>
+
+    <div class="adm-barra">
+      <label class="adm-busca">
+        <span class="adm-sr">Buscar</span>
+        <input id="busca" type="search" placeholder="Buscar e-mail, computador ou sistema…"
+               autocapitalize="off" spellcheck="false">
+      </label>
+      <label class="adm-ordem">
+        <span class="adm-sr">Ordenar</span>
+        <select id="ordem">
+          <option value="vencimento">Vence primeiro</option>
+          <option value="acesso">Acessou por último</option>
+          <option value="videos">Mais vídeos</option>
+          <option value="nome">Nome</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="adm-chips" id="filtros" role="group" aria-label="Filtrar clientes"></div>
+
     <details class="adm-novo">
-      <summary>Criar cliente e liberar</summary>
+      <summary>Novo cliente</summary>
       <div class="adm-novo-corpo">
         <label class="adm-campo">
           <span>E-mail do cliente</span>
-          <input id="novoEmail" type="email" inputmode="email" autocapitalize="off"
-                 spellcheck="false" placeholder="cliente@email.com">
+          <input id="novoEmail" type="email" inputmode="email" autocapitalize="off" spellcheck="false"
+                 placeholder="cliente@email.com">
         </label>
         <label class="adm-campo">
           <span>Senha provisória</span>
           <input id="novaSenha" type="text" autocomplete="off" placeholder="mínimo 6 caracteres">
           <small>O cliente entra com ela e troca depois em “Esqueci minha senha”.</small>
         </label>
-        <label class="adm-campo">
-          <span>Dias de acesso</span>
-          <input id="novoDias" type="number" value="365" min="1" max="3650" inputmode="numeric">
-        </label>
-        <button id="btCriar" class="adm-bt adm-bt-forte" type="button">Criar e liberar</button>
+        <div class="adm-campo">
+          <span>Acesso por</span>
+          <div class="adm-seg" id="novoPrazo" role="radiogroup" aria-label="Prazo do acesso">
+            <button type="button" role="radio" aria-checked="false" data-dias="30">30 dias</button>
+            <button type="button" role="radio" aria-checked="false" data-dias="90">90 dias</button>
+            <button type="button" role="radio" aria-checked="true" data-dias="365" class="is-on">1 ano</button>
+          </div>
+        </div>
+        <button id="btCriar" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Criar e liberar</button>
       </div>
     </details>
-    <div id="listaAssinaturas" class="adm-lista" aria-live="polite"></div>
+
+    <div id="listaClientes" class="adm-clientes" aria-live="polite"></div>
+
+    <div class="adm-cabeca-secao">
+      <h2>Computadores sem conta</h2>
+      <p>Aparelhos que abriram o ATIVAVID sem estar ligados a um cliente. O e-mail mostrado é o último que entrou neles.</p>
+    </div>
+    <div id="listaSemConta" class="adm-maquinas" aria-live="polite"></div>
   </section>
 
-  <!-- COMPUTADORES: a unidade que se bloqueia -->
-  <section id="abaComputadores" class="adm-aba-conteudo" hidden>
-    <div id="listaComputadores" class="adm-lista" aria-live="polite"></div>
+  <!-- ============================== AULAS ============================== -->
+  <section id="abaAulas" class="adm-secao" role="tabpanel" hidden>
+    <div class="adm-cabeca-secao adm-cabeca-linha">
+      <div>
+        <h2>Aulas</h2>
+        <p>O que aparece para o cliente. Cada aula é um vídeo do YouTube.</p>
+      </div>
+      <button id="btNovaAula" class="adm-bt adm-bt-forte adm-bt-sm" type="button">Nova aula</button>
+    </div>
+
+    <form id="formAula" class="adm-form-aula" hidden>
+      <h3 id="tituloFormAula">Nova aula</h3>
+      <label class="adm-campo">
+        <span>Título</span>
+        <input id="aulaTitulo" type="text" maxlength="120" required placeholder="Como importar do YouTube">
+      </label>
+      <label class="adm-campo">
+        <span>Link do YouTube</span>
+        <input id="aulaLink" type="text" autocapitalize="off" spellcheck="false" placeholder="https://youtu.be/…">
+        <small>Cole o link inteiro; o código do vídeo sai sozinho.</small>
+      </label>
+      <div class="adm-grade-2">
+        <label class="adm-campo">
+          <span>Seção</span>
+          <input id="aulaSecao" type="text" list="secoesExistentes" maxlength="60" placeholder="Começando">
+          <datalist id="secoesExistentes"></datalist>
+        </label>
+        <label class="adm-campo">
+          <span>Ordem</span>
+          <input id="aulaOrdem" type="number" min="0" max="9999" value="100" inputmode="numeric">
+        </label>
+      </div>
+      <label class="adm-campo">
+        <span>Descrição</span>
+        <textarea id="aulaDescricao" rows="3" maxlength="600" placeholder="O que a pessoa aprende nesta aula."></textarea>
+      </label>
+      <label class="adm-check">
+        <input id="aulaAtivo" type="checkbox" checked>
+        <span>Aparecer para o cliente</span>
+      </label>
+      <div class="adm-form-acoes">
+        <button id="btSalvarAula" class="adm-bt adm-bt-forte" type="button">Salvar aula</button>
+        <button id="btCancelarAula" class="adm-bt adm-bt-fraco" type="button">Cancelar</button>
+      </div>
+    </form>
+
+    <div id="listaAulas" class="adm-aulas" aria-live="polite"></div>
   </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261010d"></script>
+<script src="/admin.js?v=20261010e"></script>
 </body>
 </html>
