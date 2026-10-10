@@ -1650,3 +1650,16 @@
   font-size: 17px;
   font-weight: 800;
 }
+
+/* opções das listas nativas (status, módulo, destino): seguem o tema do painel.
+ * Sem isto, o navegador põe fundo branco e o texto claro do tema escuro some. */
+.adm select option,
+.adm select optgroup {
+  background: var(--painel-opaco);
+  color: var(--tinta);
+}
+.adm select { color-scheme: dark; }
+.adm[data-tema="claro"] select { color-scheme: light; }
+@media (prefers-color-scheme: light) {
+  .adm:not([data-tema="escuro"]) select { color-scheme: light; }
+}
