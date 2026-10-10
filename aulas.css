@@ -376,3 +376,6 @@
   .aulas-painel-form { padding: 20px; }
   .aulas-anexo-foto { width: 100%; }
 }
+
+/* botões que são links não sublinham o texto */
+a.adm-bt { text-decoration: none; }
