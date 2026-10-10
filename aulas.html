@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Área do aluno — ATIVAVID</title>
-  <meta name="description" content="Aulas do ATIVAVID, sua assinatura e o seu uso do programa.">
+  <meta name="description" content="Aulas do ATIVAVID, sua assinatura, seu uso do programa e o suporte.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0b0f1a">
   <meta name="color-scheme" content="dark light">
@@ -13,7 +13,7 @@
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="stylesheet" href="/admin.css?v=20261010q">
-  <link rel="stylesheet" href="/aulas.css?v=20261010e">
+  <link rel="stylesheet" href="/aulas.css?v=20261010f">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -92,6 +92,10 @@
       </a>
 
       <p class="adm-nav-grupo">Conta</p>
+      <a class="adm-nav-item" href="#suporte" data-secao="suporte" data-rotulo="Suporte">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-4 3.5V16H4z"/></svg>
+        <span>Suporte</span>
+      </a>
       <a class="adm-nav-item" href="#conta" data-secao="conta" data-rotulo="Conta">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.5 3.5-5.5 7-5.5s6.2 2 7 5.5"/></svg>
         <span>Conta</span>
@@ -138,27 +142,63 @@
 
       <p id="recado" class="adm-recado" role="status" hidden></p>
 
+      <!-- INÍCIO -->
       <section id="secInicio" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+        <a class="adm-vidro aulas-proxima" id="proximaAula" href="#aulas">
+          <span class="adm-rotulo" id="proximaRotulo">Próxima aula</span>
+          <strong id="proximaTitulo">Veja as aulas</strong>
+          <span class="aulas-proxima-acao" id="proximaAcao">Assistir →</span>
+        </a>
         <div class="adm-kpis" id="kpis"></div>
-        <div class="adm-duas">
-          <article class="adm-vidro adm-painel">
-            <h2 class="adm-painel-titulo">Sua assinatura</h2>
-            <div id="assinatura"></div>
-          </article>
-          <article class="adm-vidro adm-painel">
-            <h2 class="adm-painel-titulo">Presets e configuração da empresa</h2>
-            <p class="adm-ajuda">Em breve você vai poder criar presets e configurar a sua empresa direto pelo navegador. Por enquanto, isso se faz no programa.</p>
-          </article>
-        </div>
+        <article class="adm-vidro adm-painel">
+          <h2 class="adm-painel-titulo">Sua assinatura</h2>
+          <div id="assinatura"></div>
+        </article>
       </section>
 
+      <!-- AULAS: a grade de aulas -->
       <section id="secAulas" class="adm-secao" aria-labelledby="tituloSecao" hidden>
-        <div class="adm-barra">
-          <p class="adm-ajuda" id="resumoAulas"></p>
-        </div>
-        <div id="listaAulas"></div>
+        <p class="adm-ajuda" id="resumoAulas"></p>
+        <div id="listaAulas" class="aulas-grade"></div>
       </section>
 
+      <!-- AULA: uma aula, em página própria -->
+      <section id="secAula" class="adm-secao aulas-pagina" aria-labelledby="tituloSecao" hidden>
+        <a class="adm-link aulas-voltar" href="#aulas">← Todas as aulas</a>
+        <div class="aulas-player">
+          <iframe id="aulaVideo" title="Aula" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="aulas-aula-acoes">
+          <button id="btConcluir" class="adm-bt adm-bt-forte" type="button"></button>
+          <a class="adm-bt adm-bt-fraco" id="btAnterior" href="#aulas">← Anterior</a>
+          <a class="adm-bt adm-bt-fraco" id="btProxima" href="#aulas">Próxima →</a>
+        </div>
+        <article class="adm-vidro adm-painel">
+          <h2 class="adm-painel-titulo">Sobre esta aula</h2>
+          <div id="aulaDescricao" class="aulas-descricao"></div>
+        </article>
+      </section>
+
+      <!-- SUPORTE -->
+      <section id="secSuporte" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+        <article class="adm-vidro adm-painel">
+          <h2 class="adm-painel-titulo">Abrir um chamado</h2>
+          <form id="formChamado" class="aulas-form">
+            <label class="adm-campo">
+              <span>Assunto</span>
+              <input id="chamadoAssunto" type="text" maxlength="120" placeholder="Ex.: não consigo ativar no segundo computador">
+            </label>
+            <label class="adm-campo">
+              <span>Mensagem</span>
+              <textarea id="chamadoTexto" rows="5" placeholder="Conte o que aconteceu e o que você já tentou."></textarea>
+            </label>
+            <div><button id="btEnviarChamado" class="adm-bt adm-bt-forte" type="submit">Enviar chamado</button></div>
+          </form>
+        </article>
+        <div id="listaChamados" class="aulas-chamados"></div>
+      </section>
+
+      <!-- CONTA -->
       <section id="secConta" class="adm-secao" aria-labelledby="tituloSecao" hidden>
         <article class="adm-vidro adm-painel">
           <h2 class="adm-painel-titulo">Dados da conta</h2>
@@ -170,21 +210,7 @@
   </div>
 </div>
 
-<!-- MODAL. Mesma janela do painel admin. -->
-<div id="modal" class="adm-modal" hidden>
-  <div class="adm-modal-fundo" data-fechar></div>
-  <div class="adm-modal-caixa adm-vidro" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
-    <header class="adm-modal-topo">
-      <h2 id="modalTitulo"></h2>
-      <button class="adm-icone-bt" type="button" data-fechar aria-label="Fechar">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-      </button>
-    </header>
-    <div id="modalCorpo" class="adm-modal-corpo"></div>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/aulas.js?v=20261010e"></script>
+<script src="/aulas.js?v=20261010f"></script>
 </body>
 </html>

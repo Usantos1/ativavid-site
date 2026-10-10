@@ -1,9 +1,12 @@
 /* Área do aluno — ATIVAVID (versão web).
  *
  * Quem decide o que o aluno vê é o Postgres, não esta página:
- *   ativavid_area_aluno()        aulas, assinatura e uso de quem entrou
- *   ativavid_aula_marcar(...)    marca uma aula como assistida
- * As duas usam o login (auth.jwt()). Nada aqui chega a outra conta.
+ *   ativavid_area_aluno()             aulas, assinatura e uso de quem entrou
+ *   ativavid_aula_marcar(...)         marca uma aula como assistida
+ *   ativavid_aluno_chamados()         os chamados da própria conta
+ *   ativavid_aluno_abrir_chamado(...) abre um chamado
+ *   ativavid_aluno_responder(...)     responde um chamado da própria conta
+ * Todas leem a conta pelo login (auth.jwt()). Nada aqui chega a outra conta.
  *
  * Mesma base visual e de comportamento do painel admin (admin.js).
  */
@@ -21,13 +24,18 @@
   // quem dá isso é o próprio admin.
   const embutido = new URLSearchParams(location.search).has("painel");
 
-  const SECOES = {
+  const TITULOS = {
     inicio: { titulo: "Início", sub: "Sua assinatura e o seu uso do ATIVAVID." },
     aulas: { titulo: "Aulas", sub: "Assista às aulas e marque as que já viu." },
+    suporte: { titulo: "Suporte", sub: "Abra um chamado e acompanhe a resposta da equipe." },
     conta: { titulo: "Conta", sub: "Seu acesso ao ATIVAVID." },
   };
+  const SECAO_DO_ID = {
+    inicio: "secInicio", aulas: "secAulas", aula: "secAula", suporte: "secSuporte", conta: "secConta",
+  };
 
-  const estado = { dados: null, emailTroca: "", aulaAberta: null };
+  const estado = { dados: null, emailTroca: "", chamados: [], chamadoAberto: null };
+  let aulaAtual = null;
 
   const el = (tag, cls, txt) => {
     const n = document.createElement(tag);
@@ -44,6 +52,11 @@
     const t = ms(iso);
     if (!t) return "—";
     return new Date(t).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  };
+  const hora = (iso) => {
+    const t = ms(iso);
+    if (!t) return "";
+    return new Date(t).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   };
   const fmtNum = (n) => Number(n || 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 });
   const iniciais = (texto) => {
@@ -90,23 +103,6 @@
     }
   }
 
-  /* ---------- modal ---------- */
-
-  function abrirModal(titulo, corpo) {
-    $("modalTitulo").textContent = titulo;
-    const alvo = $("modalCorpo");
-    alvo.innerHTML = "";
-    alvo.appendChild(corpo);
-    $("modal").hidden = false;
-    document.body.classList.add("adm-travado");
-  }
-
-  function fecharModal() {
-    $("modal").hidden = true;
-    $("modalCorpo").innerHTML = ""; // tira o iframe do vídeo, que para o som
-    document.body.classList.remove("adm-travado");
-  }
-
   /* ---------- preferências (as mesmas do admin) ---------- */
 
   function aplicarTema(tema) {
@@ -149,17 +145,6 @@
   }
 
   /* ---------- entrar ---------- */
-
-  function situacaoAssinatura(a) {
-    if (!a) return { rot: "Sem assinatura", tom: "neutro", sub: "Esta conta ainda não tem assinatura ativa." };
-    const ate = dia(a.validaAte);
-    if (a.status !== "active" || a.diasRestantes < 0) return { rot: "Vencida", tom: "mal", sub: `Venceu em ${ate}.` };
-    if (a.diasRestantes <= 30) {
-      const d = a.diasRestantes;
-      return { rot: `Vence em ${d} dia${d === 1 ? "" : "s"}`, tom: "atencao", sub: `Válida até ${ate}.` };
-    }
-    return { rot: "Ativa", tom: "ok", sub: `Válida até ${ate} · ${a.diasRestantes} dias restantes.` };
-  }
 
   async function carregar() {
     const { data, error } = await sb.rpc("ativavid_area_aluno");
@@ -275,6 +260,35 @@
     $("quem").textContent = email;
   }
 
+  /* ---------- assinatura e progresso ---------- */
+
+  function situacaoAssinatura(a) {
+    if (!a) return { rot: "Sem assinatura", tom: "neutro", sub: "Esta conta ainda não tem assinatura ativa." };
+    const ate = dia(a.validaAte);
+    if (a.status !== "active" || a.diasRestantes < 0) return { rot: "Vencida", tom: "mal", sub: `Venceu em ${ate}.` };
+    if (a.diasRestantes <= 30) {
+      const d = a.diasRestantes;
+      return { rot: `Vence em ${d} dia${d === 1 ? "" : "s"}`, tom: "atencao", sub: `Válida até ${ate}.` };
+    }
+    return { rot: "Ativa", tom: "ok", sub: `Válida até ${ate} · ${a.diasRestantes} dias restantes.` };
+  }
+
+  function aulasDaLista() {
+    return (estado.dados && estado.dados.aulas) || [];
+  }
+
+  function progressoDe(aulaId) {
+    return (estado.dados.progresso || []).some((p) => p.aulaId === aulaId && p.concluida);
+  }
+
+  function atualizarProgresso(aulaId, concluida) {
+    const lista = estado.dados.progresso || [];
+    const reg = { aulaId, concluida, assistidaEm: concluida ? new Date().toISOString() : null };
+    const i = lista.findIndex((p) => p.aulaId === aulaId);
+    if (i >= 0) lista[i] = reg; else lista.push(reg);
+    estado.dados.progresso = lista;
+  }
+
   /* ---------- início ---------- */
 
   function desenharInicio() {
@@ -282,8 +296,23 @@
     const a = d.assinatura;
     const s = situacaoAssinatura(a);
     const v = d.videos || {};
-    const aulas = d.aulas || [];
-    const feitas = (d.progresso || []).filter((p) => p.concluida).length;
+    const aulas = aulasDaLista();
+    const feitas = aulas.filter((x) => progressoDe(x.id)).length;
+
+    // atalho para a próxima aula, ou para a lista de aulas
+    const pendente = aulas.find((x) => !progressoDe(x.id));
+    const atalho = $("proximaAula");
+    if (pendente) {
+      atalho.href = `#aulas/${pendente.id}`;
+      $("proximaRotulo").textContent = "Continue de onde parou";
+      $("proximaTitulo").textContent = pendente.titulo;
+      $("proximaAcao").textContent = "Assistir →";
+    } else {
+      atalho.href = "#aulas";
+      $("proximaRotulo").textContent = aulas.length ? "Você já assistiu todas as aulas" : "Aulas";
+      $("proximaTitulo").textContent = aulas.length ? "Rever as aulas" : "Ainda não há aulas publicadas";
+      $("proximaAcao").textContent = "Ver aulas →";
+    }
 
     const kp = $("kpis");
     kp.innerHTML = "";
@@ -307,14 +336,10 @@
     if (!a) box.append(el("p", "adm-ajuda aulas-linha", "Para assinar, use o link que você recebeu ou fale com o suporte."));
   }
 
-  /* ---------- aulas ---------- */
-
-  function progressoDe(aulaId) {
-    return (estado.dados.progresso || []).some((p) => p.aulaId === aulaId && p.concluida);
-  }
+  /* ---------- grade de aulas ---------- */
 
   function desenharAulas() {
-    const aulas = estado.dados.aulas || [];
+    const aulas = aulasDaLista();
     const feitas = aulas.filter((a) => progressoDe(a.id)).length;
     $("resumoAulas").textContent = aulas.length
       ? `${feitas} de ${aulas.length} assistidas`
@@ -324,82 +349,210 @@
     lista.innerHTML = "";
     const grupos = new Map();
     for (const a of aulas) {
-      if (!grupos.has(a.secao)) grupos.set(a.secao, []);
-      grupos.get(a.secao).push(a);
+      const k = a.secao || "Geral";
+      if (!grupos.has(k)) grupos.set(k, []);
+      grupos.get(k).push(a);
     }
     for (const [secao, itens] of grupos) {
       lista.append(el("h3", "adm-aluno-secao", secao));
-      const grade = el("div", "adm-aluno-grade");
+      const grade = el("div", "aulas-grupo-grade");
       for (const a of itens) grade.append(cartaoAula(a));
       lista.append(grade);
     }
   }
 
+  // O cartão inteiro é um link: clicar em qualquer lugar (inclusive a capa)
+  // abre a aula em página própria, já tocando.
   function cartaoAula(a) {
     const feita = progressoDe(a.id);
-    const card = el("article", "adm-vidro adm-aluno-card");
-    const capa = el("div", "adm-aluno-capa");
+    const link = el("a", "adm-vidro aulas-card");
+    link.href = `#aulas/${a.id}`;
+    const capa = el("div", "aulas-capa");
     const img = document.createElement("img");
     img.src = `https://i.ytimg.com/vi/${encodeURIComponent(a.youtubeId)}/mqdefault.jpg`;
     img.alt = "";
     img.loading = "lazy";
-    capa.appendChild(img);
-    const corpo = el("div", "adm-aluno-corpo");
-    const topo = el("div", "aulas-topo");
-    topo.append(el("h4", "", a.titulo || "Aula"), el("span", `adm-chip adm-chip-${feita ? "ok" : "espera"}`, feita ? "Assistida" : "Não assistida"));
-    corpo.append(topo);
-    if (a.descricao) corpo.append(el("p", "", a.descricao));
-    const bt = el("button", "adm-bt adm-bt-forte adm-bt-sm adm-aluno-assistir", feita ? "Rever" : "Assistir");
-    bt.type = "button";
-    bt.addEventListener("click", () => abrirAula(a));
-    corpo.append(bt);
-    card.append(capa, corpo);
-    return card;
+    capa.append(img, el("span", "aulas-play", "▶"));
+    const corpo = el("div", "aulas-card-corpo");
+    corpo.append(
+      el("h4", "", a.titulo || "Aula"),
+      el("span", `adm-chip adm-chip-${feita ? "ok" : "espera"}`, feita ? "Assistida" : "Não assistida"),
+    );
+    link.append(capa, corpo);
+    return link;
   }
 
-  function abrirAula(a) {
-    estado.aulaAberta = a;
-    const corpo = el("div", "aulas-janela");
-    const video = el("div", "aulas-video");
-    const frame = document.createElement("iframe");
-    frame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(a.youtubeId)}?rel=0`;
-    frame.title = a.titulo || "Aula";
-    frame.allow = "accelerometer; encrypted-media; picture-in-picture";
-    frame.allowFullscreen = true;
-    video.appendChild(frame);
-    const bt = el("button", "adm-bt adm-bt-forte adm-bt-cheio", "");
-    bt.type = "button";
-    bt.id = "btConcluir";
-    bt.addEventListener("click", () => marcarAula(bt, a));
-    corpo.append(video);
-    if (a.descricao) corpo.append(el("p", "adm-ajuda", a.descricao));
-    corpo.append(bt);
-    abrirModal(a.titulo || "Aula", corpo);
-    atualizarBotaoAula(bt, a);
+  /* ---------- a aula, em página própria ---------- */
+
+  // Texto que o admin escreveu vira HTML seguro: parágrafos por linha em
+  // branco, quebras de linha dentro do parágrafo e listas com "- ".
+  // Nunca usa innerHTML com o texto cru.
+  function textoHtml(txt) {
+    const frag = document.createDocumentFragment();
+    const blocos = String(txt || "").replace(/\r/g, "").split(/\n\s*\n/);
+    for (const bloco of blocos) {
+      const linhas = bloco.split("\n").map((l) => l.trim()).filter(Boolean);
+      if (!linhas.length) continue;
+      if (linhas.every((l) => /^[-•*]\s+/.test(l))) {
+        const ul = el("ul", "aulas-lista");
+        for (const l of linhas) ul.append(el("li", "", l.replace(/^[-•*]\s+/, "")));
+        frag.append(ul);
+      } else {
+        const p = el("p", "");
+        linhas.forEach((l, i) => {
+          if (i) p.append(document.createElement("br"));
+          p.append(document.createTextNode(l));
+        });
+        frag.append(p);
+      }
+    }
+    return frag;
   }
 
-  function atualizarBotaoAula(bt, a) {
-    const feita = progressoDe(a.id);
+  function setLink(id, href, rotulo) {
+    const a = $(id);
+    a.hidden = !href;
+    if (href) a.href = href;
+    if (rotulo) a.textContent = rotulo;
+  }
+
+  function abrirAulaPagina(a) {
+    const lista = aulasDaLista();
+    const i = lista.findIndex((x) => x.id === a.id);
+    if (!aulaAtual || aulaAtual.id !== a.id) {
+      const f = $("aulaVideo");
+      f.title = a.titulo || "Aula";
+      f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(a.youtubeId)}?rel=0&autoplay=1`;
+      const desc = $("aulaDescricao");
+      desc.replaceChildren();
+      if (a.descricao) desc.append(textoHtml(a.descricao));
+      else desc.append(el("p", "adm-ajuda", "Esta aula não tem descrição."));
+    }
+    aulaAtual = a;
+    atualizarBotaoAula();
+    const ant = i > 0 ? lista[i - 1] : null;
+    const prox = i >= 0 && i < lista.length - 1 ? lista[i + 1] : null;
+    setLink("btAnterior", ant ? `#aulas/${ant.id}` : null);
+    setLink("btProxima", prox ? `#aulas/${prox.id}` : null);
+  }
+
+  function pararAula() {
+    aulaAtual = null;
+    $("aulaVideo").src = ""; // tira o vídeo da página: para o som
+  }
+
+  function atualizarBotaoAula() {
+    const bt = $("btConcluir");
+    const feita = aulaAtual && progressoDe(aulaAtual.id);
     bt.textContent = feita ? "Desmarcar como assistida" : "Marcar como assistida";
     bt.dataset.feita = feita ? "1" : "0";
   }
 
-  async function marcarAula(bt, a) {
+  $("btConcluir").addEventListener("click", async () => {
+    if (!aulaAtual) return;
+    const bt = $("btConcluir");
     const vai = bt.dataset.feita !== "1";
     bt.disabled = true;
-    const { data, error } = await sb.rpc("ativavid_aula_marcar", { p_aula_id: a.id, p_concluida: vai });
+    const { data, error } = await sb.rpc("ativavid_aula_marcar", { p_aula_id: aulaAtual.id, p_concluida: vai });
     bt.disabled = false;
     if (error || !data || !data.ok) return recado("Não consegui salvar. Tente de novo.", "erro");
-    const lista = estado.dados.progresso || [];
-    const reg = { aulaId: a.id, concluida: vai, assistidaEm: vai ? new Date().toISOString() : null };
-    const i = lista.findIndex((p) => p.aulaId === a.id);
-    if (i >= 0) lista[i] = reg; else lista.push(reg);
-    estado.dados.progresso = lista;
-    atualizarBotaoAula(bt, a);
+    atualizarProgresso(aulaAtual.id, vai);
+    atualizarBotaoAula();
     desenharAulas();
     desenharInicio();
     recado(vai ? "Aula marcada como assistida." : "Marcação removida.", "ok");
+  });
+
+  /* ---------- suporte ---------- */
+
+  async function carregarChamados() {
+    const { data, error } = await sb.rpc("ativavid_aluno_chamados");
+    if (error || !data || !data.ok) return recado("Não consegui carregar os seus chamados.", "erro");
+    estado.chamados = data.chamados || [];
+    desenharChamados();
   }
+
+  function situacaoChamado(c) {
+    if (c.status === "resolvido") return { rot: "Resolvido", tom: "ok" };
+    const ult = c.mensagens[c.mensagens.length - 1];
+    if (ult && ult.autor === "admin") return { rot: "Respondido", tom: "atencao" };
+    return { rot: "Aguardando a equipe", tom: "espera" };
+  }
+
+  function desenharChamados() {
+    const alvo = $("listaChamados");
+    alvo.innerHTML = "";
+    if (!estado.chamados.length) {
+      alvo.append(el("p", "adm-ajuda", "Você ainda não abriu nenhum chamado."));
+      return;
+    }
+    for (const c of estado.chamados) alvo.append(cartaoChamado(c));
+  }
+
+  function cartaoChamado(c) {
+    const s = situacaoChamado(c);
+    const aberto = estado.chamadoAberto === c.id;
+    const card = el("article", "adm-vidro adm-painel aulas-chamado");
+    const cab = el("button", "aulas-chamado-cab");
+    cab.type = "button";
+    cab.setAttribute("aria-expanded", aberto ? "true" : "false");
+    cab.append(
+      el("strong", "", c.assunto),
+      el("span", `adm-chip adm-chip-${s.tom}`, s.rot),
+      el("span", "adm-msg-hora", `Aberto em ${dia(c.criadoEm)}`),
+    );
+    cab.addEventListener("click", () => {
+      estado.chamadoAberto = aberto ? null : c.id;
+      desenharChamados();
+    });
+    card.append(cab);
+    if (!aberto) return card;
+
+    const conversa = el("div", "aulas-conversa");
+    for (const m of c.mensagens) {
+      const eu = m.autor === "cliente";
+      const linha = el("div", `adm-msg adm-msg-${eu ? "eu" : "cliente"}`);
+      linha.append(
+        el("p", "adm-msg-texto", m.texto),
+        el("span", "adm-msg-hora", `${eu ? "Você" : "Equipe ATIVAVID"} · ${hora(m.criadoEm)}`),
+      );
+      conversa.append(linha);
+    }
+    const form = el("form", "aulas-form");
+    const area = document.createElement("textarea");
+    area.rows = 3;
+    area.placeholder = "Escreva a sua resposta";
+    const bt = el("button", "adm-bt adm-bt-forte adm-bt-sm", "Responder");
+    bt.type = "submit";
+    form.append(area, bt);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const texto = area.value.trim();
+      if (!texto) return recado("Escreva a sua resposta antes de enviar.", "atencao");
+      await ocupado(bt, async () => {
+        const { data, error } = await sb.rpc("ativavid_aluno_responder", { p_id: c.id, p_texto: texto });
+        if (error || !data || !data.ok) throw new Error((data && data.message) || "Não consegui enviar. Tente de novo.");
+        await carregarChamados();
+        recado("Resposta enviada.", "ok");
+      });
+    });
+    card.append(conversa, form);
+    return card;
+  }
+
+  $("formChamado").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const assunto = $("chamadoAssunto").value.trim();
+    const texto = $("chamadoTexto").value.trim();
+    await ocupado($("btEnviarChamado"), async () => {
+      const { data, error } = await sb.rpc("ativavid_aluno_abrir_chamado", { p_assunto: assunto, p_texto: texto });
+      if (error || !data || !data.ok) throw new Error((data && data.message) || "Não consegui abrir o chamado. Tente de novo.");
+      $("formChamado").reset();
+      estado.chamadoAberto = data.id;
+      await carregarChamados();
+      recado("Chamado enviado. A equipe responde por aqui.", "ok");
+    });
+  });
 
   /* ---------- conta ---------- */
 
@@ -420,22 +573,35 @@
     }
   }
 
-  /* ---------- navegação ---------- */
+  /* ---------- rotas por # ---------- */
 
   function rotear() {
-    const h = (location.hash || "#inicio").replace("#", "");
-    const secao = SECOES[h] ? h : "inicio";
-    for (const s of Object.keys(SECOES)) {
-      $(`sec${s[0].toUpperCase()}${s.slice(1)}`).hidden = s !== secao;
-    }
+    if (!estado.dados) return;
+    const [secao, id] = (location.hash || "#inicio").replace("#", "").split("/");
+    const aula = secao === "aulas" && id ? aulasDaLista().find((x) => x.id === id) : null;
+    const chave = aula ? "aula" : (TITULOS[secao] ? secao : "inicio");
+
+    if (chave !== "aula" && aulaAtual) pararAula();
+    for (const [k, sid] of Object.entries(SECAO_DO_ID)) $(sid).hidden = k !== chave;
+
+    const navSecao = aula ? "aulas" : chave;
     for (const a of $$(".adm-nav-item")) {
-      const on = a.dataset.secao === secao;
+      const on = a.dataset.secao === navSecao;
       a.classList.toggle("is-on", on);
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     }
-    $("tituloSecao").textContent = SECOES[secao].titulo;
-    $("subSecao").textContent = SECOES[secao].sub;
-    document.title = `${SECOES[secao].titulo} — Área do aluno ATIVAVID`;
+
+    if (aula) {
+      abrirAulaPagina(aula);
+      $("tituloSecao").textContent = aula.titulo || "Aula";
+      $("subSecao").textContent = aula.secao || "Aula";
+      document.title = `${aula.titulo || "Aula"} — Área do aluno ATIVAVID`;
+    } else {
+      $("tituloSecao").textContent = TITULOS[chave].titulo;
+      $("subSecao").textContent = TITULOS[chave].sub;
+      document.title = `${TITULOS[chave].titulo} — Área do aluno ATIVAVID`;
+    }
+    if (chave === "suporte") carregarChamados().catch((e) => recado(e.message, "erro"));
     window.scrollTo(0, 0);
   }
 
@@ -458,17 +624,14 @@
     $("btPerfil").setAttribute("aria-expanded", abrir ? "true" : "false");
   });
   document.addEventListener("click", (e) => {
-    if (e.target.closest && e.target.closest("[data-fechar]")) return fecharModal();
     if (!e.target.closest || !e.target.closest("#menuPerfil, #btPerfil")) fecharMenus();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    if (!$("modal").hidden) fecharModal();
-    else fecharMenus();
+    if (e.key === "Escape") fecharMenus();
   });
   window.addEventListener("hashchange", () => { if (!$("painel").hidden) rotear(); });
 
-  if (embutido) document.getElementById("painel").classList.add("alu-embutido");
+  if (embutido) $("painel").classList.add("alu-embutido");
   lerPreferencias();
   $("btTema").setAttribute("aria-label", temaEfetivo() === "claro" ? "Usar tema escuro" : "Usar tema claro");
 

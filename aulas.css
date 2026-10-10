@@ -1,66 +1,6 @@
 /* Área do aluno — só o que não existe no admin.css. O resto (layout, tema,
- * cartões, KPIs, modal) vem do admin.css, para as duas áreas serem a mesma. */
-
-.aulas-linha {
-  margin: 0;
-}
-
-.aulas-topo {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.aulas-topo h4 {
-  margin: 0;
-}
-
-.aulas-janela {
-  display: grid;
-  gap: 14px;
-}
-
-.aulas-video {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 18px;
-  overflow: hidden;
-  background: #000;
-}
-
-.aulas-video iframe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-.aulas-dados {
-  display: grid;
-  gap: 14px;
-}
-
-.aulas-linha-dado {
-  display: grid;
-  gap: 2px;
-}
-
-/* Dentro do painel admin (Academy): quem tem menu e topo é o admin. */
-.adm-app.alu-embutido {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.alu-embutido .adm-side,
-.alu-embutido .adm-topo {
-  display: none;
-}
-
-.alu-embutido .adm-principal {
-  padding-top: 8px;
-}
+ * cartões de vidro, KPIs, chips, mensagens) vem do admin.css, para as duas
+ * áreas serem a mesma. */
 
 .aulas-saudacao {
   margin: 0;
@@ -72,11 +12,133 @@
   white-space: nowrap;
 }
 
-/* cartões de aula em grade, não uma coluna só */
-#listaAulas .adm-aluno-grade {
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+.aulas-linha { margin: 0; }
+.aulas-dados { display: grid; gap: 14px; }
+.aulas-linha-dado { display: grid; gap: 2px; }
+.aulas-form { display: grid; gap: 12px; }
+.aulas-form textarea {
+  font: inherit;
+  font-size: 16px;
+  color: var(--tinta);
+  background: var(--campo);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  padding: 12px 14px;
+  width: 100%;
+  resize: vertical;
 }
 
-.alu-embutido .adm-cab {
-  display: none;
+.adm-rotulo {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--texto-3);
 }
+
+/* início: atalho para a próxima aula */
+.aulas-proxima {
+  display: grid;
+  gap: 6px;
+  padding: 22px 24px;
+  border-radius: 24px;
+  color: inherit;
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease;
+}
+.aulas-proxima:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--azul) 45%, transparent); }
+.aulas-proxima strong { font-family: var(--display); font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
+.aulas-proxima-acao { font-size: 14.5px; font-weight: 700; color: var(--azul); }
+
+/* grade de aulas */
+.aulas-grade { display: grid; gap: 18px; }
+.aulas-grupo-grade { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+.aulas-card {
+  display: grid;
+  overflow: hidden;
+  border-radius: 22px;
+  color: inherit;
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease;
+}
+.aulas-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--azul) 45%, transparent); }
+.aulas-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--azul) 60%, transparent); outline-offset: 3px; }
+
+.aulas-capa {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--campo);
+  overflow: hidden;
+}
+.aulas-capa img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.aulas-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  font-size: 18px;
+  padding-left: 4px;
+  box-sizing: border-box;
+  transition: background .18s ease, transform .18s ease;
+}
+.aulas-card:hover .aulas-play { background: var(--azul); transform: translate(-50%, -50%) scale(1.06); }
+
+.aulas-card-corpo { padding: 14px 16px 16px; display: grid; gap: 8px; justify-items: start; }
+.aulas-card-corpo h4 { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3; }
+
+/* página da aula */
+.aulas-pagina { gap: 14px; }
+.aulas-voltar { justify-self: start; text-decoration: none; }
+.aulas-player {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: var(--sombra);
+}
+.aulas-player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.aulas-aula-acoes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.aulas-aula-acoes a.adm-bt { text-decoration: none; }
+.aulas-aula-acoes a[hidden] { display: none !important; }
+
+.aulas-descricao { max-width: 72ch; font-size: 15.5px; line-height: 1.7; color: var(--tinta); }
+.aulas-descricao p { margin: 0 0 14px; }
+.aulas-descricao p:last-child { margin-bottom: 0; }
+.aulas-lista { margin: 0 0 14px; padding-left: 20px; display: grid; gap: 6px; }
+
+/* suporte */
+.aulas-chamados { display: grid; gap: 14px; }
+.aulas-chamado { display: grid; gap: 14px; }
+.aulas-chamado-cab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.aulas-chamado-cab strong { font-size: 16px; font-weight: 700; margin-right: auto; }
+.aulas-conversa { display: grid; gap: 12px; }
+
+/* dentro do painel admin (Academy): quem tem menu e topo é o admin. */
+.adm-app.alu-embutido { grid-template-columns: minmax(0, 1fr); }
+.alu-embutido .adm-side,
+.alu-embutido .adm-topo,
+.alu-embutido .adm-cab { display: none; }
+.alu-embutido .adm-principal { padding-top: 8px; }
