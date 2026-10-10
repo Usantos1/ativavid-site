@@ -1491,3 +1491,13 @@
   .adm-modal-caixa { width: 100%; max-height: 92dvh; border-radius: 26px 26px 0 0; }
   .adm-menu-sino { width: calc(100vw - 24px); }
 }
+
+/* janelas e menus flutuantes: mais opacos, para o fundo não atravessar o texto */
+.adm { --painel-opaco: rgba(24, 31, 48, .94); }
+.adm[data-tema="claro"] { --painel-opaco: rgba(255, 255, 255, .96); }
+@media (prefers-color-scheme: light) {
+  .adm:not([data-tema="escuro"]) { --painel-opaco: rgba(255, 255, 255, .96); }
+}
+.adm-menu-perfil,
+.adm-menu-sino,
+.adm-modal-caixa { background: var(--painel-opaco); }
