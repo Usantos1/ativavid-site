@@ -12,13 +12,13 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261010y">
+  <link rel="stylesheet" href="/admin.css?v=20261010z">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
 
 <!-- ENTRAR. Mesma conta do aplicativo: Windows, Mac e iPhone entram por aqui. -->
-<main id="telaEntrar" class="adm-entrar">
+<main id="telaEntrar" class="adm-entrar" hidden>
   <form id="formEntrar" class="adm-vidro adm-cartao" autocomplete="on">
     <img class="adm-logo-entrar" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
     <p class="adm-sub">Painel admin</p>
@@ -236,7 +236,7 @@
               <label class="adm-sup-busca">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
                 <span class="adm-sr">Buscar chamado</span>
-                <input id="buscaChamados" type="search" placeholder="Nome, e-mail ou nº" autocomplete="off" spellcheck="false">
+                <input id="buscaChamados" type="search" placeholder="Buscar chamado" autocomplete="off" spellcheck="false">
               </label>
               <div id="filtrosMais"></div>
             </div>
@@ -320,6 +320,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261010y"></script>
+<script src="/admin.js?v=20261010z"></script>
 </body>
 </html>

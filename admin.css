@@ -1965,3 +1965,8 @@ html.adm-sem-rolagem body { overflow: hidden; }
 .adm-sup-abas { display: flex; gap: 4px; }
 .adm-sup-subabas .adm-sup-aba { font-size: 12px; font-weight: 600; padding: 6px; }
 .adm-sup-subabas .adm-sup-aba.is-on { background: var(--campo); color: var(--tinta); border-color: var(--borda); }
+
+/* abas: texto inteiro, nunca cortado com reticências */
+.adm-sup-aba > span { overflow: visible; text-overflow: clip; white-space: nowrap; }
+.adm-sup-aba { font-size: 13px; padding: 8px 10px; }
+.adm-sup-subabas .adm-sup-aba { font-size: 12.5px; }

@@ -2095,7 +2095,11 @@
   lerPreferencias();
   $("btTema").setAttribute("aria-label", temaEfetivo() === "claro" ? "Usar tema escuro" : "Usar tema claro");
 
-  sb.auth.getSession().then(({ data }) => {
-    if (data && data.session) abrirPainel();
+  sb.auth.getSession().then(async ({ data }) => {
+    if (data && data.session) {
+      const r = await abrirPainel();
+      if (r && r.ok) return;
+    }
+    $("telaEntrar").hidden = false;
   });
 })();
