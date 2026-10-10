@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Área do aluno — ATIVAVID</title>
+  <meta name="description" content="Aulas do ATIVAVID, sua assinatura e o seu uso do programa.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0b0f1a">
+  <meta name="color-scheme" content="dark light">
+  <link rel="icon" href="/assets/icon-64.png" type="image/png" sizes="64x64">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
+  <link rel="stylesheet" href="/aulas.css?v=20261010a">
+</head>
+<body class="alu">
+<div class="alu-fundo" aria-hidden="true"></div>
+
+<!-- ENTRAR: a mesma conta do aplicativo. -->
+<main id="telaEntrar" class="alu-entrar" hidden>
+  <form id="formEntrar" class="alu-vidro alu-cartao" autocomplete="on" novalidate>
+    <img class="alu-logo" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
+    <p class="alu-sub">Área do aluno</p>
+    <label class="alu-campo">
+      <span>E-mail</span>
+      <input id="email" type="email" name="email" autocomplete="username" required inputmode="email" autocapitalize="off" spellcheck="false" placeholder="voce@exemplo.com">
+    </label>
+    <label class="alu-campo">
+      <span>Senha</span>
+      <input id="senha" type="password" name="senha" autocomplete="current-password" required>
+    </label>
+    <p id="erroEntrar" class="alu-erro" role="alert" hidden></p>
+    <button class="alu-bt alu-bt-forte" type="submit" id="btEntrar">Entrar</button>
+    <button class="alu-link" type="button" id="btEsqueci">Esqueci minha senha</button>
+  </form>
+
+  <form id="formTrocar" class="alu-vidro alu-cartao" autocomplete="off" novalidate hidden>
+    <img class="alu-logo" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
+    <p class="alu-sub">Trocar a senha</p>
+    <p class="alu-ajuda">Mandamos um código de 6 números para o seu e-mail. Digite o código e a nova senha.</p>
+    <label class="alu-campo">
+      <span>Código</span>
+      <input id="codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+    </label>
+    <label class="alu-campo">
+      <span>Nova senha</span>
+      <input id="novaSenha" type="password" autocomplete="new-password" minlength="8" required>
+    </label>
+    <p id="erroTrocar" class="alu-erro" role="alert" hidden></p>
+    <button class="alu-bt alu-bt-forte" type="submit" id="btTrocar">Salvar nova senha</button>
+    <button class="alu-link" type="button" id="btVoltar">Voltar para a entrada</button>
+  </form>
+</main>
+
+<!-- ÁREA. Aparece depois de entrar. -->
+<div id="area" class="alu-area" hidden>
+  <header class="alu-topo">
+    <div class="alu-topo-barra alu-vidro">
+      <img class="alu-topo-logo" src="/assets/logo.png" alt="ATIVAVID" width="140" height="45">
+      <nav class="alu-abas" aria-label="Seções">
+        <a href="#inicio" data-secao="inicio">Início</a>
+        <a href="#aulas" data-secao="aulas">Aulas</a>
+        <a href="#conta" data-secao="conta">Conta</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="alu-principal">
+    <section id="secInicio" class="alu-secao" hidden>
+      <h1>Olá<span id="nomeSaudacao"></span></h1>
+
+      <article class="alu-vidro alu-card" id="cardAssinatura"></article>
+
+      <div class="alu-numeros" id="numeros"></div>
+
+      <article class="alu-vidro alu-card alu-card-aviso">
+        <h2>Presets e configuração da empresa</h2>
+        <p>Em breve você vai poder criar presets e configurar a sua empresa direto pelo navegador. Por enquanto, isso se faz no programa.</p>
+      </article>
+    </section>
+
+    <section id="secAulas" class="alu-secao" hidden>
+      <header class="alu-cabeca">
+        <h1>Aulas</h1>
+        <p class="alu-ajuda" id="resumoAulas"></p>
+      </header>
+      <div class="alu-barra"><span id="barraAulas"></span></div>
+      <div id="listaAulas"></div>
+    </section>
+
+    <section id="secConta" class="alu-secao" hidden>
+      <h1>Conta</h1>
+      <article class="alu-vidro alu-card">
+        <p class="alu-rotulo">E-mail</p>
+        <p id="emailConta"></p>
+        <button class="alu-bt" type="button" id="btSair">Sair</button>
+      </article>
+    </section>
+  </main>
+</div>
+
+<!-- Janela da aula -->
+<div id="janela" class="alu-janela" hidden>
+  <div class="alu-janela-fundo" data-fechar></div>
+  <div class="alu-janela-caixa alu-vidro" role="dialog" aria-modal="true" aria-labelledby="janelaTitulo">
+    <header class="alu-janela-cabeca">
+      <h2 id="janelaTitulo"></h2>
+      <button class="alu-x" type="button" data-fechar aria-label="Fechar">×</button>
+    </header>
+    <div class="alu-video"><iframe id="janelaVideo" title="Aula" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+    <p id="janelaDescricao" class="alu-ajuda"></p>
+    <footer class="alu-janela-rodape">
+      <button class="alu-bt alu-bt-forte" type="button" id="btConcluir"></button>
+    </footer>
+  </div>
+</div>
+
+<div id="aviso" class="alu-aviso" role="status" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="/aulas.js?v=20261010a"></script>
+</body>
+</html>
