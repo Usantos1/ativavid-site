@@ -1,176 +1,63 @@
-/* Área do aluno — ATIVAVID. Tokens no :root; tema claro e escuro. */
-:root {
-  --fundo: #0b0f1a;
-  --tinta: #f1f4fa;
-  --texto-2: rgba(241, 244, 250, .72);
-  --texto-3: rgba(241, 244, 250, .5);
-  --vidro: rgba(28, 36, 56, .45);
-  --borda: rgba(255, 255, 255, .13);
-  --campo: rgba(255, 255, 255, .06);
-  --azul: #3d82ff;
-  --verde: #2fbf71;
-  --vermelho: #ff3b3e;
-  --ambar: #f5a524;
-  --sombra: 0 20px 60px rgba(0, 0, 0, .35);
-  --painel-opaco: rgba(24, 31, 48, .96);
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-tema="escuro"]) {
-    --fundo: #eef2f9;
-    --tinta: #0f1420;
-    --texto-2: rgba(15, 20, 32, .72);
-    --texto-3: rgba(15, 20, 32, .5);
-    --vidro: rgba(255, 255, 255, .6);
-    --borda: rgba(15, 20, 32, .1);
-    --campo: rgba(255, 255, 255, .7);
-    --sombra: 0 20px 50px rgba(30, 40, 70, .12);
-    --painel-opaco: rgba(255, 255, 255, .97);
-  }
-}
-:root[data-tema="claro"] {
-  --fundo: #eef2f9;
-  --tinta: #0f1420;
-  --texto-2: rgba(15, 20, 32, .72);
-  --texto-3: rgba(15, 20, 32, .5);
-  --vidro: rgba(255, 255, 255, .6);
-  --borda: rgba(15, 20, 32, .1);
-  --campo: rgba(255, 255, 255, .7);
-  --sombra: 0 20px 50px rgba(30, 40, 70, .12);
-  --painel-opaco: rgba(255, 255, 255, .97);
-}
-[hidden] { display: none !important; }
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body.alu {
-  min-height: 100vh;
-  background: var(--fundo);
-  color: var(--tinta);
-  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-.alu-fundo {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(60% 50% at 15% 10%, rgba(61, 130, 255, .22), transparent 60%),
-    radial-gradient(50% 45% at 90% 85%, rgba(47, 191, 113, .14), transparent 60%);
-}
-.alu-vidro {
-  background: var(--vidro);
-  border: 1px solid var(--borda);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border-radius: 22px;
-  box-shadow: var(--sombra);
-}
-h1, h2 { font-family: "Poppins", "Segoe UI", sans-serif; font-weight: 900; letter-spacing: -.01em; margin: 0; }
-h1 { font-size: 28px; }
-h2 { font-size: 18px; }
-p { margin: 0; }
+/* Área do aluno — só o que não existe no admin.css. O resto (layout, tema,
+ * cartões, KPIs, modal) vem do admin.css, para as duas áreas serem a mesma. */
 
-/* entrar */
-.alu-entrar { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
-.alu-cartao { width: min(420px, 100%); padding: 28px 24px; display: grid; gap: 14px; }
-.alu-logo { display: block; width: min(220px, 70%); height: auto; margin: 0 auto 4px; }
-.alu-sub { text-align: center; color: var(--texto-2); font-size: 15px; }
-.alu-ajuda { color: var(--texto-2); font-size: 14px; }
-.alu-campo { display: grid; gap: 6px; font-size: 14px; color: var(--texto-2); }
-.alu-campo input {
-  font: inherit; font-size: 16px; color: var(--tinta);
-  background: var(--campo); border: 1px solid var(--borda);
-  border-radius: 14px; padding: 12px 14px; min-height: 46px; width: 100%;
-}
-.alu-campo input:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 3px rgba(61, 130, 255, .25); }
-.alu-erro { color: var(--vermelho); font-size: 14px; }
-.alu-bt {
-  font: inherit; font-weight: 700; cursor: pointer;
-  min-height: 44px; padding: 0 18px; border-radius: 999px;
-  background: var(--campo); color: var(--tinta); border: 1px solid var(--borda);
-}
-.alu-bt-forte { background: var(--azul); border-color: var(--azul); color: #fff; }
-.alu-bt:disabled { opacity: .6; cursor: default; }
-.alu-link { font: inherit; font-size: 14px; color: var(--azul); background: none; border: 0; cursor: pointer; padding: 6px; }
-
-/* área */
-.alu-area { min-height: 100vh; }
-.alu-topo { position: sticky; top: 0; z-index: 20; padding: 14px 16px 0; }
-.alu-topo-barra { display: flex; align-items: center; gap: 18px; height: 60px; padding: 0 14px 0 18px; border-radius: 999px; }
-.alu-topo-logo { height: 30px; width: auto; }
-.alu-abas { display: flex; gap: 4px; margin-left: auto; }
-.alu-abas a {
-  color: var(--texto-2); text-decoration: none; font-weight: 600; font-size: 15px;
-  padding: 8px 14px; border-radius: 999px;
-}
-.alu-abas a[aria-current="page"] { background: var(--campo); color: var(--tinta); }
-.alu-principal { max-width: 980px; margin: 0 auto; padding: 24px 16px 60px; display: grid; gap: 18px; }
-.alu-secao { display: grid; gap: 16px; }
-.alu-cabeca { display: grid; gap: 4px; }
-.alu-card { padding: 22px; display: grid; gap: 12px; justify-items: start; }
-.alu-card-aviso { border-style: dashed; }
-.alu-rotulo { font-size: 13px; color: var(--texto-3); text-transform: uppercase; letter-spacing: .04em; }
-
-.alu-pilula {
-  display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700;
-  padding: 6px 12px; border-radius: 999px; background: var(--campo); border: 1px solid var(--borda);
-}
-.alu-pilula::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--texto-3); }
-.alu-pilula-ok::before { background: var(--verde); }
-.alu-pilula-atencao::before { background: var(--ambar); }
-.alu-pilula-parado::before { background: var(--vermelho); }
-
-.alu-numeros { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
-.alu-numero { padding: 18px; display: grid; gap: 4px; }
-.alu-numero strong { font-family: "Poppins", sans-serif; font-size: 28px; font-weight: 900; font-variant-numeric: tabular-nums; }
-.alu-numero span { font-size: 14px; color: var(--texto-2); }
-
-.alu-barra { height: 8px; border-radius: 999px; background: var(--campo); overflow: hidden; }
-.alu-barra span { display: block; height: 100%; width: 0; background: var(--verde); border-radius: 999px; transition: width .3s ease; }
-
-.alu-grupo { display: grid; gap: 10px; }
-.alu-grupo > h2 { font-size: 15px; color: var(--texto-2); margin-top: 8px; }
-.alu-aula {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
-  padding: 14px 16px; border-radius: 18px; cursor: pointer;
-  background: var(--vidro); border: 1px solid var(--borda); text-align: left; color: inherit; font: inherit; width: 100%;
-}
-.alu-aula:focus-visible { outline: 3px solid rgba(61, 130, 255, .5); outline-offset: 2px; }
-.alu-check {
-  width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--borda);
-  display: grid; place-items: center; font-size: 14px; color: transparent;
-}
-.alu-aula[data-feita="1"] .alu-check { background: var(--verde); border-color: var(--verde); color: #fff; }
-.alu-aula-titulo { font-weight: 700; }
-.alu-aula-sub { font-size: 14px; color: var(--texto-3); }
-.alu-aula-play { font-size: 14px; color: var(--azul); font-weight: 700; }
-
-/* janela da aula */
-.alu-janela { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; }
-.alu-janela-fundo { position: absolute; inset: 0; background: rgba(5, 8, 14, .6); backdrop-filter: blur(6px); }
-.alu-janela-caixa { position: relative; width: min(860px, 100%); max-height: 92vh; overflow: auto; padding: 18px; display: grid; gap: 12px; background: var(--painel-opaco); }
-.alu-janela-cabeca { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.alu-x { font-size: 26px; line-height: 1; background: none; border: 0; color: var(--tinta); cursor: pointer; padding: 4px 8px; }
-.alu-video { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #000; }
-.alu-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.alu-janela-rodape { display: flex; justify-content: flex-end; }
-
-/* aviso */
-.alu-aviso {
-  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60;
-  padding: 12px 18px; border-radius: 999px; background: var(--painel-opaco); border: 1px solid var(--borda);
-  box-shadow: var(--sombra); font-size: 14px;
+.aulas-linha {
+  margin: 0;
 }
 
-@media (max-width: 640px) {
-  .alu-topo-barra { gap: 8px; padding: 0 8px 0 14px; }
-  .alu-topo-logo { height: 24px; }
-  .alu-abas a { padding: 8px 10px; font-size: 14px; }
-  h1 { font-size: 24px; }
+.aulas-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-/* dentro do painel admin (Academy): sem fundo próprio nem barra fixa */
-.alu--embutido { background: transparent; }
-.alu--embutido .alu-fundo { display: none; }
-.alu--embutido .alu-area { min-height: 0; }
-.alu--embutido .alu-topo { position: relative; padding-top: 6px; }
-.alu--embutido .alu-principal { padding-top: 12px; }
+.aulas-topo h4 {
+  margin: 0;
+}
+
+.aulas-janela {
+  display: grid;
+  gap: 14px;
+}
+
+.aulas-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #000;
+}
+
+.aulas-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.aulas-dados {
+  display: grid;
+  gap: 14px;
+}
+
+.aulas-linha-dado {
+  display: grid;
+  gap: 2px;
+}
+
+/* Dentro do painel admin (Academy): quem tem menu e topo é o admin. */
+.adm-app.alu-embutido {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.alu-embutido .adm-side,
+.alu-embutido .adm-topo {
+  display: none;
+}
+
+.alu-embutido .adm-principal {
+  padding-top: 8px;
+}

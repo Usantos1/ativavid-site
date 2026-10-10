@@ -12,113 +12,179 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/aulas.css?v=20261010b">
+  <link rel="stylesheet" href="/admin.css?v=20261010q">
+  <link rel="stylesheet" href="/aulas.css?v=20261010c">
 </head>
-<body class="alu">
-<div class="alu-fundo" aria-hidden="true"></div>
+<body class="adm">
+<div class="adm-fundo" aria-hidden="true"></div>
 
-<!-- ENTRAR: a mesma conta do aplicativo. -->
-<main id="telaEntrar" class="alu-entrar" hidden>
-  <form id="formEntrar" class="alu-vidro alu-cartao" autocomplete="on" novalidate>
-    <img class="alu-logo" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
-    <p class="alu-sub">Área do aluno</p>
-    <label class="alu-campo">
+<!-- ENTRAR. Mesma conta do aplicativo. -->
+<main id="telaEntrar" class="adm-entrar" hidden>
+  <form id="formEntrar" class="adm-vidro adm-cartao" autocomplete="on">
+    <img class="adm-logo-entrar" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
+    <p class="adm-sub">Área do aluno</p>
+    <label class="adm-campo">
       <span>E-mail</span>
       <input id="email" type="email" name="email" autocomplete="username" required inputmode="email" autocapitalize="off" spellcheck="false" placeholder="voce@exemplo.com">
     </label>
-    <label class="alu-campo">
+    <label class="adm-campo">
       <span>Senha</span>
-      <input id="senha" type="password" name="senha" autocomplete="current-password" required>
+      <input id="senha" type="password" name="password" autocomplete="current-password" required placeholder="Sua senha">
     </label>
-    <p id="erroEntrar" class="alu-erro" role="alert" hidden></p>
-    <button class="alu-bt alu-bt-forte" type="submit" id="btEntrar">Entrar</button>
-    <button class="alu-link" type="button" id="btEsqueci">Esqueci minha senha</button>
+    <button id="btEntrar" class="adm-bt adm-bt-forte adm-bt-cheio" type="submit">Entrar</button>
+    <button id="btEsqueci" class="adm-link" type="button">Esqueci minha senha</button>
+    <p id="erroEntrar" class="adm-aviso" role="alert" hidden></p>
+    <p class="adm-rodape">A mesma conta que você usa no ATIVAVID do computador e do iPhone.</p>
   </form>
 
-  <form id="formTrocar" class="alu-vidro alu-cartao" autocomplete="off" novalidate hidden>
-    <img class="alu-logo" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
-    <p class="alu-sub">Trocar a senha</p>
-    <p class="alu-ajuda">Mandamos um código de 6 números para o seu e-mail. Digite o código e a nova senha.</p>
-    <label class="alu-campo">
-      <span>Código</span>
-      <input id="codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
-    </label>
-    <label class="alu-campo">
-      <span>Nova senha</span>
-      <input id="novaSenha" type="password" autocomplete="new-password" minlength="8" required>
-    </label>
-    <p id="erroTrocar" class="alu-erro" role="alert" hidden></p>
-    <button class="alu-bt alu-bt-forte" type="submit" id="btTrocar">Salvar nova senha</button>
-    <button class="alu-link" type="button" id="btVoltar">Voltar para a entrada</button>
+  <form id="formTrocar" class="adm-vidro adm-cartao" autocomplete="off" hidden>
+    <img class="adm-logo-entrar" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
+    <p class="adm-sub">Trocar a senha</p>
+    <div id="passoPedir">
+      <label class="adm-campo">
+        <span>E-mail da sua conta</span>
+        <input id="emailTrocar" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="voce@exemplo.com">
+      </label>
+      <button id="btPedirCodigo" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Mandar o código</button>
+    </div>
+    <div id="passoCodigo" hidden>
+      <label class="adm-campo">
+        <span>Código que chegou no e-mail</span>
+        <input id="codigo" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="10" placeholder="000000">
+      </label>
+      <label class="adm-campo">
+        <span>Senha nova</span>
+        <input id="senhaNova" type="password" autocomplete="new-password" placeholder="mínimo 6 caracteres">
+      </label>
+      <button id="btTrocar" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Trocar a senha e entrar</button>
+      <button id="btReenviar" class="adm-link" type="button">Mandar o código de novo</button>
+    </div>
+    <p id="avisoTrocar" class="adm-aviso" role="alert" hidden></p>
+    <button id="btVoltar" class="adm-link" type="button">Voltar para a entrada</button>
   </form>
 </main>
 
-<!-- ÁREA. Aparece depois de entrar. -->
-<div id="area" class="alu-area" hidden>
-  <header class="alu-topo">
-    <div class="alu-topo-barra alu-vidro">
-      <img class="alu-topo-logo" src="/assets/logo.png" alt="ATIVAVID" width="140" height="45">
-      <nav class="alu-abas" aria-label="Seções">
-        <a href="#inicio" data-secao="inicio">Início</a>
-        <a href="#aulas" data-secao="aulas">Aulas</a>
-        <a href="#conta" data-secao="conta">Conta</a>
-      </nav>
+<!-- PAINEL DO ALUNO. Nasce escondido; quem o mostra é a sessão. -->
+<div id="painel" class="adm-app" hidden>
+
+  <aside id="menuLateral" class="adm-side adm-vidro" aria-label="Seções da área do aluno">
+    <button id="btMenu" class="adm-side-bolinha" type="button" aria-expanded="true" aria-controls="menuLateral" data-tip="Recolher menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+      <span class="adm-sr">Recolher ou abrir o menu</span>
+    </button>
+
+    <div class="adm-side-logo">
+      <a href="#inicio" aria-label="ATIVAVID, início">
+        <img src="/assets/logo.png" alt="ATIVAVID" width="190" height="61">
+        <img class="adm-logo-icone" src="/assets/icon.png" alt="" width="44" height="44">
+      </a>
     </div>
-  </header>
 
-  <main class="alu-principal">
-    <section id="secInicio" class="alu-secao" hidden>
-      <h1>Olá<span id="nomeSaudacao"></span></h1>
+    <nav class="adm-nav-lista">
+      <p class="adm-nav-grupo">Sua área</p>
+      <a class="adm-nav-item" href="#inicio" data-secao="inicio" data-rotulo="Início">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
+        <span>Início</span>
+      </a>
+      <a class="adm-nav-item" href="#aulas" data-secao="aulas" data-rotulo="Aulas">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9.5 12 5l10 4.5-10 4.5z"/><path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
+        <span>Aulas</span>
+      </a>
 
-      <article class="alu-vidro alu-card" id="cardAssinatura"></article>
+      <p class="adm-nav-grupo">Conta</p>
+      <a class="adm-nav-item" href="#conta" data-secao="conta" data-rotulo="Conta">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.5 3.5-5.5 7-5.5s6.2 2 7 5.5"/></svg>
+        <span>Conta</span>
+      </a>
+    </nav>
+  </aside>
 
-      <div class="alu-numeros" id="numeros"></div>
+  <div class="adm-coluna">
 
-      <article class="alu-vidro alu-card alu-card-aviso">
-        <h2>Presets e configuração da empresa</h2>
-        <p>Em breve você vai poder criar presets e configurar a sua empresa direto pelo navegador. Por enquanto, isso se faz no programa.</p>
-      </article>
-    </section>
+    <header class="adm-topo">
+      <div class="adm-topo-barra adm-vidro">
+        <span class="adm-topo-espaco"></span>
 
-    <section id="secAulas" class="alu-secao" hidden>
-      <header class="alu-cabeca">
-        <h1>Aulas</h1>
-        <p class="alu-ajuda" id="resumoAulas"></p>
-      </header>
-      <div class="alu-barra"><span id="barraAulas"></span></div>
-      <div id="listaAulas"></div>
-    </section>
+        <button id="btTema" class="adm-icone-bt" type="button" aria-label="Usar tema claro" title="Tema claro / escuro">
+          <svg class="ic-sol" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
+          <svg class="ic-lua" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        </button>
 
-    <section id="secConta" class="alu-secao" hidden>
-      <h1>Conta</h1>
-      <article class="alu-vidro alu-card">
-        <p class="alu-rotulo">E-mail</p>
-        <p id="emailConta"></p>
-        <button class="alu-bt" type="button" id="btSair">Sair</button>
-      </article>
-    </section>
-  </main>
-</div>
-
-<!-- Janela da aula -->
-<div id="janela" class="alu-janela" hidden>
-  <div class="alu-janela-fundo" data-fechar></div>
-  <div class="alu-janela-caixa alu-vidro" role="dialog" aria-modal="true" aria-labelledby="janelaTitulo">
-    <header class="alu-janela-cabeca">
-      <h2 id="janelaTitulo"></h2>
-      <button class="alu-x" type="button" data-fechar aria-label="Fechar">×</button>
+        <div class="adm-perfil">
+          <button id="btPerfil" class="adm-avatar-bt" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menuPerfil">
+            <span id="avatarUsuario" class="adm-avatar">AL</span>
+            <span class="adm-sr">Perfil e conta</span>
+          </button>
+          <div id="menuPerfil" class="adm-menu-perfil adm-vidro" hidden>
+            <div class="adm-menu-perfil-quem">
+              <span id="avatarMenu" class="adm-avatar adm-avatar-grande">AL</span>
+              <div>
+                <strong id="nomeMenu">Aluno</strong>
+                <span id="quem"></span>
+              </div>
+            </div>
+            <button id="btSair" class="adm-menu-perfil-item adm-menu-perigo" type="button">Sair</button>
+          </div>
+        </div>
+      </div>
     </header>
-    <div class="alu-video"><iframe id="janelaVideo" title="Aula" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
-    <p id="janelaDescricao" class="alu-ajuda"></p>
-    <footer class="alu-janela-rodape">
-      <button class="alu-bt alu-bt-forte" type="button" id="btConcluir"></button>
-    </footer>
+
+    <main class="adm-principal">
+
+      <header class="adm-cab">
+        <h1 id="tituloSecao">Início</h1>
+        <p id="subSecao">Sua assinatura e o seu uso do ATIVAVID.</p>
+      </header>
+
+      <p id="recado" class="adm-recado" role="status" hidden></p>
+
+      <section id="secInicio" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+        <div class="adm-kpis" id="kpis"></div>
+        <div class="adm-duas">
+          <article class="adm-vidro adm-painel">
+            <h2 class="adm-painel-titulo">Sua assinatura</h2>
+            <div id="assinatura"></div>
+          </article>
+          <article class="adm-vidro adm-painel">
+            <h2 class="adm-painel-titulo">Presets e configuração da empresa</h2>
+            <p class="adm-ajuda">Em breve você vai poder criar presets e configurar a sua empresa direto pelo navegador. Por enquanto, isso se faz no programa.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="secAulas" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+        <div class="adm-barra">
+          <p class="adm-ajuda" id="resumoAulas"></p>
+        </div>
+        <div id="listaAulas"></div>
+      </section>
+
+      <section id="secConta" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+        <article class="adm-vidro adm-painel">
+          <h2 class="adm-painel-titulo">Dados da conta</h2>
+          <div id="contaDados" class="aulas-dados"></div>
+        </article>
+      </section>
+
+    </main>
   </div>
 </div>
 
-<div id="aviso" class="alu-aviso" role="status" hidden></div>
+<!-- MODAL. Mesma janela do painel admin. -->
+<div id="modal" class="adm-modal" hidden>
+  <div class="adm-modal-fundo" data-fechar></div>
+  <div class="adm-modal-caixa adm-vidro" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <header class="adm-modal-topo">
+      <h2 id="modalTitulo"></h2>
+      <button class="adm-icone-bt" type="button" data-fechar aria-label="Fechar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div id="modalCorpo" class="adm-modal-corpo"></div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/aulas.js?v=20261010b"></script>
+<script src="/aulas.js?v=20261010c"></script>
 </body>
 </html>
