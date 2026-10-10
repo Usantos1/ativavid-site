@@ -2008,3 +2008,11 @@ html.adm-sem-rolagem body { overflow: hidden; }
 @media (min-width: 960px) {
   .adm-kpis { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 }
+
+/* receita: mais simples, com olho para ocultar valores */
+.adm-receita-cab { align-items: center; }
+.adm-receita-titulo { margin: 0; }
+.adm-receita-olho svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.adm-receita-grade { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.adm-receita-nota { margin: 0; font-size: 12.5px; color: var(--texto-3); }
+@media (max-width: 640px) { .adm-receita-grade { grid-template-columns: 1fr; } }

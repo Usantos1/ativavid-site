@@ -613,42 +613,51 @@
   const PRECO_MENSAL_CENTAVOS = 7990;
   const brl = (centavos) => (centavos / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+  // Olho: oculta os valores em reais (fica lembrado neste navegador).
+  function valoresOcultos() {
+    try { return localStorage.getItem("adm-ocultar-valores") === "1"; } catch { return false; }
+  }
+
   function desenharReceita() {
     const ativos = estado.clientes.filter((c) => c.status !== "revoked" && diasAte(c.validoAte) >= 0);
     let anuais = 0;
     let mensais = 0;
-    let avulsos = 0;
     for (const c of ativos) {
       const p = planoDe(c).nome;
       if (p === "Anual") anuais += 1;
       else if (p === "Mensal") mensais += 1;
-      else avulsos += 1;
     }
     const arr = anuais * PRECO_ANUAL_CENTAVOS + mensais * PRECO_MENSAL_CENTAVOS * 12;
+    const oculto = valoresOcultos();
+    const dinheiro = (c) => (oculto ? "R$ •••••" : brl(c));
 
     const alvo = $("receita");
     alvo.innerHTML = "";
     const cab = el("div", "adm-receita-cab");
-    const titulo = el("div", "");
-    titulo.append(
-      el("h2", "adm-receita-titulo", "Receita recorrente"),
-      el("p", "adm-ajuda", `Estimada pelos clientes ativos e pela tabela de preços atual (anual ${brl(PRECO_ANUAL_CENTAVOS)} · mensal ${brl(PRECO_MENSAL_CENTAVOS)}). O valor exato está na Stripe.`),
-    );
-    cab.append(titulo);
+    cab.append(el("h2", "adm-receita-titulo", "Receita recorrente"));
+    const olho = botao("", "adm-icone-bt adm-receita-olho", () => {
+      try { localStorage.setItem("adm-ocultar-valores", oculto ? "0" : "1"); } catch { /* sem armazenamento */ }
+      desenharReceita();
+    });
+    olho.setAttribute("aria-label", oculto ? "Mostrar valores" : "Ocultar valores");
+    olho.title = oculto ? "Mostrar valores" : "Ocultar valores";
+    olho.innerHTML = oculto
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 9 6 9 6a16 16 0 0 1-3.2 3.8M6.5 7.6C4.3 9.2 3 12 3 12s4 6 9 6c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s4-6 9-6 9 6 9 6-4 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="3"/></svg>';
+    cab.append(olho);
+
     const grade = el("div", "adm-receita-grade");
     const itens = [
-      ["ARR", brl(arr), "por ano", "ok", true],
-      ["MRR", brl(Math.round(arr / 12)), "por mês", "neutro", false],
-      ["Anuais", anuais, `${brl(anuais * PRECO_ANUAL_CENTAVOS)} por ano`, "neutro", false],
-      ["Mensais", mensais, `${brl(mensais * PRECO_MENSAL_CENTAVOS)} por mês`, "neutro", false],
-      ["Fora da conta", avulsos, "prazo avulso ou cortesia", "neutro", false],
+      ["ARR", dinheiro(arr), "por ano", true],
+      ["MRR", dinheiro(Math.round(arr / 12)), "por mês", false],
+      ["Assinantes", anuais + mensais, `${anuais} anuais · ${mensais} mensais`, false],
     ];
-    for (const [rot, n, sub, tom, destaque] of itens) {
-      const k = el("div", `adm-kpi adm-kpi-${tom}${destaque ? " adm-receita-arr" : ""}`);
+    for (const [rot, n, sub, destaque] of itens) {
+      const k = el("div", `adm-kpi adm-kpi-neutro${destaque ? " adm-receita-arr" : ""}`);
       k.append(el("span", "adm-kpi-rot", rot), el("strong", "adm-kpi-n", n), el("span", "adm-kpi-sub", sub));
       grade.append(k);
     }
-    alvo.append(cab, grade);
+    alvo.append(cab, grade, el("p", "adm-receita-nota", "Estimativa pela tabela de preços atual."));
   }
 
   function desenharVisao() {
