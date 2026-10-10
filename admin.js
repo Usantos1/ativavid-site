@@ -21,6 +21,8 @@
   const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtvb2xiZGl2ZHFucXhsdWtjdHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NzM5NTUsImV4cCI6MjEwMjE0OTk1NX0.PV9L4Ign4PfLAd2mgwQVVIlGr9AxbP54Gt2-BRLma_s";
   const TRIAL_DIAS = 7;
   const DIA = 86400000;
+  const CHECKOUT_ANUAL = "https://buy.stripe.com/5kQ7sMexzgip2Tk8wwdwc00";
+  const CHECKOUT_MENSAL = "https://buy.stripe.com/9B63cw0GJ6HPfG6aEEdwc01";
 
   const SECOES = {
     visao: { titulo: "Visão geral", sub: "O que precisa de atenção hoje.", admin: true },
@@ -49,7 +51,7 @@
     foto: "",
     secao: "visao",
     clientes: [],
-    semConta: [],
+    semAssinatura: [],
     filtro: "todos",
     ordem: "vencimento",
     abertos: new Set(),
@@ -259,7 +261,7 @@
   function aplicarMenu(aberto) {
     $("painel").classList.toggle("adm-app--fechado", !aberto);
     $("btMenu").setAttribute("aria-expanded", aberto ? "true" : "false");
-    $("btMenu").title = aberto ? "Recolher menu" : "Abrir menu";
+    $("btMenu").dataset.tip = aberto ? "Recolher menu" : "Expandir menu";
     try { localStorage.setItem("adm-menu", aberto ? "aberto" : "fechado"); } catch { /* sem armazenamento */ }
   }
 
@@ -589,13 +591,12 @@
     if (error) { recado(error.message || "Falhou ao carregar.", "erro"); return; }
     if (!data || data.ok === false) { recado((data && data.message) || "Sem permissão.", "erro"); return; }
     estado.clientes = Array.isArray(data.clientes) ? data.clientes : [];
-    estado.semConta = Array.isArray(data.maquinasSemConta) ? data.maquinasSemConta : [];
+    estado.semAssinatura = Array.isArray(data.semAssinatura) ? data.semAssinatura : [];
     desenharVisao();
     desenharFiltros();
     desenharClientes();
-    desenharSemConta();
     const n = $("navClientes");
-    n.textContent = String(estado.clientes.length);
+    n.textContent = String(estado.clientes.length + estado.semAssinatura.length);
     n.hidden = false;
   }
 
@@ -610,7 +611,7 @@
       return r >= 0 && r <= 30;
     });
     const bloqueados = cs.filter((c) => c.status === "revoked");
-    const maquinas = cs.flatMap((c) => c.computadores || []).concat(estado.semConta);
+    const maquinas = cs.flatMap((c) => c.computadores || []).concat(estado.semAssinatura.flatMap((s) => s.computadores || []));
     const hoje = maquinas.filter((m) => Date.now() - ms(m.ultimoAcesso) < DIA).length;
     const videosMes = cs.reduce((s, c) => s + Number(c.videosMes || 0), 0);
     const chamadosAbertos = estado.chamados.filter((x) => x.status === "aberto" || x.status === "em_analise").length;
@@ -640,6 +641,9 @@
     for (const c of cs.filter((x) => !x.temLogin)) {
       pendencias.push({ tom: "espera", titulo: c.email, texto: "Dias reservados, mas sem login: ainda não valem.", acao: "Ver ficha", id: c.id });
     }
+    if (estado.semAssinatura.length) {
+      pendencias.push({ tom: "atencao", titulo: plural(estado.semAssinatura.length, "conta sem assinatura", "contas sem assinatura"), texto: "Têm login, mas o trial acabou ou nunca assinaram. Mande o link de assinatura.", acao: "Ver contas", filtro: "semassinatura" });
+    }
     if (chamadosAbertos) {
       pendencias.push({ tom: "mal", titulo: plural(chamadosAbertos, "chamado aguardando", "chamados aguardando"), texto: "Clientes esperando resposta.", acao: "Abrir suporte", secao: "suporte" });
     }
@@ -654,8 +658,8 @@
       corpo.append(el("strong", "", p.titulo), el("span", "", p.texto));
       const bt = botao(p.acao, "adm-bt adm-bt-fraco adm-bt-sm", () => {
         if (p.secao) { location.hash = p.secao; return; }
-        estado.abertos.add(p.id);
-        estado.filtro = "todos";
+        if (p.filtro) estado.filtro = p.filtro;
+        else { estado.abertos.add(p.id); estado.filtro = "todos"; }
         location.hash = "clientes";
       });
       item.append(corpo, bt);
@@ -691,6 +695,7 @@
     ["semlogin", "Sem login"],
     ["anual", "Anual"],
     ["mensal", "Mensal"],
+    ["semassinatura", "Sem assinatura"],
   ];
 
   function desenharFiltros() {
@@ -715,6 +720,7 @@
       case "semlogin": return s.k === "semlogin";
       case "anual": return p.nome === "Anual";
       case "mensal": return p.nome === "Mensal";
+      case "semassinatura": return false;
       default: return true;
     }
   }
@@ -739,15 +745,139 @@
   function desenharClientes() {
     const q = $("buscaGlobal").value.trim().toLowerCase();
     const alvo = $("listaClientes");
+    const mostraSemAss = estado.filtro === "todos" || estado.filtro === "semassinatura";
     const lista = ordenar(estado.clientes.filter((c) => casaFiltro(c) && casaBusca(c, q)));
+    const semAss = mostraSemAss
+      ? estado.semAssinatura.filter((s) => casaBusca(s, q)).sort((a, b) => String(a.email).localeCompare(String(b.email), "pt-BR"))
+      : [];
     alvo.innerHTML = "";
-    if (!lista.length) {
-      alvo.appendChild(el("p", "adm-vazio", estado.clientes.length
-        ? "Nenhum cliente com este filtro ou busca."
+    if (!lista.length && !semAss.length) {
+      alvo.appendChild(el("p", "adm-vazio", estado.clientes.length || estado.semAssinatura.length
+        ? "Nada com este filtro ou busca."
         : "Nenhum cliente ainda. Use “Novo cliente” acima."));
       return;
     }
     for (const c of lista) alvo.appendChild(cartaoCliente(c));
+    for (const s of semAss) alvo.appendChild(cartaoSemAssinatura(s));
+  }
+
+  function linkAssinatura(email, plano) {
+    const base = plano === "mensal" ? CHECKOUT_MENSAL : CHECKOUT_ANUAL;
+    return `${base}?prefilled_email=${encodeURIComponent(email)}`;
+  }
+
+  function abrirLinkAssinatura(email) {
+    const corpo = el("div", "adm-form-modal");
+    corpo.appendChild(el("p", "adm-ajuda", `Mande este link para ${email}. Ele abre a compra no navegador, com o e-mail dele já preenchido. Assim que pagar, o acesso é liberado sozinho.`));
+    for (const [plano, rot] of [["anual", "Anual"], ["mensal", "Mensal"]]) {
+      const url = linkAssinatura(email, plano);
+      const linha = el("div", "adm-link-linha");
+      const caixa = entrada("text", url, { readonly: "readonly" });
+      caixa.className = "adm-link-caixa";
+      caixa.addEventListener("focus", () => caixa.select());
+      const copiar = botao("Copiar", "adm-bt adm-bt-forte adm-bt-sm", async () => {
+        try {
+          await navigator.clipboard.writeText(url);
+          recado(`Link ${rot.toLowerCase()} copiado.`, "ok");
+        } catch {
+          caixa.select();
+          recado("Selecionei o link: copie com Ctrl+C.", "atencao");
+        }
+      });
+      const w = el("div", "adm-campo");
+      w.append(el("span", "", `Plano ${rot.toLowerCase()}`));
+      linha.append(caixa, copiar);
+      w.appendChild(linha);
+      corpo.appendChild(w);
+    }
+    abrirModal("Link de assinatura", corpo);
+  }
+
+  function cartaoSemAssinatura(s) {
+    const restam = s.trialInicio ? Math.ceil((ms(s.trialInicio) + TRIAL_DIAS * DIA - Date.now()) / DIA) : null;
+    const situacao = restam !== null && restam > 0
+      ? { rot: `Trial · ${restam} dia${restam === 1 ? "" : "s"}`, tom: "atencao" }
+      : { rot: s.trialInicio ? "Trial acabou" : "Sem assinatura", tom: "espera" };
+    const art = el("article", "adm-vidro adm-cli adm-cli-espera");
+    art.dataset.email = s.email;
+    const topo = el("div", "adm-cli-topo");
+    topo.append(avatar(iniciais(s.email), "espera"));
+    const quem = el("div", "adm-cli-quem");
+    quem.append(el("h3", "adm-cli-email", s.email));
+    quem.append(el("p", "adm-cli-sub", `Conta criada ${dia(s.criadoEm)} · último login ${rel(s.ultimoLogin)}`));
+    topo.appendChild(quem);
+    const chips = el("div", "adm-cli-chips");
+    const aulas = Number(s.aulasAssistidas || 0);
+    chips.append(chip("Sem assinatura", "espera"), chip(situacao.rot, situacao.tom), chip(`${aulas}/${s.aulasTotal || 0} aulas`, aulas ? "ok" : "espera"));
+    topo.appendChild(chips);
+    art.appendChild(topo);
+
+    const numeros = el("dl", "adm-numeros");
+    const numero = (rot, valor, sub) => {
+      const w = el("div", "adm-numero");
+      w.append(el("dt", "", rot), el("dd", "", valor));
+      if (sub) w.append(el("small", "", sub));
+      return w;
+    };
+    const maqs = s.computadores || [];
+    numeros.append(
+      numero("Computadores", String(maqs.length), maqs.length ? "com essa conta" : "nenhum ainda"),
+      numero("Vídeos", String(s.videosTotal || 0), `${s.videosMes || 0} este mês`),
+      numero("Aulas", `${aulas}/${s.aulasTotal || 0}`, "assistidas"),
+      numero("Último acesso", rel(s.ultimaAbertura || s.ultimoLogin), s.aberturasTotal ? `aberturas: ${s.aberturasTotal}` : "nunca abriu o app"),
+    );
+    art.appendChild(numeros);
+
+    const aberto = estado.abertos.has(s.email);
+    const bt = botao(aberto ? "Fechar ficha" : "Abrir ficha", "adm-expandir", () => {
+      if (estado.abertos.has(s.email)) estado.abertos.delete(s.email); else estado.abertos.add(s.email);
+      desenharClientes();
+    });
+    bt.setAttribute("aria-expanded", aberto ? "true" : "false");
+    art.appendChild(bt);
+
+    if (aberto) {
+      const f = el("div", "adm-ficha");
+      const col = el("section", "adm-ficha-col");
+      col.appendChild(el("h4", "adm-ficha-titulo", "Liberar acesso"));
+      col.appendChild(el("p", "adm-ajuda", "Libera esta conta com um prazo. Pagou por fora ou ganhou um tempo? Libere aqui."));
+      let dias = 30;
+      const prazo = el("div", "adm-seg adm-seg-mini");
+      prazo.setAttribute("role", "radiogroup");
+      for (const d of [30, 90, 365]) {
+        const b = botao(d === 365 ? "1 ano" : `${d} dias`, d === 30 ? "is-on" : "", () => {
+          dias = d;
+          $$("button", prazo).forEach((x) => { x.classList.toggle("is-on", x === b); x.setAttribute("aria-checked", x === b ? "true" : "false"); });
+        });
+        b.setAttribute("role", "radio");
+        b.setAttribute("aria-checked", d === 30 ? "true" : "false");
+        prazo.appendChild(b);
+      }
+      const liberar = botao("Liberar acesso", "adm-bt adm-bt-forte adm-bt-sm", () => ocupado(liberar, async () => {
+        const r = await licenca("grant_access", { p_email: s.email, p_days: dias, p_max_devices: 1 });
+        recado(r.message || "Acesso liberado.", "ok");
+        await carregar();
+      }));
+      const linkBt = botao("Enviar link de assinatura", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirLinkAssinatura(s.email));
+      const excluir = botao("Excluir conta", "adm-bt adm-bt-perigo adm-bt-sm", null);
+      excluir.addEventListener("click", () => doisToques(excluir, () => ocupado(excluir, async () => {
+        const r = await fn({ acao: "apagar_conta", email: s.email });
+        recado(r.message || "Conta apagada.", "ok");
+        estado.abertos.delete(s.email);
+        await carregar();
+      })));
+      const acoes = el("div", "adm-acoes");
+      acoes.append(liberar, linkBt, excluir);
+      col.append(prazo, acoes);
+      f.appendChild(col);
+
+      const colM = el("section", "adm-ficha-col");
+      colM.appendChild(el("h4", "adm-ficha-titulo", maqs.length ? plural(maqs.length, "Computador", "Computadores") : "Nenhum computador"));
+      for (const m of maqs) colM.appendChild(linhaMaquina(m, null));
+      f.appendChild(colM);
+      art.appendChild(f);
+    }
+    return art;
   }
 
   function cartaoCliente(c) {
@@ -999,21 +1129,6 @@
       await carregar();
     })));
     return bt;
-  }
-
-  function desenharSemConta() {
-    const alvo = $("listaSemConta");
-    alvo.innerHTML = "";
-    if (!estado.semConta.length) {
-      alvo.appendChild(el("p", "adm-vazio", "Todo computador que abriu o ATIVAVID está ligado a um cliente."));
-      return;
-    }
-    for (const m of estado.semConta) {
-      const st = estadoMaquina(m, null);
-      const box = el("div", `adm-maq adm-maq-${st.tom}`);
-      box.append(cabecaMaquina(m, st), gradeMaquina(m, true), botaoBloquearMaquina(m));
-      alvo.appendChild(box);
-    }
   }
 
   function abrirNovoCliente() {

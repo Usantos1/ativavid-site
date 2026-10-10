@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261010l">
+  <link rel="stylesheet" href="/admin.css?v=20261010m">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -67,7 +67,7 @@
 <div id="painel" class="adm-app" hidden>
 
   <aside id="menuLateral" class="adm-side adm-vidro" aria-label="Seções do painel">
-    <button id="btMenu" class="adm-side-bolinha" type="button" aria-expanded="true" aria-controls="menuLateral" title="Recolher menu">
+    <button id="btMenu" class="adm-side-bolinha" type="button" aria-expanded="true" aria-controls="menuLateral" data-tip="Recolher menu">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
       <span class="adm-sr">Recolher ou abrir o menu</span>
     </button>
@@ -208,12 +208,6 @@
         </button>
 
         <div id="listaClientes" class="adm-clientes" aria-live="polite"></div>
-
-        <div class="adm-cabeca-secao">
-          <h2>Computadores sem conta</h2>
-          <p>Aparelhos que abriram o ATIVAVID sem estar ligados a um cliente. O e-mail mostrado é o último que entrou neles.</p>
-        </div>
-        <div id="listaSemConta" class="adm-maquinas" aria-live="polite"></div>
       </section>
 
       <section id="secAulas" class="adm-secao" aria-labelledby="tituloSecao" hidden>
@@ -298,6 +292,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261010k"></script>
+<script src="/admin.js?v=20261010m"></script>
 </body>
 </html>

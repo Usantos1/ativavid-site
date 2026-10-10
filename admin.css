@@ -1501,3 +1501,82 @@
 .adm-menu-perfil,
 .adm-menu-sino,
 .adm-modal-caixa { background: var(--painel-opaco); }
+
+/* bolinha de recolher: igual ao Ativa AI, com dica ao lado */
+.adm-side-bolinha {
+  background: rgb(16, 23, 42);
+  border: 1px solid rgba(61, 130, 255, .34);
+  box-shadow: 0 2px 8px -2px rgba(15, 35, 80, .28);
+}
+.adm-side-bolinha svg { stroke: #3d82ff; width: 12px; height: 12px; }
+.adm[data-tema="claro"] .adm-side-bolinha { background: #fff; }
+.adm-side-bolinha::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 7px 12px;
+  border-radius: 12px;
+  background: rgba(16, 23, 42, .96);
+  border: 1px solid rgba(255, 255, 255, .12);
+  color: #f1f4fa;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+}
+.adm[data-tema="claro"] .adm-side-bolinha::after { background: rgba(255, 255, 255, .97); color: #0f1420; border-color: rgba(15, 20, 35, .12); }
+.adm-side-bolinha:hover::after,
+.adm-side-bolinha:focus-visible::after { opacity: 1; }
+
+/* degradê sob a barra superior: o conteúdo some suave ao subir, em vez de passar atrás da barra */
+.adm-topo {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg) 58%, transparent 100%);
+  padding-bottom: 34px;
+  margin-bottom: -34px;
+}
+
+/* logo: a letra A fica no lugar; ao expandir, o nome cresce a partir dela */
+.adm-side-logo { position: relative; display: block; height: 84px; padding: 0; margin: 0 0 6px; }
+.adm-side-logo a { position: absolute; inset: 0; display: block; border-radius: 12px; }
+.adm-side-logo img { position: absolute; top: 50%; max-width: none; height: auto; display: block; }
+.adm-side-logo img:not(.adm-logo-icone) {
+  left: 20px;
+  width: 176px;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  opacity: 1;
+  transition: transform .38s cubic-bezier(.2, .8, .2, 1), opacity .3s ease;
+}
+.adm-side-logo .adm-logo-icone {
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  display: block !important;
+  transition: transform .38s cubic-bezier(.2, .8, .2, 1), opacity .3s ease;
+}
+.adm-app--fechado .adm-side-logo img:not(.adm-logo-icone) {
+  width: 176px;
+  height: auto;
+  display: block !important;
+  transform: translateY(-50%) scale(.22);
+  opacity: 0;
+}
+.adm-app--fechado .adm-side-logo .adm-logo-icone {
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  display: block !important;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+/* janela do link de assinatura */
+.adm-link-linha { display: flex; gap: 8px; align-items: center; }
+.adm-link-caixa { flex: 1; min-width: 0; font-size: 13px !important; }
