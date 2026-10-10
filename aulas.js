@@ -186,7 +186,11 @@
   function mostrarEntrada() {
     $("painel").hidden = true;
     $("telaEntrar").hidden = false;
-    mostrarTrocar(false);
+    // vindo do e-mail de boas-vindas (compra pela Hotmart): já abre "criar senha"
+    const criar = new URLSearchParams(location.search).has("criar-senha");
+    mostrarTrocar(criar);
+    $("formTrocar").querySelector(".adm-sub").textContent = criar ? "Crie a sua senha" : "Trocar a senha";
+    $("btTrocar").textContent = criar ? "Criar a senha e entrar" : "Trocar a senha e entrar";
   }
 
   async function entrar(ev) {

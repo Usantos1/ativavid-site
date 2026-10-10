@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261011f">
+  <link rel="stylesheet" href="/admin.css?v=20261012a">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -110,6 +110,10 @@
       </a>
 
       <p class="adm-nav-grupo" data-so-admin>Administração</p>
+      <a class="adm-nav-item" href="/admin/integracoes" data-secao="integracoes" data-rotulo="Integrações" data-so-admin>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0z"/><path d="M12 17v4"/></svg>
+        <span>Integrações</span>
+      </a>
       <a class="adm-nav-item" href="/admin/equipe" data-secao="equipe" data-rotulo="Equipe" data-so-admin>
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.5 3.5-5.5 7-5.5s6.2 2 7 5.5"/><path d="M19 8v4M17 10h4"/></svg>
         <span>Equipe</span>
@@ -305,6 +309,11 @@
         <div id="listaEquipe" class="adm-equipe" aria-live="polite"></div>
       </section>
 
+      <section id="secIntegracoes" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+        <div id="intServicos" class="adm-int-servicos" role="tablist" aria-label="Integrações"></div>
+        <div id="intConteudo" class="adm-int-conteudo" aria-live="polite"></div>
+      </section>
+
       <section id="secAcademy" class="adm-secao" aria-labelledby="tituloSecao" hidden>
         <iframe id="academyFrame" class="adm-academy" title="Academy: a área do aluno com a sua conta" loading="lazy"></iframe>
       </section>
@@ -328,6 +337,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261011g"></script>
+<script src="/admin.js?v=20261012a"></script>
 </body>
 </html>

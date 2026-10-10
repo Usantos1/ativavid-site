@@ -30,6 +30,7 @@
     aulas: { titulo: "Aulas", sub: "O que o cliente vê na área de aulas. Cada aula é um vídeo do YouTube.", admin: true },
     suporte: { titulo: "Suporte", sub: "Chamados dos clientes. Responda aqui; a resposta aparece na conta dele.", admin: false },
     equipe: { titulo: "Equipe", sub: "Quem entra neste painel e o que cada pessoa pode fazer.", admin: true },
+    integracoes: { titulo: "Integrações", sub: "Stripe, Hotmart e os e-mails que o cliente recebe.", admin: true },
     academy: { titulo: "Academy", sub: "A área do aluno com a sua conta: o que o cliente vê.", admin: false },
   };
 
@@ -61,6 +62,7 @@
     filtroChamado: "ativos",
     chamadoAberto: null,
     equipe: [],
+    int: { aba: "stripe", status: null, dados: null, stripe: null, stripeCarregando: false, filtroLog: "todos" },
   };
 
   // ============================================================ utilidades
@@ -469,7 +471,10 @@
     $("telaEntrar").hidden = true;
     $("painel").hidden = false;
     $("senha").value = "";
-    if (estado.papel === "admin") await carregar();
+    if (estado.papel === "admin") {
+      await carregar();
+      fnInt({ acao: "status" }).then((st) => { estado.int.status = st; if (st.stripe) carregarStripe(); }).catch(() => {});
+    }
     await carregarChamados(true).catch(() => {});
     rotear();
     ouvirSuporte();
@@ -584,7 +589,7 @@
       a.classList.toggle("is-on", on);
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
-    const mapa = { visao: "secVisao", clientes: "secClientes", aulas: "secAulas", suporte: "secSuporte", equipe: "secEquipe", academy: "secAcademy" };
+    const mapa = { visao: "secVisao", clientes: "secClientes", aulas: "secAulas", suporte: "secSuporte", equipe: "secEquipe", integracoes: "secIntegracoes", academy: "secAcademy" };
     for (const [k, id] of Object.entries(mapa)) $(id).hidden = k !== s;
     // no suporte a página não rola: lista e conversa rolam por dentro
     document.documentElement.classList.toggle("adm-sem-rolagem", s === "suporte");
@@ -597,6 +602,7 @@
     if (s === "equipe") carregarEquipe().catch((e) => recado(e.message, "erro"));
     if (s === "clientes") desenharClientes();
     if (s === "academy") abrirAcademy();
+    if (s === "integracoes") carregarIntegracoes().catch((e) => recado(e.message, "erro"));
     window.scrollTo(0, 0);
   }
 
@@ -639,7 +645,8 @@
       if (p === "Anual") anuais += 1;
       else if (p === "Mensal") mensais += 1;
     }
-    const arr = anuais * PRECO_ANUAL_CENTAVOS + mensais * PRECO_MENSAL_CENTAVOS * 12;
+    const st = estado.int.stripe && estado.int.stripe.ok ? estado.int.stripe : null;
+    const arr = st ? st.assinaturas.arrCentavos : anuais * PRECO_ANUAL_CENTAVOS + mensais * PRECO_MENSAL_CENTAVOS * 12;
     const oculto = valoresOcultos();
     const dinheiro = (c) => (oculto ? "R$ •••••" : brl(c));
 
@@ -661,15 +668,17 @@
     const grade = el("div", "adm-receita-grade");
     const itens = [
       ["ARR", dinheiro(arr), "por ano", true],
-      ["MRR", dinheiro(Math.round(arr / 12)), "por mês", false],
-      ["Assinantes", anuais + mensais, `${anuais} anuais · ${mensais} mensais`, false],
+      ["MRR", dinheiro(st ? st.assinaturas.mrrCentavos : Math.round(arr / 12)), "por mês", false],
+      st
+        ? ["Assinantes", st.assinaturas.ativas, st.assinaturas.atrasadas ? `${st.assinaturas.atrasadas} com pagamento atrasado` : "assinaturas ativas na Stripe", false]
+        : ["Assinantes", anuais + mensais, `${anuais} anuais · ${mensais} mensais`, false],
     ];
     for (const [rot, n, sub, destaque] of itens) {
       const k = el("div", `adm-kpi adm-kpi-neutro${destaque ? " adm-receita-arr" : ""}`);
       k.append(el("span", "adm-kpi-rot", rot), el("strong", "adm-kpi-n", n), el("span", "adm-kpi-sub", sub));
       grade.append(k);
     }
-    alvo.append(cab, grade, el("p", "adm-receita-nota", "Estimativa pela tabela de preços atual."));
+    alvo.append(cab, grade, el("p", "adm-receita-nota", st ? "Pela Stripe: assinaturas ativas, já com desconto." : "Estimativa pela tabela de preços atual. Conecte a Stripe em Integrações para o valor exato."));
   }
 
   function desenharVisao() {
@@ -1284,6 +1293,462 @@
     abrirModal("Novo cliente", corpo);
   }
 
+  // ============================================================ integrações (Stripe, Hotmart, e-mail)
+  //
+  // As chaves ficam nos Secrets das Edge Functions do Supabase; esta tela só
+  // pergunta à função `integracoes` se elas existem e lê o resultado.
+
+  const SUPABASE_SECRETS = "https://supabase.com/dashboard/project/koolbdivdqnqxlukctqu/functions/secrets";
+  const SERVICOS_INT = [
+    { id: "stripe", nome: "Stripe", papel: "Assinaturas do site e do programa", marca: "S" },
+    { id: "hotmart", nome: "Hotmart", papel: "Vendas de afiliados e influenciadores", marca: "H" },
+    { id: "email", nome: "E-mails", papel: "Avisos ao cliente pelo Resend", marca: "@" },
+    { id: "registro", nome: "Registro", papel: "Tudo o que chegou e saiu", marca: "≡" },
+  ];
+  const EVENTOS_INT = {
+    PURCHASE_APPROVED: "Compra aprovada",
+    PURCHASE_COMPLETE: "Compra completa",
+    PURCHASE_REFUNDED: "Reembolso",
+    PURCHASE_CHARGEBACK: "Chargeback",
+    PURCHASE_CANCELED: "Compra cancelada",
+    PURCHASE_PROTEST: "Pedido de reembolso",
+    PURCHASE_DELAYED: "Pagamento atrasado",
+    PURCHASE_BILLET_PRINTED: "Boleto gerado",
+    PURCHASE_EXPIRED: "Compra expirada",
+    SUBSCRIPTION_CANCELLATION: "Assinatura cancelada",
+    SWITCH_PLAN: "Troca de plano",
+    chamado_respondido: "Chamado respondido",
+    chamado_encerrado: "Chamado encerrado",
+    teste: "E-mail de teste",
+  };
+  const INTERVALO = { month: "mês", year: "ano", week: "semana", day: "dia" };
+
+  async function fnInt(corpo) {
+    const { data, error } = await sb.functions.invoke("integracoes", { body: corpo });
+    if (error) {
+      let detalhe = "";
+      try { detalhe = (await error.context?.json())?.message || ""; } catch { /* sem corpo */ }
+      const m = String(error.message || "");
+      if (!detalhe && /not found|404|failed to send/i.test(m)) detalhe = "A função integracoes ainda não está publicada no Supabase.";
+      throw new Error(detalhe || m || "Falhou a chamada ao servidor.");
+    }
+    if (data && data.ok === false) throw new Error(data.message || "Recusado.");
+    return data || {};
+  }
+
+  async function copiarTexto(texto, aviso) {
+    try {
+      await navigator.clipboard.writeText(texto);
+      recado(aviso || "Copiado.", "ok");
+    } catch {
+      recado("Não consegui copiar. Selecione o texto e use Ctrl+C.", "atencao");
+    }
+  }
+
+  function caixaCopia(texto, rotulo) {
+    const w = el("div", "adm-int-copia");
+    const code = el("code", "", texto);
+    w.append(code, botao(rotulo || "Copiar", "adm-bt adm-bt-fraco adm-bt-sm", () => copiarTexto(texto)));
+    return w;
+  }
+
+  function cartaoInt(titulo, ajuda, acoes) {
+    const card = el("article", "adm-vidro adm-int-card");
+    const cab = el("header", "adm-int-card-cab");
+    const txt = el("div", "");
+    txt.append(el("h2", "", titulo));
+    if (ajuda) txt.append(el("p", "", ajuda));
+    cab.append(txt);
+    if (acoes) cab.append(acoes);
+    card.append(cab);
+    return card;
+  }
+
+  function kpiInt(rot, n, sub, tom) {
+    const k = el("div", `adm-kpi adm-kpi-${tom || "neutro"}`);
+    k.append(el("span", "adm-kpi-rot", rot), el("strong", "adm-kpi-n", n), el("span", "adm-kpi-sub", sub || ""));
+    return k;
+  }
+
+  function tabelaInt(colunas, linhas, vazio) {
+    const wrap = el("div", "adm-int-tabela");
+    if (!linhas.length) {
+      wrap.append(el("p", "adm-int-vazio", vazio || "Nada por aqui ainda."));
+      return wrap;
+    }
+    const t = document.createElement("table");
+    const th = document.createElement("thead");
+    const trh = document.createElement("tr");
+    for (const c of colunas) trh.append(el("th", "", c));
+    th.append(trh);
+    const tb = document.createElement("tbody");
+    for (const l of linhas) {
+      const tr = document.createElement("tr");
+      for (const v of l) {
+        const td = document.createElement("td");
+        if (v instanceof Node) td.append(v); else td.textContent = v == null || v === "" ? "—" : String(v);
+        tr.append(td);
+      }
+      tb.append(tr);
+    }
+    t.append(th, tb);
+    wrap.append(t);
+    return wrap;
+  }
+
+  const dinheiroInt = (centavos, moeda) => {
+    if (valoresOcultos()) return "R$ •••••";
+    const c = String(moeda || "brl").toUpperCase();
+    return (Number(centavos || 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: c });
+  };
+
+  async function carregarIntegracoes() {
+    const [status, dados] = await Promise.all([
+      fnInt({ acao: "status" }).catch((e) => ({ ok: false, erro: e.message })),
+      rpc("ativavid_admin_integracoes").catch((e) => ({ ok: false, erro: e.message })),
+    ]);
+    estado.int.status = status;
+    estado.int.dados = dados;
+    desenharIntegracoes();
+    if (status.stripe && !estado.int.stripe) carregarStripe();
+  }
+
+  async function carregarStripe() {
+    estado.int.stripeCarregando = true;
+    if (estado.secao === "integracoes") desenharIntegracoes();
+    try {
+      estado.int.stripe = await fnInt({ acao: "stripe_resumo" });
+      estado.int.stripe.lidoEm = new Date().toISOString();
+    } catch (e) {
+      estado.int.stripe = { ok: false, erro: e.message };
+    } finally {
+      estado.int.stripeCarregando = false;
+    }
+    if (estado.secao === "integracoes") desenharIntegracoes();
+    if (estado.secao === "visao") desenharReceita();
+  }
+
+  function statusServico(id) {
+    const st = estado.int.status || {};
+    const d = estado.int.dados || {};
+    if (st.ok === false && id !== "registro") return ["Função não publicada", "mal"];
+    if (id === "stripe") return st.stripe ? ["Conectada", "ok"] : ["Falta a chave", "mal"];
+    if (id === "hotmart") return st.hotmart ? ["Conectada", "ok"] : ["Falta o hottok", "atencao"];
+    if (id === "email") return st.resend ? ["Ativo", "ok"] : ["Falta a chave", "atencao"];
+    const falhas = (d.log || []).filter((l) => !l.ok && Date.now() - ms(l.criado_em) < DIA).length;
+    return falhas ? [`${plural(falhas, "falha", "falhas")} hoje`, "mal"] : ["Tudo certo", "ok"];
+  }
+
+  function desenharIntegracoes() {
+    const topo = $("intServicos");
+    topo.innerHTML = "";
+    for (const s of SERVICOS_INT) {
+      const on = estado.int.aba === s.id;
+      const b = botao("", `adm-vidro adm-int-servico adm-int-${s.id}${on ? " is-on" : ""}`, () => {
+        estado.int.aba = s.id;
+        desenharIntegracoes();
+      });
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", on ? "true" : "false");
+      const [rot, tom] = statusServico(s.id);
+      const txt = el("span", "adm-int-servico-txt");
+      txt.append(el("strong", "", s.nome), el("small", "", s.papel));
+      b.append(el("span", "adm-int-marca", s.marca), txt, chip(rot, tom, "adm-int-servico-chip"));
+      topo.append(b);
+    }
+
+    const alvo = $("intConteudo");
+    alvo.innerHTML = "";
+    const st = estado.int.status;
+    if (!st) {
+      alvo.append(el("p", "adm-int-vazio", "Carregando as integrações…"));
+      return;
+    }
+    if (st.ok === false || (estado.int.dados && estado.int.dados.ok === false)) {
+      const c = cartaoInt("Falta publicar uma peça no servidor",
+        "Esta tela precisa da função integracoes (Edge Function) e do SQL de integrações. Enquanto um deles faltar, os dados não aparecem.");
+      c.append(el("p", "adm-int-erro", st.erro || (estado.int.dados && estado.int.dados.erro) || ""));
+      alvo.append(c);
+    }
+    const aba = estado.int.aba;
+    if (aba === "stripe") desenharIntStripe(alvo);
+    else if (aba === "hotmart") desenharIntHotmart(alvo);
+    else if (aba === "email") desenharIntEmail(alvo);
+    else desenharIntRegistro(alvo);
+  }
+
+  // ---------------------------------------------------------------- Stripe
+
+  function desenharIntStripe(alvo) {
+    const st = estado.int.status || {};
+    if (!st.stripe) {
+      const c = cartaoInt("Conectar a Stripe", "A chave secreta da Stripe é lida no servidor, nunca no navegador.");
+      const ol = el("ol", "adm-int-passos");
+      ol.append(
+        el("li", "", "Na Stripe: Desenvolvedores → Chaves de API → copie a chave secreta (sk_live_…)."),
+        el("li", "", "No Supabase: Edge Functions → Secrets → adicione STRIPE_SECRET_KEY com essa chave."),
+      );
+      const ir = el("a", "adm-bt adm-bt-fraco adm-bt-sm", "Abrir os Secrets do Supabase");
+      ir.href = SUPABASE_SECRETS; ir.target = "_blank"; ir.rel = "noopener";
+      c.append(ol, ir);
+      alvo.append(c);
+      return;
+    }
+
+    const s = estado.int.stripe;
+    const atualizar = botao("Atualizar", "adm-bt adm-bt-fraco adm-bt-sm", () => carregarStripe());
+    if (estado.int.stripeCarregando) atualizar.disabled = true;
+    const acoes = el("div", "adm-int-acoes");
+    const abrir = el("a", "adm-bt adm-bt-fraco adm-bt-sm", "Abrir a Stripe");
+    abrir.href = "https://dashboard.stripe.com"; abrir.target = "_blank"; abrir.rel = "noopener";
+    acoes.append(atualizar, abrir);
+
+    const resumo = cartaoInt("Receita pela Stripe",
+      s && s.ok ? `Conta ${s.conta && s.conta.nome ? s.conta.nome : ""} · lido ${rel(s.lidoEm)}. Assinaturas ativas já com desconto.` : "Lendo assinaturas e cobranças direto da Stripe.",
+      acoes);
+    if (!s || estado.int.stripeCarregando) {
+      resumo.append(el("p", "adm-int-vazio", "Buscando na Stripe…"));
+      alvo.append(resumo);
+      return;
+    }
+    if (!s.ok) {
+      resumo.append(el("p", "adm-int-erro", s.erro || "Não consegui ler a Stripe."));
+      alvo.append(resumo);
+      return;
+    }
+    const a = s.assinaturas;
+    const grade = el("div", "adm-int-kpis");
+    grade.append(
+      kpiInt("MRR", dinheiroInt(a.mrrCentavos), "por mês", "ok"),
+      kpiInt("ARR", dinheiroInt(a.arrCentavos), "por ano", "ok"),
+      kpiInt("Assinaturas ativas", a.ativas, [a.atrasadas ? `${a.atrasadas} com pagamento atrasado` : "", a.emTeste ? `${a.emTeste} em teste` : ""].filter(Boolean).join(" · ") || "nenhuma atrasada", a.atrasadas ? "atencao" : "neutro"),
+      kpiInt("Recebido em 30 dias", dinheiroInt(s.ultimos30dias.recebidoCentavos), s.ultimos30dias.estornadoCentavos ? `${dinheiroInt(s.ultimos30dias.estornadoCentavos)} estornado` : "sem estornos", "neutro"),
+    );
+    resumo.append(grade);
+    alvo.append(resumo);
+
+    const planos = cartaoInt("Planos e preços",
+      "Os preços ativos na Stripe. “Libera acesso” = o webhook aceita esse preço e cria o acesso sozinho (lista STRIPE_PRICE_ID).");
+    planos.append(tabelaInt(
+      ["Produto", "Valor", "Cobrança", "Assinantes", "Libera acesso", "Link de venda"],
+      s.precos.map((p) => [
+        p.produto,
+        dinheiroInt(p.valorCentavos, p.moeda),
+        p.intervalo ? `a cada ${p.intervaloQtd > 1 ? p.intervaloQtd + " " : ""}${INTERVALO[p.intervalo] || p.intervalo}` : "pagamento único",
+        p.assinantes,
+        p.aceito ? chip("Sim", "ok") : chip("Não", "neutro"),
+        p.links.length ? botao("Copiar link", "adm-bt adm-bt-fraco adm-bt-sm", () => copiarTexto(p.links[0], "Link de venda copiado.")) : "—",
+      ]),
+      "Nenhum preço ativo na Stripe."));
+    if (s.precosAceitosForaDaLista && s.precosAceitosForaDaLista.length) {
+      planos.append(el("p", "adm-int-erro", `Na lista STRIPE_PRICE_ID há ${s.precosAceitosForaDaLista.length} preço(s) arquivado(s) na Stripe: ${s.precosAceitosForaDaLista.join(", ")}. Quem ainda paga por eles continua renovando normalmente.`));
+    }
+    alvo.append(planos);
+
+    const wh = cartaoInt("Webhook da Stripe", "É por aqui que a compra e a renovação liberam o acesso. Já está ligado.");
+    wh.append(caixaCopia(st.stripeUrl || ""), el("p", "adm-int-nota", st.stripeWebhook ? "Assinatura do webhook configurada (STRIPE_WEBHOOK_SECRET)." : "Falta STRIPE_WEBHOOK_SECRET nos Secrets."));
+    alvo.append(wh);
+  }
+
+  // ---------------------------------------------------------------- Hotmart
+
+  function desenharIntHotmart(alvo) {
+    const st = estado.int.status || {};
+    const d = estado.int.dados || {};
+    const h = d.hotmart || { vendas: [], afiliados: [], aprovadas: 0, receitaCentavos: 0 };
+    const cfg = (d.config && d.config.hotmart) || { diasPadrao: 365, ofertas: {} };
+
+    const grade = el("div", "adm-int-kpis adm-int-kpis-solta");
+    grade.append(
+      kpiInt("Vendas liberadas", h.aprovadas || 0, "conta e acesso criados sozinhos", "ok"),
+      kpiInt("Receita pela Hotmart", dinheiroInt(h.receitaCentavos), "valor bruto das compras", "neutro"),
+      kpiInt("Afiliados que venderam", (h.afiliados || []).length, "com ao menos uma venda", "neutro"),
+    );
+    alvo.append(grade);
+
+    const con = cartaoInt("Conectar a Hotmart",
+      "Cada compra aprovada cria a conta do comprador, libera o acesso (programa, aulas e suporte) e manda o e-mail para ele criar a senha. Reembolso e chargeback tiram o acesso.",
+      chip(st.hotmart ? "Hottok configurado" : "Falta o hottok", st.hotmart ? "ok" : "atencao"));
+    const ol = el("ol", "adm-int-passos");
+    const p1 = el("li", "");
+    p1.append(el("span", "", "Na Hotmart: Ferramentas → Webhook (API e notificações) → Cadastrar webhook. Cole esta URL:"), caixaCopia(st.hotmartUrl || ""));
+    ol.append(
+      p1,
+      el("li", "", "Versão 2.0.0. Eventos: Compra aprovada, Compra completa, Reembolso, Chargeback, Compra cancelada e Cancelamento de assinatura."),
+      el("li", "", "Copie o Hottok que a Hotmart mostra nessa tela. No Supabase, em Edge Functions → Secrets, crie HOTMART_HOTTOK com ele. Não cole o hottok em lugar nenhum além dali."),
+      el("li", "", "Clique em “Enviar teste” na Hotmart: o teste aparece no Registro sem criar conta."),
+    );
+    const ir = el("a", "adm-bt adm-bt-fraco adm-bt-sm", "Abrir os Secrets do Supabase");
+    ir.href = SUPABASE_SECRETS; ir.target = "_blank"; ir.rel = "noopener";
+    con.append(ol, ir);
+    alvo.append(con);
+
+    // regras de dias
+    const regras = cartaoInt("Quanto tempo cada compra libera",
+      "Use o código da oferta (o ?off= do link de checkout) ou o ID do produto. Assinatura sem regra usa o período do plano + 5 dias de folga; o resto usa o padrão.");
+    const lista = el("div", "adm-int-regras");
+    const linhas = Object.entries(cfg.ofertas || {}).map(([k, v]) => ({ codigo: k, dias: v }));
+    const desenharRegras = () => {
+      lista.innerHTML = "";
+      linhas.forEach((r, i) => {
+        const linha = el("div", "adm-int-regra");
+        const cod = entrada("text", r.codigo, { placeholder: "Código da oferta ou ID do produto", "aria-label": "Código da oferta ou ID do produto" });
+        cod.addEventListener("input", () => { r.codigo = cod.value.trim(); });
+        const dias = entrada("number", r.dias, { min: "1", step: "1", "aria-label": "Dias de acesso" });
+        dias.addEventListener("input", () => { r.dias = Number(dias.value); });
+        const tirar = botao("Remover", "adm-bt adm-bt-fraco adm-bt-sm", () => { linhas.splice(i, 1); desenharRegras(); });
+        linha.append(cod, dias, el("span", "adm-int-regra-un", "dias"), tirar);
+        lista.append(linha);
+      });
+      if (!linhas.length) lista.append(el("p", "adm-int-vazio", "Nenhuma regra: vale o período do plano ou o padrão."));
+    };
+    desenharRegras();
+    const padrao = entrada("number", cfg.diasPadrao || 365, { min: "1", step: "1" });
+    const rodape = el("div", "adm-int-regras-rodape");
+    const wPadrao = el("label", "adm-int-padrao");
+    wPadrao.append(el("span", "", "Compra sem regra e sem recorrência libera"), padrao, el("span", "", "dias"));
+    const salvar = botao("Salvar regras", "adm-bt adm-bt-forte adm-bt-sm", () => ocupado(salvar, async () => {
+      const ofertas = {};
+      for (const r of linhas) {
+        if (!r.codigo) continue;
+        if (!(r.dias > 0)) throw new Error(`Informe os dias da regra “${r.codigo}”.`);
+        ofertas[r.codigo] = Math.round(r.dias);
+      }
+      const diasPadrao = Math.round(Number(padrao.value));
+      if (!(diasPadrao > 0)) throw new Error("Informe os dias do padrão.");
+      await rpc("ativavid_admin_integracao_salvar", { p_chave: "hotmart", p_valor: { diasPadrao, ofertas } });
+      recado("Regras da Hotmart salvas.", "ok");
+      await carregarIntegracoes();
+    }));
+    rodape.append(botao("+ Regra", "adm-bt adm-bt-fraco adm-bt-sm", () => { linhas.push({ codigo: "", dias: 30 }); desenharRegras(); }), wPadrao, salvar);
+    regras.append(lista, rodape);
+    alvo.append(regras);
+
+    const af = cartaoInt("Afiliados e influenciadores", "Quem mais vendeu. Comissão e pagamento ficam com a Hotmart.");
+    af.append(tabelaInt(["Afiliado", "Código", "Vendas", "Receita"],
+      (h.afiliados || []).map((a) => [a.nome, a.codigo, a.vendas, dinheiroInt(a.receitaCentavos)]),
+      "Nenhuma venda de afiliado ainda."));
+    alvo.append(af);
+
+    const vendas = cartaoInt("Últimas vendas", "Cada transação que a Hotmart avisou.");
+    vendas.append(tabelaInt(["Quando", "Comprador", "Produto", "Valor", "Afiliado", "Acesso"],
+      (h.vendas || []).map((v) => [
+        hora(v.criado_em),
+        v.nome ? `${v.nome} · ${v.email}` : v.email,
+        [v.produto_nome, v.oferta].filter(Boolean).join(" · "),
+        v.valor_centavos ? dinheiroInt(v.valor_centavos, v.moeda) : "—",
+        v.afiliado_nome || "direto",
+        v.liberado ? chip(`Liberado${v.dias ? ` · ${v.dias} dias` : ""}`, "ok")
+          : /REFUND|CHARGEBACK/.test(v.evento || "") ? chip("Revogado", "mal")
+          : chip(EVENTOS_INT[v.evento] || v.status || "Registrado", "neutro"),
+      ]),
+      "Nenhuma venda da Hotmart ainda."));
+    alvo.append(vendas);
+  }
+
+  // ---------------------------------------------------------------- e-mails
+
+  function desenharIntEmail(alvo) {
+    const st = estado.int.status || {};
+    const d = estado.int.dados || {};
+    const cfg = Object.assign({ chamadoRespondido: true, chamadoEncerrado: true, boasVindas: true }, (d.config && d.config.email) || {});
+
+    const avisos = cartaoInt("Avisos que o cliente recebe",
+      "Saem de nao-responda@ativavid.com. O botão do e-mail leva direto para a conversa na área do aluno.",
+      chip(st.resend ? "Resend conectado" : "Falta RESEND_API_KEY", st.resend ? "ok" : "atencao"));
+    const opcoes = [
+      ["chamadoRespondido", "Chamado respondido", "Quando a equipe responde. Respostas seguidas no mesmo chamado viram um e-mail só a cada 10 minutos.", "Seu chamado #106 foi respondido"],
+      ["chamadoEncerrado", "Chamado encerrado", "Quando o status muda para Resolvido.", "Chamado #106 encerrado"],
+      ["boasVindas", "Boas-vindas na compra pela Hotmart", "Com o passo a passo para criar a senha e baixar o programa.", "Seu acesso ao ATIVAVID: crie sua senha"],
+    ];
+    const lista = el("div", "adm-int-opcoes");
+    for (const [chave, titulo, ajuda, assunto] of opcoes) {
+      const linha = el("label", "adm-int-opcao");
+      const txt = el("span", "adm-int-opcao-txt");
+      txt.append(el("strong", "", titulo), el("small", "", ajuda), el("em", "", `Assunto: “${assunto}”`));
+      const sw = document.createElement("input");
+      sw.type = "checkbox";
+      sw.className = "adm-int-switch";
+      sw.checked = cfg[chave] !== false;
+      sw.addEventListener("change", async () => {
+        sw.disabled = true;
+        const novo = Object.assign({}, cfg, { [chave]: sw.checked });
+        try {
+          await rpc("ativavid_admin_integracao_salvar", { p_chave: "email", p_valor: novo });
+          cfg[chave] = sw.checked;
+          if (d.config) d.config.email = novo;
+          recado(sw.checked ? `“${titulo}” ligado.` : `“${titulo}” desligado.`, "ok");
+        } catch (e) {
+          sw.checked = !sw.checked;
+          recado(e.message, "erro");
+        } finally {
+          sw.disabled = false;
+        }
+      });
+      linha.append(txt, sw);
+      lista.append(linha);
+    }
+    avisos.append(lista);
+    alvo.append(avisos);
+
+    const teste = cartaoInt("Testar o envio", "Manda um e-mail de exemplo para a sua própria conta, no mesmo modelo que o cliente recebe.");
+    const bt = botao("Enviar e-mail de teste para mim", "adm-bt adm-bt-forte adm-bt-sm", () => ocupado(bt, async () => {
+      const r = await fnInt({ acao: "testar_email" });
+      recado(r.message || "E-mail de teste enviado.", "ok");
+      await carregarIntegracoes();
+    }));
+    if (!st.resend) {
+      bt.disabled = true;
+      const ol = el("ol", "adm-int-passos");
+      ol.append(
+        el("li", "", "No Resend: API Keys → Create API Key (permissão Sending access, domínio ativavid.com)."),
+        el("li", "", "No Supabase: Edge Functions → Secrets → crie RESEND_API_KEY com essa chave."),
+      );
+      const ir = el("a", "adm-bt adm-bt-fraco adm-bt-sm", "Abrir os Secrets do Supabase");
+      ir.href = SUPABASE_SECRETS; ir.target = "_blank"; ir.rel = "noopener";
+      teste.append(ol, ir);
+    }
+    teste.append(bt);
+    alvo.append(teste);
+  }
+
+  // ---------------------------------------------------------------- registro
+
+  function desenharIntRegistro(alvo) {
+    const d = estado.int.dados || {};
+    const filtro = estado.int.filtroLog || "todos";
+    const card = cartaoInt("Registro", "As últimas 60 notificações da Hotmart e e-mails enviados. Vendas da Stripe ficam no painel da Stripe, em Desenvolvedores → Webhooks.",
+      botao("Atualizar", "adm-bt adm-bt-fraco adm-bt-sm", () => carregarIntegracoes()));
+    const chips = el("div", "adm-chips");
+    for (const [k, rot] of [["todos", "Todos"], ["hotmart", "Hotmart"], ["resend", "E-mails"], ["falhas", "Falhas"]]) {
+      const b = botao(rot, `adm-chip-filtro${filtro === k ? " is-on" : ""}`, () => { estado.int.filtroLog = k; desenharIntegracoes(); });
+      b.setAttribute("aria-pressed", filtro === k ? "true" : "false");
+      chips.append(b);
+    }
+    const log = (d.log || []).filter((l) => filtro === "todos" || (filtro === "falhas" ? !l.ok : l.servico === filtro));
+    card.append(chips, tabelaInt(["Quando", "Serviço", "Evento", "E-mail", "Resultado", "Detalhe"],
+      log.map((l) => [
+        hora(l.criado_em),
+        l.servico === "resend" ? "E-mail" : l.servico === "hotmart" ? "Hotmart" : l.servico,
+        EVENTOS_INT[l.evento] || l.evento,
+        l.email,
+        l.ok ? chip("Certo", "ok") : chip("Falhou", "mal"),
+        el("span", "adm-int-detalhe", l.detalhe || ""),
+      ]),
+      filtro === "falhas" ? "Nenhuma falha registrada." : "Nada registrado ainda."));
+    alvo.append(card);
+  }
+
+  // Aviso por e-mail ao cliente depois de responder ou encerrar. Não segura a
+  // tela: a resposta já foi gravada; se o e-mail falhar, só avisa.
+  function avisarClientePorEmail(chamadoId, tipo) {
+    fnInt({ acao: "avisar_chamado", chamadoId, tipo })
+      .then((r) => {
+        if (r && r.enviado) recado(tipo === "encerrado" ? "Cliente avisado por e-mail que o chamado foi encerrado." : "Cliente avisado por e-mail.", "ok");
+      })
+      .catch((e) => recado(`A mensagem foi gravada, mas o e-mail de aviso falhou: ${e.message}`, "atencao"));
+  }
+
   // ============================================================ academy (a área do aluno, com a sua conta)
 
   function abrirAcademy() {
@@ -1584,6 +2049,7 @@
       await carregarChamados(true);
       await abrirChamado(id, true);
       recado(`Status alterado para “${STATUS_CHAMADO[sel.value].rot}”. O cliente vê na conta dele.`, "ok");
+      if (sel.value === "resolvido") avisarClientePorEmail(id, "encerrado");
     } catch (e) {
       recado((e && e.message) || "Não consegui mudar o status.", "erro");
     } finally {
@@ -1642,6 +2108,7 @@
     await ocupado($("btResponder"), async () => {
       const r = await rpc("ativavid_admin_responder", { p_id: id, p_texto: texto });
       await enviarAnexosAdmin(id, r.mensagemId, anexosResposta);
+      avisarClientePorEmail(id, "resposta");
       $("textoResposta").value = "";
       $("textoResposta").style.height = "";
       anexosResposta = [];
