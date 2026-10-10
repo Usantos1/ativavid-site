@@ -1,10 +1,12 @@
 /* Painel admin — ATIVAVID
  *
  * Quem decide o que cada chamada pode fazer é o Postgres, não esta página:
- *   - ativavid_admin_clientes()    ficha inteira (confere ativavid_is_admin)
- *   - ativavid_admin_license(...)  ações de assinatura e o whoami que abre o painel
- *   - ativavid_admin_aulas(...)    aulas
- *   - ativavid_admin_chamados / _chamado / _responder   suporte
+ *   - ativavid_quem_sou()          papel de quem entrou (admin, suporte ou nada)
+ *   - ativavid_admin_clientes()    ficha inteira (só admin)
+ *   - ativavid_admin_license(...)  ações de assinatura (só admin)
+ *   - ativavid_admin_aulas(...)    aulas (só admin)
+ *   - ativavid_admin_chamados / _chamado / _responder   suporte (admin e suporte)
+ *   - ativavid_admin_equipe*(...)  equipe (só admin)
  *   - Edge Function admin-contas   criar login, apagar conta, bloquear computador
  *
  * A conta é a MESMA do aplicativo. A chave abaixo é a ANON, pública de propósito.
@@ -18,10 +20,11 @@
   const DIA = 86400000;
 
   const SECOES = {
-    visao: { titulo: "Visão geral", sub: "O que precisa de atenção hoje." },
-    clientes: { titulo: "Clientes", sub: "Assinaturas, computadores e uso. Abra a ficha de quem quiser ver tudo." },
-    aulas: { titulo: "Aulas", sub: "O que aparece para o cliente. Cada aula é um vídeo do YouTube." },
-    suporte: { titulo: "Suporte", sub: "Chamados dos clientes. Responda aqui; a resposta aparece na conta dele." },
+    visao: { titulo: "Visão geral", sub: "O que precisa de atenção hoje.", admin: true },
+    clientes: { titulo: "Clientes", sub: "Assinaturas, computadores e uso. Abra a ficha de quem quiser ver tudo.", admin: true },
+    aulas: { titulo: "Aulas", sub: "O que aparece para o cliente. Cada aula é um vídeo do YouTube.", admin: true },
+    suporte: { titulo: "Suporte", sub: "Chamados dos clientes. Responda aqui; a resposta aparece na conta dele.", admin: false },
+    equipe: { titulo: "Equipe", sub: "Quem entra neste painel e o que cada um pode fazer.", admin: true },
   };
 
   const STATUS_CHAMADO = {
@@ -36,10 +39,13 @@
   const $$ = (sel, raiz = document) => Array.from(raiz.querySelectorAll(sel));
 
   const estado = {
+    papel: "",
+    email: "",
     secao: "visao",
     clientes: [],
     semConta: [],
     filtro: "todos",
+    busca: "",
     ordem: "vencimento",
     abertos: new Set(),
     aulas: [],
@@ -49,6 +55,8 @@
     chamados: [],
     filtroChamado: "ativos",
     chamadoAberto: null,
+    equipe: [],
+    papelNovo: "admin",
   };
 
   // ============================================================ utilidades
@@ -181,6 +189,41 @@
     }, 4000);
   }
 
+  // ============================================================ preferências (por navegador)
+
+  function aplicarTema(tema) {
+    if (tema) document.body.dataset.tema = tema; else delete document.body.dataset.tema;
+  }
+
+  function temaEfetivo() {
+    if (document.body.dataset.tema) return document.body.dataset.tema;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "claro" : "escuro";
+  }
+
+  function alternarTema() {
+    const novo = temaEfetivo() === "claro" ? "escuro" : "claro";
+    aplicarTema(novo);
+    try { localStorage.setItem("adm-tema", novo); } catch { /* sem armazenamento */ }
+  }
+
+  function aplicarMenu(aberto) {
+    $("painel").classList.toggle("adm-app--fechado", !aberto);
+    $("btMenu").setAttribute("aria-expanded", aberto ? "true" : "false");
+    $("btMenu").title = aberto ? "Ocultar menu" : "Mostrar menu";
+    try { localStorage.setItem("adm-menu", aberto ? "aberto" : "fechado"); } catch { /* sem armazenamento */ }
+  }
+
+  function lerPreferencias() {
+    let tema = null;
+    let menu = "aberto";
+    try {
+      tema = localStorage.getItem("adm-tema");
+      menu = localStorage.getItem("adm-menu") || "aberto";
+    } catch { /* sem armazenamento */ }
+    aplicarTema(tema === "claro" || tema === "escuro" ? tema : null);
+    aplicarMenu(menu !== "fechado");
+  }
+
   // ============================================================ regras
 
   function planoDe(c) {
@@ -234,29 +277,45 @@
     return s;
   }
 
+  function avatar(texto, tom, extra) {
+    return el("span", `adm-avatar adm-avatar-${tom || "neutro"}${extra ? " " + extra : ""}`, texto);
+  }
+
   // ============================================================ entrar / sair
 
+  /** Só o servidor diz quem é você e o que pode. Sem papel, a conta não entra. */
   async function abrirPainel() {
     let quem;
     try {
-      quem = await licenca("whoami");
+      quem = await rpc("ativavid_quem_sou");
     } catch (e) {
       await sb.auth.signOut();
-      const msg = (e && e.message) || "";
-      if (/forbidden|admin/i.test(msg)) return { ok: false, motivo: "nao_admin" };
-      return { ok: false, motivo: "erro", detalhe: msg };
+      return { ok: false, motivo: "erro", detalhe: (e && e.message) || "" };
     }
-    if (!quem.admin) {
+    if (!quem.papel) {
       await sb.auth.signOut();
-      return { ok: false, motivo: "nao_admin" };
+      return { ok: false, motivo: "nao_equipe" };
     }
-    $("quem").textContent = String(quem.email || "");
+    estado.papel = quem.papel;
+    estado.email = String(quem.email || "");
+    aplicarPapel();
     $("telaEntrar").hidden = true;
     $("painel").hidden = false;
     $("senha").value = "";
-    await carregar();
+    if (estado.papel === "admin") {
+      await carregar();
+    }
+    await carregarChamados(true).catch(() => {});
     rotear();
     return { ok: true };
+  }
+
+  function aplicarPapel() {
+    const admin = estado.papel === "admin";
+    $("quem").textContent = estado.email;
+    $("avatarUsuario").textContent = iniciais(estado.email);
+    $("papelUsuario").textContent = admin ? "Admin" : "Suporte";
+    $$("[data-so-admin]").forEach((n) => { n.hidden = !admin; });
   }
 
   async function entrar(ev) {
@@ -273,8 +332,8 @@
       }
       const r = await abrirPainel();
       if (r.ok) return;
-      if (r.motivo === "nao_admin") {
-        throw new Error(`A conta ${email} entrou, mas não é admin. Use a conta de admin para abrir este painel.`);
+      if (r.motivo === "nao_equipe") {
+        throw new Error(`A conta ${email} entrou, mas não faz parte da equipe. Peça ao admin para adicionar você.`);
       }
       throw new Error(r.detalhe || "O servidor não confirmou quem é você. Tente de novo.");
     }, "erroEntrar");
@@ -327,17 +386,24 @@
       const r = await abrirPainel();
       if (r.ok) return;
       mostrarTrocar(false);
-      avisarEntrar("erroEntrar", r.motivo === "nao_admin"
-        ? `Senha trocada. Mas ${estado.emailTroca} não é admin, então este painel não abre — use a senha nova no aplicativo.`
+      avisarEntrar("erroEntrar", r.motivo === "nao_equipe"
+        ? `Senha trocada. Mas ${estado.emailTroca} não faz parte da equipe — use a senha nova no aplicativo.`
         : "Senha trocada, mas o servidor não confirmou quem é você. Entre de novo.", "ok");
     }, "avisoTrocar");
   }
 
   // ============================================================ navegação
 
+  function secaoPermitida(s) {
+    const cfg = SECOES[s];
+    if (!cfg) return false;
+    return !cfg.admin || estado.papel === "admin";
+  }
+
   function secaoDoHash() {
     const h = location.hash.replace("#", "");
-    return Object.prototype.hasOwnProperty.call(SECOES, h) ? h : "visao";
+    if (secaoPermitida(h)) return h;
+    return estado.papel === "admin" ? "visao" : "suporte";
   }
 
   function rotear() {
@@ -348,15 +414,18 @@
       a.classList.toggle("is-on", on);
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
-    ["visao", "clientes", "aulas", "suporte"].forEach((k) => {
-      $(`sec${k[0].toUpperCase()}${k.slice(1)}`).hidden = k !== s;
-    });
+    for (const k of Object.keys(SECOES)) {
+      const sec = $(`sec${k[0].toUpperCase()}${k.slice(1)}`);
+      if (sec) sec.hidden = k !== s;
+    }
     $("tituloSecao").textContent = SECOES[s].titulo;
     $("subSecao").textContent = SECOES[s].sub;
     document.title = `${SECOES[s].titulo} — Painel admin ATIVAVID`;
     if (s === "aulas") carregarAulas().catch((e) => recado(e.message, "erro"));
     if (s === "suporte") carregarChamados().catch((e) => recado(e.message, "erro"));
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+    if (s === "equipe") carregarEquipe().catch((e) => recado(e.message, "erro"));
+    if (s === "clientes") desenharClientes();
+    window.scrollTo(0, 0);
   }
 
   // ============================================================ carregar
@@ -374,7 +443,6 @@
     const n = $("navClientes");
     n.textContent = String(estado.clientes.length);
     n.hidden = false;
-    carregarChamados(true).catch(() => {});
   }
 
   // ============================================================ visão geral
@@ -403,12 +471,11 @@
       ["Vídeos este mês", videosMes, "neutro", "editados pelos clientes"],
     ];
     for (const [rot, n, tom, sub] of itens) {
-      const k = el("div", `adm-kpi adm-kpi-${tom}`);
+      const k = el("div", `adm-vidro adm-kpi adm-kpi-${tom}`);
       k.append(el("span", "adm-kpi-rot", rot), el("strong", "adm-kpi-n", n), el("span", "adm-kpi-sub", sub));
       kp.appendChild(k);
     }
 
-    // ---- precisa de atenção
     const at = $("atencao");
     at.innerHTML = "";
     const pendencias = [];
@@ -426,9 +493,7 @@
     if (bloqMaq) {
       pendencias.push({ tom: "espera", titulo: plural(bloqMaq, "computador bloqueado", "computadores bloqueados"), texto: "Continuam bloqueados até você desbloquear.", acao: "Ver clientes", secao: "clientes" });
     }
-    if (!pendencias.length) {
-      at.appendChild(el("p", "adm-vazio adm-vazio-ok", "Nada pendente. Tudo em dia."));
-    }
+    if (!pendencias.length) at.appendChild(el("p", "adm-vazio adm-vazio-ok", "Nada pendente. Tudo em dia."));
     for (const p of pendencias.slice(0, 12)) {
       const item = el("div", `adm-pend adm-pend-${p.tom}`);
       const corpo = el("div", "adm-pend-corpo");
@@ -445,7 +510,6 @@
       at.appendChild(item);
     }
 
-    // ---- acessaram por último
     const rc = $("recentes");
     rc.innerHTML = "";
     const recentes = cs
@@ -453,12 +517,10 @@
       .filter((x) => x.t > 0)
       .sort((a, b) => b.t - a.t)
       .slice(0, 6);
-    if (!recentes.length) {
-      rc.appendChild(el("p", "adm-vazio", "Ninguém abriu o ATIVAVID ainda."));
-    }
+    if (!recentes.length) rc.appendChild(el("p", "adm-vazio", "Ninguém abriu o ATIVAVID ainda."));
     for (const { c, t } of recentes) {
       const linha = el("div", "adm-recente");
-      linha.append(el("span", "adm-avatar adm-avatar-mini", iniciais(c.email)));
+      linha.append(avatar(iniciais(c.email), "neutro", "adm-avatar-mini"));
       const txt = el("div", "adm-recente-txt");
       txt.append(el("strong", "", c.email), el("span", "", rel(new Date(t).toISOString())));
       linha.appendChild(txt);
@@ -524,13 +586,13 @@
   }
 
   function desenharClientes() {
-    const q = $("busca").value.trim().toLowerCase();
+    const q = estado.busca;
     const alvo = $("listaClientes");
     const lista = ordenar(estado.clientes.filter((c) => casaFiltro(c) && casaBusca(c, q)));
     alvo.innerHTML = "";
     if (!lista.length) {
       alvo.appendChild(el("p", "adm-vazio", estado.clientes.length
-        ? "Nenhum cliente com este filtro."
+        ? "Nenhum cliente com este filtro ou busca."
         : "Nenhum cliente ainda. Use “Novo cliente” acima."));
       return;
     }
@@ -543,11 +605,11 @@
     const maqs = c.computadores || [];
     const aberto = estado.abertos.has(c.id);
 
-    const art = el("article", `adm-cli adm-cli-${s.tom}`);
+    const art = el("article", `adm-vidro adm-cli adm-cli-${s.tom}`);
     art.dataset.id = c.id;
 
     const topo = el("div", "adm-cli-topo");
-    topo.append(el("span", `adm-avatar adm-avatar-${s.tom}`, iniciais(c.email)));
+    topo.append(avatar(iniciais(c.email), s.tom));
     const quem = el("div", "adm-cli-quem");
     quem.append(el("h3", "adm-cli-email", c.email));
     quem.append(el("p", "adm-cli-sub", `Cliente desde ${dia(c.clienteDesde)} · último acesso ${rel(ultimoAcessoDo(c))}`));
@@ -767,19 +829,19 @@
         acesso.pendingSignup ? "atencao" : "ok");
       $("novoEmail").value = "";
       $("novaSenha").value = "";
-      const novo = document.querySelector(".adm-novo");
+      const novo = $("secClientes").querySelector(".adm-novo");
       if (novo) novo.open = false;
       await carregar();
     });
   }
 
-  function escolherPrazoNovo(bt) {
-    estado.prazoNovo = Number(bt.dataset.dias);
-    $$("#novoPrazo button").forEach((x) => {
-      const on = x === bt;
+  function escolherSeg(container, atributo, valor, cb) {
+    $$("button", container).forEach((x) => {
+      const on = x.dataset[atributo] === String(valor);
       x.classList.toggle("is-on", on);
       x.setAttribute("aria-checked", on ? "true" : "false");
     });
+    if (cb) cb(valor);
   }
 
   // ============================================================ suporte
@@ -801,7 +863,7 @@
     n.textContent = String(abertos);
     n.hidden = abertos === 0;
     if (estado.secao === "suporte") desenharSuporte();
-    if (!silencioso) desenharVisao();
+    if (!silencioso && estado.papel === "admin") desenharVisao();
   }
 
   function filtraChamados() {
@@ -836,7 +898,7 @@
     }
     for (const x of lista) {
       const st = STATUS_CHAMADO[x.status] || { rot: x.status, tom: "neutro" };
-      const it = el("button", `adm-chamado ${estado.chamadoAberto === x.id ? "is-on" : ""}`);
+      const it = el("button", `adm-vidro adm-chamado ${estado.chamadoAberto === x.id ? "is-on" : ""}`);
       it.type = "button";
       it.dataset.id = String(x.id);
       const topo = el("div", "adm-chamado-topo");
@@ -864,7 +926,7 @@
     msgs.innerHTML = "";
     for (const m of r.mensagens || []) {
       const linha = el("div", `adm-msg adm-msg-${m.autor === "admin" ? "eu" : "cliente"}`);
-      linha.append(el("p", "adm-msg-texto", m.texto), el("span", "adm-msg-hora", `${m.autor === "admin" ? "Você" : "Cliente"} · ${hora(m.criado_em)}`));
+      linha.append(el("p", "adm-msg-texto", m.texto), el("span", "adm-msg-hora", `${m.autor === "admin" ? "Equipe" : "Cliente"} · ${hora(m.criado_em)}`));
       msgs.appendChild(linha);
     }
     msgs.scrollTop = msgs.scrollHeight;
@@ -892,6 +954,90 @@
       recado("Resposta enviada. O cliente vê na conta dele.", "ok");
       await carregarChamados(true);
       await abrirChamado(id);
+    });
+  }
+
+  // ============================================================ equipe
+
+  async function carregarEquipe() {
+    const r = await rpc("ativavid_admin_equipe");
+    estado.equipe = Array.isArray(r.equipe) ? r.equipe : [];
+    desenharEquipe();
+  }
+
+  function desenharEquipe() {
+    const alvo = $("listaEquipe");
+    alvo.innerHTML = "";
+    if (!estado.equipe.length) {
+      alvo.appendChild(el("p", "adm-vazio", "Ninguém na equipe ainda."));
+      return;
+    }
+    const ordenada = estado.equipe.slice().sort((a, b) => (a.papel === "admin" ? -1 : 1) - (b.papel === "admin" ? -1 : 1) || String(a.email).localeCompare(String(b.email)));
+    for (const p of ordenada) {
+      const eu = p.email.toLowerCase() === estado.email.toLowerCase();
+      const cartao = el("article", "adm-vidro adm-membro");
+      const topo = el("div", "adm-membro-topo");
+      topo.append(avatar(iniciais(p.email), p.papel === "admin" ? "ok" : "neutro"));
+      const quem = el("div", "adm-membro-quem");
+      const nome = el("strong", "", p.label || p.email);
+      quem.append(nome);
+      if (p.label) quem.append(el("span", "adm-membro-mail", p.email));
+      topo.appendChild(quem);
+      const tags = el("div", "adm-membro-tags");
+      tags.append(chip(p.papel === "admin" ? "Admin" : "Suporte", p.papel === "admin" ? "ok" : "plano"));
+      if (eu) tags.append(chip("Você", "neutro"));
+      if (!p.temLogin) tags.append(chip("Sem login ainda", "espera"));
+      topo.appendChild(tags);
+      cartao.appendChild(topo);
+
+      const acoes = el("div", "adm-acoes adm-membro-acoes");
+      const papelSel = el("select", "adm-papel-sel");
+      papelSel.setAttribute("aria-label", `Papel de ${p.email}`);
+      papelSel.append(new Option("Admin", "admin"), new Option("Suporte", "suporte"));
+      papelSel.value = p.papel;
+      papelSel.disabled = eu;
+      papelSel.addEventListener("change", () => ocupado(papelSel, async () => {
+        const r = await rpc("ativavid_admin_equipe_salvar", { p_email: p.email, p_papel: papelSel.value, p_label: null });
+        recado(r.message || "Papel atualizado.", "ok");
+        await carregarEquipe();
+      }));
+      const remover = el("button", "adm-bt adm-bt-perigo adm-bt-sm", "Remover");
+      remover.type = "button";
+      remover.disabled = eu;
+      remover.addEventListener("click", () => doisToques(remover, () => ocupado(remover, async () => {
+        const r = await rpc("ativavid_admin_equipe_remover", { p_email: p.email });
+        recado(r.message || "Removido da equipe.", "ok");
+        await carregarEquipe();
+      })));
+      acoes.append(papelSel, remover);
+      cartao.appendChild(acoes);
+      alvo.appendChild(cartao);
+    }
+  }
+
+  async function adicionarEquipe(ev) {
+    ev.preventDefault();
+    const bt = $("btAddEquipe");
+    const email = $("equipeEmail").value.trim().toLowerCase();
+    const nome = $("equipeNome").value.trim();
+    const senha = $("equipeSenha").value.trim();
+    const papel = estado.papelNovo;
+    if (!email.includes("@")) return recado("Informe o e-mail da pessoa.", "erro");
+    if (senha && senha.length < 6) return recado("A senha provisória precisa de pelo menos 6 caracteres.", "erro");
+    await ocupado(bt, async () => {
+      let aviso = "";
+      if (senha) {
+        const login = await fn({ acao: "criar_login", email, senha });
+        aviso = login.created ? "Login criado. " : "A conta já existia. ";
+      }
+      const r = await rpc("ativavid_admin_equipe_salvar", { p_email: email, p_papel: papel, p_label: nome || null });
+      recado(`${aviso}${r.message || "Equipe atualizada."}`, senha || r.ok ? "ok" : "atencao");
+      $("equipeEmail").value = "";
+      $("equipeNome").value = "";
+      $("equipeSenha").value = "";
+      const det = $("secEquipe").querySelector(".adm-novo");
+      if (det) det.open = false;
+      await carregarEquipe();
     });
   }
 
@@ -927,7 +1073,7 @@
     }
     const ordenadas = estado.aulas.slice().sort((a, b) => (a.ordem ?? 100) - (b.ordem ?? 100));
     for (const a of ordenadas) {
-      const linha = el("article", `adm-aula ${a.ativo === false ? "is-oculta" : ""}`);
+      const linha = el("article", `adm-vidro adm-aula ${a.ativo === false ? "is-oculta" : ""}`);
       const capa = el("div", "adm-aula-capa");
       if (a.youtubeId) {
         const img = document.createElement("img");
@@ -1003,6 +1149,16 @@
     });
   }
 
+  // ============================================================ busca global
+
+  function buscaGlobal(ev) {
+    estado.busca = ev.target.value.trim().toLowerCase();
+    if (estado.busca && estado.papel === "admin") {
+      if (location.hash !== "#clientes") location.hash = "clientes";
+      else desenharClientes();
+    }
+  }
+
   // ============================================================ ligar
 
   $("formEntrar").addEventListener("submit", entrar);
@@ -1012,9 +1168,19 @@
   $("btReenviar").addEventListener("click", (e) => pedirCodigo(e.currentTarget));
   $("btTrocar").addEventListener("click", (e) => trocarSenha(e.currentTarget));
   $("btSair").addEventListener("click", sair);
+  $("btMenu").addEventListener("click", () => aplicarMenu($("painel").classList.contains("adm-app--fechado")));
+  $("btTema").addEventListener("click", alternarTema);
+  $("buscaGlobal").addEventListener("input", buscaGlobal);
   $("btCriar").addEventListener("click", (e) => criarCliente(e.currentTarget));
-  $$("#novoPrazo button").forEach((b) => b.addEventListener("click", () => escolherPrazoNovo(b)));
-  $("busca").addEventListener("input", desenharClientes);
+  $$("#novoPrazo button").forEach((b) => b.addEventListener("click", () => {
+    estado.prazoNovo = Number(b.dataset.dias);
+    escolherSeg($("novoPrazo"), "dias", b.dataset.dias);
+  }));
+  $$("#equipePapel button").forEach((b) => b.addEventListener("click", () => {
+    estado.papelNovo = b.dataset.papel;
+    escolherSeg($("equipePapel"), "papel", b.dataset.papel);
+  }));
+  $("formEquipe").addEventListener("submit", adicionarEquipe);
   $("ordem").addEventListener("change", (e) => { estado.ordem = e.target.value; desenharClientes(); });
   $("btNovaAula").addEventListener("click", () => abrirFormAula(null));
   $("btCancelarAula").addEventListener("click", fecharFormAula);
@@ -1022,6 +1188,14 @@
   $("btFecharConversa").addEventListener("click", fecharConversa);
   $("formResposta").addEventListener("submit", responder);
   window.addEventListener("hashchange", () => { if (!$("painel").hidden) rotear(); });
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "/" && !/input|textarea|select/i.test(ev.target.tagName)) {
+      ev.preventDefault();
+      $("buscaGlobal").focus();
+    }
+  });
+
+  lerPreferencias();
 
   // Sessão guardada não é permissão: só evita redigitar a senha.
   sb.auth.getSession().then(({ data }) => {
