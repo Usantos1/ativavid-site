@@ -13,7 +13,7 @@
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="stylesheet" href="/admin.css?v=20261010q">
-  <link rel="stylesheet" href="/aulas.css?v=20261010f">
+  <link rel="stylesheet" href="/aulas.css?v=20261010h">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -135,25 +135,27 @@
 
     <main class="adm-principal">
 
-      <header class="adm-cab">
-        <h1 id="tituloSecao">Início</h1>
-        <p id="subSecao">Sua assinatura e o seu uso do ATIVAVID.</p>
+      <header class="adm-cab" id="cabSecao">
+        <h1 id="tituloSecao">Aulas</h1>
+        <p id="subSecao"></p>
       </header>
 
       <p id="recado" class="adm-recado" role="status" hidden></p>
 
-      <!-- INÍCIO -->
-      <section id="secInicio" class="adm-secao" aria-labelledby="tituloSecao" hidden>
-        <a class="adm-vidro aulas-proxima" id="proximaAula" href="#aulas">
-          <span class="adm-rotulo" id="proximaRotulo">Próxima aula</span>
-          <strong id="proximaTitulo">Veja as aulas</strong>
-          <span class="aulas-proxima-acao" id="proximaAcao">Assistir →</span>
-        </a>
-        <div class="adm-kpis" id="kpis"></div>
-        <article class="adm-vidro adm-painel">
-          <h2 class="adm-painel-titulo">Sua assinatura</h2>
-          <div id="assinatura"></div>
+      <!-- INÍCIO: onboarding que leva o aluno pelo caminho, sem título em cima -->
+      <section id="secInicio" class="adm-secao" aria-label="Primeiros passos" hidden>
+        <article class="adm-vidro aulas-passos">
+          <div class="aulas-passos-cab">
+            <div>
+              <span class="adm-rotulo">Primeiros passos</span>
+              <h2 id="passosTitulo"></h2>
+            </div>
+            <span id="passosContagem" class="adm-chip adm-chip-neutro"></span>
+          </div>
+          <div class="aulas-barra"><span id="passosBarra"></span></div>
+          <ol class="aulas-passos-lista" id="passosLista"></ol>
         </article>
+        <div class="aulas-stats" id="kpis"></div>
       </section>
 
       <!-- AULAS: a grade de aulas -->
@@ -162,21 +164,18 @@
         <div id="listaAulas" class="aulas-grade"></div>
       </section>
 
-      <!-- AULA: uma aula, em página própria -->
-      <section id="secAula" class="adm-secao aulas-pagina" aria-labelledby="tituloSecao" hidden>
-        <a class="adm-link aulas-voltar" href="#aulas">← Todas as aulas</a>
+      <!-- AULA: vídeo no topo, ocupando a área; título, ações e descrição embaixo -->
+      <section id="secAula" class="adm-secao aulas-pagina" aria-label="Aula" hidden>
         <div class="aulas-player">
           <iframe id="aulaVideo" title="Aula" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
         </div>
-        <div class="aulas-aula-acoes">
-          <button id="btConcluir" class="adm-bt adm-bt-forte" type="button"></button>
+        <h2 id="aulaTitulo" class="aulas-aula-titulo"></h2>
+        <div class="aulas-aula-barra">
           <a class="adm-bt adm-bt-fraco" id="btAnterior" href="#aulas">← Anterior</a>
+          <button id="btConcluir" class="adm-bt adm-bt-forte" type="button"></button>
           <a class="adm-bt adm-bt-fraco" id="btProxima" href="#aulas">Próxima →</a>
         </div>
-        <article class="adm-vidro adm-painel">
-          <h2 class="adm-painel-titulo">Sobre esta aula</h2>
-          <div id="aulaDescricao" class="aulas-descricao"></div>
-        </article>
+        <div id="aulaDescricao" class="aulas-descricao"></div>
       </section>
 
       <!-- SUPORTE -->
@@ -211,6 +210,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/aulas.js?v=20261010f"></script>
+<script src="/aulas.js?v=20261010h"></script>
 </body>
 </html>

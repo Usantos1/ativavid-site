@@ -2,7 +2,7 @@
  *
  * Quem decide o que o aluno vê é o Postgres, não esta página:
  *   ativavid_area_aluno()             aulas, assinatura e uso de quem entrou
- *   ativavid_aula_marcar(...)         marca uma aula como assistida
+ *   ativavid_aula_marcar(...)         marca uma aula como concluída
  *   ativavid_aluno_chamados()         os chamados da própria conta
  *   ativavid_aluno_abrir_chamado(...) abre um chamado
  *   ativavid_aluno_responder(...)     responde um chamado da própria conta
@@ -25,7 +25,7 @@
   const embutido = new URLSearchParams(location.search).has("painel");
 
   const TITULOS = {
-    inicio: { titulo: "Início", sub: "Sua assinatura e o seu uso do ATIVAVID." },
+    inicio: { titulo: "Início", sub: "" },
     aulas: { titulo: "Aulas", sub: "Assista às aulas e marque as que já viu." },
     suporte: { titulo: "Suporte", sub: "Abra um chamado e acompanhe a resposta da equipe." },
     conta: { titulo: "Conta", sub: "Seu acesso ao ATIVAVID." },
@@ -289,51 +289,80 @@
     estado.dados.progresso = lista;
   }
 
-  /* ---------- início ---------- */
+  /* ---------- início: primeiros passos e números ---------- */
 
   function desenharInicio() {
     const d = estado.dados;
     const a = d.assinatura;
     const s = situacaoAssinatura(a);
     const v = d.videos || {};
+    const total = v.total || 0;
     const aulas = aulasDaLista();
     const feitas = aulas.filter((x) => progressoDe(x.id)).length;
+    const pendente = aulas.find((x) => !progressoDe(x.id)) || aulas[0];
+    const ativa = !!a && a.status === "active" && a.diasRestantes >= 0;
 
-    // atalho para a próxima aula, ou para a lista de aulas
-    const pendente = aulas.find((x) => !progressoDe(x.id));
-    const atalho = $("proximaAula");
-    if (pendente) {
-      atalho.href = `#aulas/${pendente.id}`;
-      $("proximaRotulo").textContent = "Continue de onde parou";
-      $("proximaTitulo").textContent = pendente.titulo;
-      $("proximaAcao").textContent = "Assistir →";
-    } else {
-      atalho.href = "#aulas";
-      $("proximaRotulo").textContent = aulas.length ? "Você já assistiu todas as aulas" : "Aulas";
-      $("proximaTitulo").textContent = aulas.length ? "Rever as aulas" : "Ainda não há aulas publicadas";
-      $("proximaAcao").textContent = "Ver aulas →";
-    }
-
-    const kp = $("kpis");
-    kp.innerHTML = "";
-    const itens = [
-      ["Assinatura", s.rot, s.tom, a ? `${a.computadores} computador${a.computadores === 1 ? "" : "es"} liberado${a.computadores === 1 ? "" : "s"}` : "sem assinatura ativa"],
-      ["Vídeos editados", v.total || 0, "neutro", "desde o começo"],
-      ["Neste mês", v.mes || 0, "neutro", "vídeos editados"],
-      ["Vídeo entregue", `${fmtNum(v.minutosEntregues)} min`, "neutro", "tempo de vídeo pronto"],
-      ["Gravação usada", `${fmtNum(v.minutosDeFonte)} min`, "neutro", "material bruto editado"],
-      ["Aulas assistidas", `${feitas} de ${aulas.length}`, feitas && feitas === aulas.length ? "ok" : "neutro", "marcadas por você"],
+    const passos = [
+      {
+        feito: feitas > 0,
+        titulo: "Assista a primeira aula",
+        sub: feitas > 0 ? "Você já começou." : "Comece por ela para entender o fluxo do programa.",
+        acao: pendente ? { texto: feitas > 0 ? "Continuar" : "Assistir", href: `#aulas/${pendente.id}` } : null,
+      },
+      {
+        feito: aulas.length > 0 && feitas === aulas.length,
+        titulo: "Assista a todas as aulas",
+        sub: aulas.length ? `${feitas} de ${aulas.length} assistidas` : "Ainda não há aulas publicadas.",
+        acao: { texto: "Ver aulas", href: "#aulas" },
+      },
+      {
+        feito: total > 0,
+        titulo: "Edite o seu primeiro vídeo",
+        sub: total > 0 ? `${total} vídeo${total === 1 ? "" : "s"} editado${total === 1 ? "" : "s"} até agora.` : "Os vídeos que você editar no programa aparecem aqui.",
+        acao: null,
+      },
+      {
+        feito: ativa,
+        titulo: "Ter a assinatura ativa",
+        sub: s.sub,
+        acao: { texto: "Ver conta", href: "#conta" },
+      },
     ];
-    for (const [rot, n, tom, sub] of itens) {
-      const k = el("div", `adm-vidro adm-kpi adm-kpi-${tom}`);
-      k.append(el("span", "adm-kpi-rot", rot), el("strong", "adm-kpi-n", n), el("span", "adm-kpi-sub", sub));
-      kp.append(k);
-    }
 
-    const box = $("assinatura");
-    box.innerHTML = "";
-    box.append(el("span", `adm-chip adm-chip-${s.tom}`, s.rot), el("p", "adm-ajuda aulas-linha", s.sub));
-    if (!a) box.append(el("p", "adm-ajuda aulas-linha", "Para assinar, use o link que você recebeu ou fale com o suporte."));
+    const lista = $("passosLista");
+    lista.replaceChildren();
+    passos.forEach((p, i) => {
+      const li = el("li", `aulas-passo${p.feito ? " is-feito" : ""}`);
+      li.append(el("span", "aulas-passo-marca", p.feito ? "✓" : String(i + 1)));
+      const texto = el("span", "aulas-passo-texto");
+      texto.append(el("strong", "", p.titulo), el("small", "", p.sub));
+      li.append(texto);
+      if (p.acao) {
+        const link = el("a", "adm-bt adm-bt-fraco adm-bt-sm", p.acao.texto);
+        link.href = p.acao.href;
+        li.append(link);
+      }
+      lista.append(li);
+    });
+    const feitos = passos.filter((p) => p.feito).length;
+    $("passosTitulo").textContent = feitos === passos.length ? "Tudo certo por aqui" : "Seus próximos passos";
+    $("passosContagem").textContent = `${feitos} de ${passos.length} concluídos`;
+    $("passosBarra").style.width = `${Math.round((100 * feitos) / passos.length)}%`;
+
+    const numeros = [
+      [total, "Vídeos editados"],
+      [v.mes || 0, "Editados neste mês"],
+      [`${fmtNum(v.minutosEntregues)} min`, "Vídeo entregue"],
+      [`${fmtNum(v.minutosDeFonte)} min`, "Gravação usada"],
+      [`${feitas} de ${aulas.length}`, "Aulas assistidas"],
+    ];
+    const kp = $("kpis");
+    kp.replaceChildren();
+    for (const [valor, rot] of numeros) {
+      const c = el("article", "adm-vidro aulas-stat");
+      c.append(el("span", "", rot), el("strong", "", valor));
+      kp.append(c);
+    }
   }
 
   /* ---------- grade de aulas ---------- */
@@ -346,7 +375,7 @@
       : "Ainda não há aulas publicadas.";
 
     const lista = $("listaAulas");
-    lista.innerHTML = "";
+    lista.replaceChildren();
     const grupos = new Map();
     for (const a of aulas) {
       const k = a.secao || "Geral";
@@ -376,7 +405,7 @@
     const corpo = el("div", "aulas-card-corpo");
     corpo.append(
       el("h4", "", a.titulo || "Aula"),
-      el("span", `adm-chip adm-chip-${feita ? "ok" : "espera"}`, feita ? "Assistida" : "Não assistida"),
+      el("span", `adm-chip adm-chip-${feita ? "ok" : "espera"}`, feita ? "Concluída" : "Não concluída"),
     );
     link.append(capa, corpo);
     return link;
@@ -409,11 +438,10 @@
     return frag;
   }
 
-  function setLink(id, href, rotulo) {
+  function setLink(id, href) {
     const a = $(id);
     a.hidden = !href;
     if (href) a.href = href;
-    if (rotulo) a.textContent = rotulo;
   }
 
   function abrirAulaPagina(a) {
@@ -423,6 +451,7 @@
       const f = $("aulaVideo");
       f.title = a.titulo || "Aula";
       f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(a.youtubeId)}?rel=0&autoplay=1`;
+      $("aulaTitulo").textContent = a.titulo || "Aula";
       const desc = $("aulaDescricao");
       desc.replaceChildren();
       if (a.descricao) desc.append(textoHtml(a.descricao));
@@ -444,7 +473,7 @@
   function atualizarBotaoAula() {
     const bt = $("btConcluir");
     const feita = aulaAtual && progressoDe(aulaAtual.id);
-    bt.textContent = feita ? "Desmarcar como assistida" : "Marcar como assistida";
+    bt.textContent = feita ? "Desmarcar concluída" : "Marcar como concluída";
     bt.dataset.feita = feita ? "1" : "0";
   }
 
@@ -460,7 +489,7 @@
     atualizarBotaoAula();
     desenharAulas();
     desenharInicio();
-    recado(vai ? "Aula marcada como assistida." : "Marcação removida.", "ok");
+    recado(vai ? "Aula marcada como concluída." : "Marcação removida.", "ok");
   });
 
   /* ---------- suporte ---------- */
@@ -481,7 +510,7 @@
 
   function desenharChamados() {
     const alvo = $("listaChamados");
-    alvo.innerHTML = "";
+    alvo.replaceChildren();
     if (!estado.chamados.length) {
       alvo.append(el("p", "adm-ajuda", "Você ainda não abriu nenhum chamado."));
       return;
@@ -559,7 +588,7 @@
   function desenharConta() {
     const d = estado.dados;
     const box = $("contaDados");
-    box.innerHTML = "";
+    box.replaceChildren();
     const linhas = [
       ["E-mail", d.email],
       ["Assinatura", d.assinatura ? situacaoAssinatura(d.assinatura).rot : "Sem assinatura"],
@@ -584,6 +613,9 @@
     if (chave !== "aula" && aulaAtual) pararAula();
     for (const [k, sid] of Object.entries(SECAO_DO_ID)) $(sid).hidden = k !== chave;
 
+    // Início e aula não têm cabeçalho: começam direto no conteúdo.
+    $("cabSecao").hidden = chave === "inicio" || chave === "aula";
+
     const navSecao = aula ? "aulas" : chave;
     for (const a of $$(".adm-nav-item")) {
       const on = a.dataset.secao === navSecao;
@@ -593,8 +625,6 @@
 
     if (aula) {
       abrirAulaPagina(aula);
-      $("tituloSecao").textContent = aula.titulo || "Aula";
-      $("subSecao").textContent = aula.secao || "Aula";
       document.title = `${aula.titulo || "Aula"} — Área do aluno ATIVAVID`;
     } else {
       $("tituloSecao").textContent = TITULOS[chave].titulo;

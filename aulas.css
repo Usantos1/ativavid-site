@@ -1,6 +1,22 @@
 /* Área do aluno — só o que não existe no admin.css. O resto (layout, tema,
- * cartões de vidro, KPIs, chips, mensagens) vem do admin.css, para as duas
+ * cartões de vidro, chips, mensagens, modal) vem do admin.css, para as duas
  * áreas serem a mesma. */
+
+/* Degradê no topo: vai de ponta a ponta, por trás da barra lateral também.
+ * A barra lateral fica por cima (z-index), então o vidro dela mostra o degradê
+ * em vez de ser cortado na borda da coluna. Usa a cor do fundo do tema. */
+#painel::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 128px;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg) 52%, transparent 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+#menuLateral { z-index: 4; }
 
 .aulas-saudacao {
   margin: 0;
@@ -36,23 +52,54 @@
   color: var(--texto-3);
 }
 
-/* início: atalho para a próxima aula */
-.aulas-proxima {
+/* início: primeiros passos */
+.aulas-passos { display: grid; gap: 20px; padding: 26px; }
+.aulas-passos-cab { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.aulas-passos-cab h2 { margin: 6px 0 0; font-family: var(--display); font-size: 24px; font-weight: 800; letter-spacing: -.01em; }
+.aulas-barra { height: 8px; border-radius: 999px; background: var(--campo); overflow: hidden; }
+.aulas-barra span { display: block; height: 100%; width: 0; background: var(--verde); border-radius: 999px; transition: width .4s ease; }
+.aulas-passos-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.aulas-passo {
   display: grid;
-  gap: 6px;
-  padding: 22px 24px;
-  border-radius: 24px;
-  color: inherit;
-  text-decoration: none;
-  transition: transform .18s ease, border-color .18s ease;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--campo);
+  border: 1px solid var(--borda);
 }
-.aulas-proxima:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--azul) 45%, transparent); }
-.aulas-proxima strong { font-family: var(--display); font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
-.aulas-proxima-acao { font-size: 14.5px; font-weight: 700; color: var(--azul); }
+.aulas-passo-marca {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--texto-2);
+  border: 2px solid var(--borda);
+}
+.aulas-passo.is-feito .aulas-passo-marca { background: var(--verde); border-color: var(--verde); color: #fff; }
+.aulas-passo-texto { display: grid; gap: 2px; min-width: 0; }
+.aulas-passo-texto strong { font-size: 16px; font-weight: 700; }
+.aulas-passo-texto small { font-size: 14px; color: var(--texto-2); }
+.aulas-passo.is-feito .aulas-passo-texto strong { color: var(--texto-2); text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* números: espaçados, um por cartão */
+.aulas-stats {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  margin-top: 18px;
+}
+.aulas-stat { padding: 22px 24px; display: grid; gap: 8px; }
+.aulas-stat > span { font-size: 14px; color: var(--texto-2); }
+.aulas-stat > strong { font-family: var(--display); font-size: 30px; font-weight: 900; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 
 /* grade de aulas */
-.aulas-grade { display: grid; gap: 18px; }
-.aulas-grupo-grade { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.aulas-grade { display: grid; gap: 22px; }
+.aulas-grupo-grade { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 
 .aulas-card {
   display: grid;
@@ -91,33 +138,54 @@
 }
 .aulas-card:hover .aulas-play { background: var(--azul); transform: translate(-50%, -50%) scale(1.06); }
 
-.aulas-card-corpo { padding: 14px 16px 16px; display: grid; gap: 8px; justify-items: start; }
+.aulas-card-corpo { padding: 16px 18px 18px; display: grid; gap: 10px; justify-items: start; }
 .aulas-card-corpo h4 { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3; }
 
-/* página da aula */
-.aulas-pagina { gap: 14px; }
-.aulas-voltar { justify-self: start; text-decoration: none; }
+/* página da aula: vídeo no topo ocupando a área; o resto embaixo */
+.aulas-pagina { gap: 18px; }
 .aulas-player {
   position: relative;
-  width: 100%;
+  width: min(100%, calc((100dvh - 150px) * 16 / 9));
   aspect-ratio: 16 / 9;
+  justify-self: center;
   border-radius: 24px;
   overflow: hidden;
   background: #000;
   box-shadow: var(--sombra);
 }
 .aulas-player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.aulas-aula-acoes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.aulas-aula-acoes a.adm-bt { text-decoration: none; }
-.aulas-aula-acoes a[hidden] { display: none !important; }
+.aulas-aula-titulo {
+  margin: 4px 0 0;
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  line-height: 1.25;
+}
+.aulas-aula-barra {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.aulas-aula-barra > a:first-child { justify-self: start; }
+.aulas-aula-barra > a:last-child { justify-self: end; }
+.aulas-aula-barra a.adm-bt { text-decoration: none; }
+.aulas-aula-barra a[hidden] { display: none !important; }
 
-.aulas-descricao { max-width: 72ch; font-size: 15.5px; line-height: 1.7; color: var(--tinta); }
+.aulas-descricao {
+  max-width: 72ch;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--tinta);
+  padding: 4px 2px 40px;
+}
 .aulas-descricao p { margin: 0 0 14px; }
 .aulas-descricao p:last-child { margin-bottom: 0; }
 .aulas-lista { margin: 0 0 14px; padding-left: 20px; display: grid; gap: 6px; }
 
 /* suporte */
-.aulas-chamados { display: grid; gap: 14px; }
+.aulas-chamados { display: grid; gap: 16px; }
 .aulas-chamado { display: grid; gap: 14px; }
 .aulas-chamado-cab {
   display: flex;
@@ -135,6 +203,16 @@
 }
 .aulas-chamado-cab strong { font-size: 16px; font-weight: 700; margin-right: auto; }
 .aulas-conversa { display: grid; gap: 12px; }
+
+/* celular: botões da aula em duas colunas, concluir em cima */
+@media (max-width: 640px) {
+  .aulas-aula-barra { grid-template-columns: 1fr 1fr; }
+  .aulas-aula-barra #btConcluir { grid-column: 1 / -1; order: -1; }
+  .aulas-aula-barra > a:first-child, .aulas-aula-barra > a:last-child { justify-self: stretch; text-align: center; }
+  .aulas-player { width: 100%; }
+  .aulas-passo { grid-template-columns: auto minmax(0, 1fr); }
+  .aulas-passo > a { grid-column: 2; justify-self: start; }
+}
 
 /* dentro do painel admin (Academy): quem tem menu e topo é o admin. */
 .adm-app.alu-embutido { grid-template-columns: minmax(0, 1fr); }
