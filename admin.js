@@ -875,24 +875,84 @@
     { id: "mensal-antigo", nome: "Mensal antigo", valor: "R$ 59,00 por mês", url: "https://buy.stripe.com/9B68wQgFH6HP2Tk6oodwc02" },
   ];
 
-  function linkAssinatura(email, plano) {
+  // Links de checkout da Hotmart (produtos ATIVAVID Pro Mensal e Anual). O
+  // painel lê os links salvos em Integrações; estes são só o valor inicial.
+  const HOTMART_PADRAO = {
+    hotmartMensal: "https://pay.hotmart.com/F107971297H",
+    hotmartAnual: "https://pay.hotmart.com/C107971333T",
+  };
+  const GATEWAYS = [
+    { id: "stripe", nome: "Stripe", ajuda: "Cartão. Taxa menor; o dinheiro do cartão cai em uns 30 dias." },
+    { id: "hotmart", nome: "Hotmart", ajuda: "Cartão em até 12x no anual, e as outras formas que a Hotmart liberar. Taxa maior." },
+  ];
+
+  function configCobranca() {
+    const c = (estado.int.dados && estado.int.dados.config && estado.int.dados.config.cobranca) || {};
+    return Object.assign({ padrao: "stripe" }, HOTMART_PADRAO, c);
+  }
+
+  function linkAssinatura(email, plano, gateway) {
+    if (gateway === "hotmart") {
+      const c = configCobranca();
+      const url = plano === "anual" ? c.hotmartAnual : c.hotmartMensal;
+      return `${url}?email=${encodeURIComponent(email)}`;
+    }
     const p = PLANOS_VENDA.find((x) => x.id === plano) || PLANOS_VENDA[0];
     return `${p.url}?prefilled_email=${encodeURIComponent(email)}`;
   }
 
-  function abrirLinkAssinatura(email) {
+  // Botões lado a lado para escolher o gateway.
+  function seletorGateway(atual, aoTrocar) {
+    const grupo = el("div", "adm-gateway");
+    grupo.setAttribute("role", "radiogroup");
+    grupo.setAttribute("aria-label", "Onde o cliente paga");
+    const ajuda = el("small", "adm-gateway-ajuda", "");
+    const desenhar = () => {
+      grupo.querySelectorAll("button").forEach((b) => {
+        const on = b.dataset.id === atual;
+        b.classList.toggle("is-on", on);
+        b.setAttribute("aria-checked", on ? "true" : "false");
+      });
+      ajuda.textContent = (GATEWAYS.find((g) => g.id === atual) || GATEWAYS[0]).ajuda;
+    };
+    for (const g of GATEWAYS) {
+      const b = botao(g.nome, `adm-gateway-op adm-gateway-${g.id}`, () => { atual = g.id; desenhar(); aoTrocar(g.id); });
+      b.dataset.id = g.id;
+      b.setAttribute("role", "radio");
+      grupo.append(b);
+    }
+    desenhar();
+    const w = el("div", "adm-gateway-caixa");
+    w.append(grupo, ajuda);
+    return w;
+  }
+
+  async function abrirLinkAssinatura(email) {
+    if (!estado.int.dados) {
+      estado.int.dados = await rpc("ativavid_admin_integracoes").catch(() => null);
+    }
+    let gateway = configCobranca().padrao === "hotmart" ? "hotmart" : "stripe";
     const corpo = el("div", "adm-form-modal");
-    corpo.appendChild(el("p", "adm-ajuda", `Escolha o plano e mande o link para ${email}. Ele abre a compra no navegador, com o e-mail já preenchido. Assim que pagar, o acesso é liberado sozinho.`));
+    corpo.appendChild(el("p", "adm-ajuda", `Escolha onde o cliente paga e o plano, e mande o link para ${email}. Ele abre a compra no navegador, com o e-mail já preenchido. Assim que pagar, o acesso é liberado sozinho.`));
     const escolha = document.createElement("select");
     for (const p of PLANOS_VENDA) {
       const op = el("option", "", `${p.nome} · ${p.valor}`);
       op.value = p.id;
       escolha.appendChild(op);
     }
+    // na Hotmart só existem o Mensal (R$ 79,90) e o Anual
+    const ajustarPlanos = () => {
+      const antigo = escolha.querySelector('option[value="mensal-antigo"]');
+      if (antigo) antigo.disabled = gateway === "hotmart";
+      if (gateway === "hotmart" && escolha.value === "mensal-antigo") escolha.value = "mensal";
+    };
+    const wGateway = el("div", "adm-campo");
+    wGateway.append(el("span", "", "Onde o cliente paga"), seletorGateway(gateway, (g) => { gateway = g; ajustarPlanos(); atualizar(); }));
+    ajustarPlanos();
     const caixa = entrada("text", "", { readonly: "readonly" });
     caixa.className = "adm-link-caixa";
     caixa.addEventListener("focus", () => caixa.select());
-    const atualizar = () => { caixa.value = linkAssinatura(email, escolha.value); };
+    const atualizar = () => { caixa.value = linkAssinatura(email, escolha.value, gateway); };
     escolha.addEventListener("change", atualizar);
     atualizar();
     const copiar = botao("Copiar", "adm-bt adm-bt-forte adm-bt-sm", async () => {
@@ -910,7 +970,7 @@
     const linha = el("div", "adm-link-linha");
     linha.append(caixa, copiar);
     wLink.append(el("span", "", "Link"), linha);
-    corpo.append(wPlano, wLink);
+    corpo.append(wGateway, wPlano, wLink);
     abrirModal("Link de assinatura", corpo);
   }
 
@@ -1470,11 +1530,45 @@
       c.append(el("p", "adm-int-erro", st.erro || (estado.int.dados && estado.int.dados.erro) || ""));
       alvo.append(c);
     }
+    if (estado.int.dados && estado.int.dados.ok !== false) alvo.append(cartaoCobranca());
     const aba = estado.int.aba;
     if (aba === "stripe") desenharIntStripe(alvo);
     else if (aba === "hotmart") desenharIntHotmart(alvo);
     else if (aba === "email") desenharIntEmail(alvo);
     else desenharIntRegistro(alvo);
+  }
+
+  // ---------------------------------------------------------------- cobrança
+
+  function cartaoCobranca() {
+    const c = configCobranca();
+    const salvar = async (novo, aviso) => {
+      const valor = Object.assign({}, c, novo);
+      await rpc("ativavid_admin_integracao_salvar", { p_chave: "cobranca", p_valor: valor });
+      estado.int.dados.config = Object.assign({}, estado.int.dados.config, { cobranca: valor });
+      Object.assign(c, novo);
+      recado(aviso, "ok");
+    };
+    const card = cartaoInt("Onde o cliente paga",
+      "O padrão já vem marcado quando você manda um link de assinatura a um cliente, e dá para trocar cliente por cliente. Se um gateway cair, mude o padrão para o outro.");
+    card.classList.add("adm-int-cobranca");
+    card.append(seletorGateway(c.padrao === "hotmart" ? "hotmart" : "stripe", (g) => {
+      salvar({ padrao: g }, g === "hotmart" ? "Hotmart agora é o padrão de cobrança." : "Stripe agora é o padrão de cobrança.").catch((e) => recado(e.message, "erro"));
+    }));
+    const links = el("div", "adm-int-links");
+    for (const [chave, rot] of [["hotmartMensal", "Checkout Hotmart · Mensal"], ["hotmartAnual", "Checkout Hotmart · Anual"]]) {
+      const w = el("label", "adm-int-link");
+      const i = entrada("url", c[chave] || "", { spellcheck: "false" });
+      i.addEventListener("change", () => {
+        const v = i.value.trim();
+        if (!/^https:\/\/pay\.hotmart\.com\//.test(v)) { recado("O link de checkout da Hotmart começa com https://pay.hotmart.com/", "atencao"); i.value = c[chave]; return; }
+        salvar({ [chave]: v }, "Link da Hotmart salvo.").catch((e) => recado(e.message, "erro"));
+      });
+      w.append(el("span", "", rot), i);
+      links.append(w);
+    }
+    card.append(links);
+    return card;
   }
 
   // ---------------------------------------------------------------- Stripe

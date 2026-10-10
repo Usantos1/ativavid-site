@@ -2255,3 +2255,19 @@ html.adm-sem-rolagem body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .adm-int-switch, .adm-int-switch::after { transition: none; } }
 /* botão que é link: texto centrado como os outros */
 .adm-int-card a.adm-bt { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; justify-self: start; }
+
+/* escolha do gateway: Stripe ou Hotmart */
+.adm-gateway-caixa { display: grid; gap: 6px; }
+.adm-gateway { display: inline-grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: var(--campo); border: 1px solid var(--borda); max-width: 360px; }
+.adm-gateway-op { --marca: var(--azul); height: 38px; border: 0; border-radius: 10px; background: none; color: var(--texto-2); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; transition: background .2s ease, color .2s ease; }
+.adm-gateway-op:hover { color: var(--tinta); }
+.adm-gateway-op.is-on { background: var(--marca); color: #fff; box-shadow: 0 6px 16px -8px var(--marca); }
+.adm-gateway-op:focus-visible { outline: 2px solid var(--azul); outline-offset: 2px; }
+.adm-gateway-stripe { --marca: #635bff; }
+.adm-gateway-hotmart { --marca: #f04e23; }
+.adm-gateway-ajuda { font-size: 12.5px; color: var(--texto-3); line-height: 1.45; }
+.adm-int-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.adm-int-link { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--texto-2); min-width: 0; }
+.adm-int-link input { height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--borda); background: var(--campo); color: var(--tinta); font: 13px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; min-width: 0; }
+.adm-int-link input:focus { outline: none; border-color: var(--azul); }
+@media (max-width: 720px) { .adm-int-links { grid-template-columns: 1fr; } }
