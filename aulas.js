@@ -789,6 +789,8 @@
     $("suporteLista").hidden = modo !== "lista";
     $("suporteNovo").hidden = modo !== "novo";
     $("suporteChamado").hidden = modo !== "chamado";
+    // na conversa, o cabeçalho do chat já mostra o chamado
+    $("cabSecao").hidden = modo === "chamado";
     if (modo === "novo") {
       $("tituloSecao").textContent = "Novo chamado";
       $("subSecao").textContent = "Conte o que aconteceu. Um print ajuda muito.";
