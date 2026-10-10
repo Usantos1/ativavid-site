@@ -1,6 +1,14 @@
 /* Painel do dono — tela de ferramenta, não de venda.
    Pensada primeiro para o celular: é onde o suporte acontece. */
 
+/* O `hidden` do HTML vale `display:none` com especificidade de regra do
+   navegador — QUALQUER `display` nosso ganha dele. Foi o que aconteceu: a
+   `.adm-entrar` é `display:grid`, então, depois de entrar, a tela de login
+   continuava ocupando a altura toda e empurrava o painel para fora da vista.
+   Parecia que o login não fazia nada; ele funcionava e ninguém via o
+   resultado. Esta linha é a guarda para todo o arquivo. */
+[hidden] { display: none !important; }
+
 .adm {
   background: var(--bg);
   color: var(--text);
