@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Painel admin — ATIVAVID</title>
-  <meta name="description" content="Painel admin do ATIVAVID: clientes, computadores, uso e aulas.">
+  <meta name="description" content="Painel admin do ATIVAVID: clientes, computadores, aulas e suporte.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0b0c10">
   <meta name="color-scheme" content="dark">
@@ -13,7 +13,7 @@
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css?v=20261006b">
-  <link rel="stylesheet" href="/admin.css?v=20261010e">
+  <link rel="stylesheet" href="/admin.css?v=20261010f">
 </head>
 <body class="adm">
 
@@ -76,138 +76,219 @@
 </main>
 
 <!-- PAINEL. Nasce escondido; quem o mostra é a resposta do servidor (whoami). -->
-<div id="painel" hidden>
+<div id="painel" class="adm-app" hidden>
 
-  <header class="adm-topo">
-    <div class="adm-topo-marca">
+  <aside class="adm-nav" aria-label="Seções do painel">
+    <div class="adm-nav-marca">
       <span class="adm-logo-mini" aria-hidden="true"></span>
       <div>
         <strong class="adm-marca-pq">ATIVAVID</strong>
         <span class="adm-tag">Painel admin</span>
       </div>
     </div>
-    <div class="adm-topo-dir">
+
+    <nav class="adm-nav-lista">
+      <p class="adm-nav-grupo">Gestão</p>
+      <a class="adm-nav-item" href="#visao" data-secao="visao">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
+        <span>Visão geral</span>
+      </a>
+      <a class="adm-nav-item" href="#clientes" data-secao="clientes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.4 3.3-5.5 6.5-5.5s5.9 2.1 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.7c1.9.8 3 2.7 3 5.3"/></svg>
+        <span>Clientes</span>
+        <em class="adm-nav-n" id="navClientes" hidden></em>
+      </a>
+
+      <p class="adm-nav-grupo">Conteúdo</p>
+      <a class="adm-nav-item" href="#aulas" data-secao="aulas">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9.5 12 5l10 4.5-10 4.5z"/><path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
+        <span>Aulas</span>
+      </a>
+
+      <p class="adm-nav-grupo">Atendimento</p>
+      <a class="adm-nav-item" href="#suporte" data-secao="suporte">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-4 3.5V16H4z"/></svg>
+        <span>Suporte</span>
+        <em class="adm-nav-n adm-nav-n-alerta" id="navSuporte" hidden></em>
+      </a>
+    </nav>
+
+    <div class="adm-nav-rodape">
       <span id="quem" class="adm-quem"></span>
-      <button id="btSair" class="adm-bt adm-bt-fraco adm-bt-sm" type="button">Sair</button>
+      <button id="btSair" class="adm-link-sair" type="button">Sair</button>
     </div>
-  </header>
+  </aside>
 
-  <nav class="adm-abas" role="tablist" aria-label="Seções">
-    <button class="adm-aba is-on" type="button" role="tab" data-aba="clientes" aria-selected="true">Clientes</button>
-    <button class="adm-aba" type="button" role="tab" data-aba="aulas" aria-selected="false">Aulas</button>
-  </nav>
+  <div class="adm-principal">
 
-  <p id="recado" class="adm-recado" role="status" hidden></p>
-
-  <!-- ============================ CLIENTES ============================ -->
-  <section id="abaClientes" class="adm-secao" role="tabpanel">
-
-    <div class="adm-kpis" id="kpis"></div>
-
-    <div class="adm-barra">
-      <label class="adm-busca">
-        <span class="adm-sr">Buscar</span>
-        <input id="busca" type="search" placeholder="Buscar e-mail, computador ou sistema…"
-               autocapitalize="off" spellcheck="false">
-      </label>
-      <label class="adm-ordem">
-        <span class="adm-sr">Ordenar</span>
-        <select id="ordem">
-          <option value="vencimento">Vence primeiro</option>
-          <option value="acesso">Acessou por último</option>
-          <option value="videos">Mais vídeos</option>
-          <option value="nome">Nome</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="adm-chips" id="filtros" role="group" aria-label="Filtrar clientes"></div>
-
-    <details class="adm-novo">
-      <summary>Novo cliente</summary>
-      <div class="adm-novo-corpo">
-        <label class="adm-campo">
-          <span>E-mail do cliente</span>
-          <input id="novoEmail" type="email" inputmode="email" autocapitalize="off" spellcheck="false"
-                 placeholder="cliente@email.com">
-        </label>
-        <label class="adm-campo">
-          <span>Senha provisória</span>
-          <input id="novaSenha" type="text" autocomplete="off" placeholder="mínimo 6 caracteres">
-          <small>O cliente entra com ela e troca depois em “Esqueci minha senha”.</small>
-        </label>
-        <div class="adm-campo">
-          <span>Acesso por</span>
-          <div class="adm-seg" id="novoPrazo" role="radiogroup" aria-label="Prazo do acesso">
-            <button type="button" role="radio" aria-checked="false" data-dias="30">30 dias</button>
-            <button type="button" role="radio" aria-checked="false" data-dias="90">90 dias</button>
-            <button type="button" role="radio" aria-checked="true" data-dias="365" class="is-on">1 ano</button>
-          </div>
-        </div>
-        <button id="btCriar" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Criar e liberar</button>
-      </div>
-    </details>
-
-    <div id="listaClientes" class="adm-clientes" aria-live="polite"></div>
-
-    <div class="adm-cabeca-secao">
-      <h2>Computadores sem conta</h2>
-      <p>Aparelhos que abriram o ATIVAVID sem estar ligados a um cliente. O e-mail mostrado é o último que entrou neles.</p>
-    </div>
-    <div id="listaSemConta" class="adm-maquinas" aria-live="polite"></div>
-  </section>
-
-  <!-- ============================== AULAS ============================== -->
-  <section id="abaAulas" class="adm-secao" role="tabpanel" hidden>
-    <div class="adm-cabeca-secao adm-cabeca-linha">
+    <header class="adm-cab">
       <div>
-        <h2>Aulas</h2>
-        <p>O que aparece para o cliente. Cada aula é um vídeo do YouTube.</p>
+        <h1 id="tituloSecao">Visão geral</h1>
+        <p id="subSecao">O que precisa de atenção hoje.</p>
       </div>
-      <button id="btNovaAula" class="adm-bt adm-bt-forte adm-bt-sm" type="button">Nova aula</button>
-    </div>
+    </header>
 
-    <form id="formAula" class="adm-form-aula" hidden>
-      <h3 id="tituloFormAula">Nova aula</h3>
-      <label class="adm-campo">
-        <span>Título</span>
-        <input id="aulaTitulo" type="text" maxlength="120" required placeholder="Como importar do YouTube">
-      </label>
-      <label class="adm-campo">
-        <span>Link do YouTube</span>
-        <input id="aulaLink" type="text" autocapitalize="off" spellcheck="false" placeholder="https://youtu.be/…">
-        <small>Cole o link inteiro; o código do vídeo sai sozinho.</small>
-      </label>
-      <div class="adm-grade-2">
+    <p id="recado" class="adm-recado" role="status" hidden></p>
+
+    <!-- ============================ VISÃO GERAL ============================ -->
+    <section id="secVisao" class="adm-secao" aria-labelledby="tituloSecao">
+      <div class="adm-kpis" id="kpis"></div>
+
+      <div class="adm-duas">
+        <article class="adm-painel">
+          <h2 class="adm-painel-titulo">Precisa de atenção</h2>
+          <div id="atencao" class="adm-atencao"></div>
+        </article>
+        <article class="adm-painel">
+          <h2 class="adm-painel-titulo">Acessaram por último</h2>
+          <div id="recentes" class="adm-recentes"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================ CLIENTES ============================ -->
+    <section id="secClientes" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+      <div class="adm-barra">
+        <label class="adm-busca">
+          <span class="adm-sr">Buscar</span>
+          <input id="busca" type="search" placeholder="Buscar e-mail, computador ou sistema…"
+                 autocapitalize="off" spellcheck="false">
+        </label>
+        <label class="adm-ordem">
+          <span class="adm-sr">Ordenar</span>
+          <select id="ordem">
+            <option value="vencimento">Vence primeiro</option>
+            <option value="acesso">Acessou por último</option>
+            <option value="videos">Mais vídeos</option>
+            <option value="nome">Nome</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="adm-chips" id="filtros" role="group" aria-label="Filtrar clientes"></div>
+
+      <details class="adm-novo">
+        <summary>Novo cliente</summary>
+        <div class="adm-novo-corpo">
+          <label class="adm-campo">
+            <span>E-mail do cliente</span>
+            <input id="novoEmail" type="email" inputmode="email" autocapitalize="off" spellcheck="false"
+                   placeholder="cliente@email.com">
+          </label>
+          <label class="adm-campo">
+            <span>Senha provisória</span>
+            <input id="novaSenha" type="text" autocomplete="off" placeholder="mínimo 6 caracteres">
+            <small>O cliente entra com ela e troca depois em “Esqueci minha senha”.</small>
+          </label>
+          <div class="adm-campo">
+            <span>Acesso por</span>
+            <div class="adm-seg" id="novoPrazo" role="radiogroup" aria-label="Prazo do acesso">
+              <button type="button" role="radio" aria-checked="false" data-dias="30">30 dias</button>
+              <button type="button" role="radio" aria-checked="false" data-dias="90">90 dias</button>
+              <button type="button" role="radio" aria-checked="true" data-dias="365" class="is-on">1 ano</button>
+            </div>
+          </div>
+          <button id="btCriar" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Criar e liberar</button>
+        </div>
+      </details>
+
+      <div id="listaClientes" class="adm-clientes" aria-live="polite"></div>
+
+      <div class="adm-cabeca-secao">
+        <h2>Computadores sem conta</h2>
+        <p>Aparelhos que abriram o ATIVAVID sem estar ligados a um cliente. O e-mail mostrado é o último que entrou neles.</p>
+      </div>
+      <div id="listaSemConta" class="adm-maquinas" aria-live="polite"></div>
+    </section>
+
+    <!-- ============================== AULAS ============================== -->
+    <section id="secAulas" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+      <div class="adm-cabeca-secao adm-cabeca-linha">
+        <div>
+          <h2>Aulas</h2>
+          <p>O que aparece para o cliente. Cada aula é um vídeo do YouTube.</p>
+        </div>
+        <button id="btNovaAula" class="adm-bt adm-bt-forte adm-bt-sm" type="button">Nova aula</button>
+      </div>
+
+      <form id="formAula" class="adm-form-aula" hidden>
+        <h3 id="tituloFormAula">Nova aula</h3>
         <label class="adm-campo">
-          <span>Seção</span>
-          <input id="aulaSecao" type="text" list="secoesExistentes" maxlength="60" placeholder="Começando">
-          <datalist id="secoesExistentes"></datalist>
+          <span>Título</span>
+          <input id="aulaTitulo" type="text" maxlength="120" required placeholder="Como importar do YouTube">
         </label>
         <label class="adm-campo">
-          <span>Ordem</span>
-          <input id="aulaOrdem" type="number" min="0" max="9999" value="100" inputmode="numeric">
+          <span>Link do YouTube</span>
+          <input id="aulaLink" type="text" autocapitalize="off" spellcheck="false" placeholder="https://youtu.be/…">
+          <small>Cole o link inteiro; o código do vídeo sai sozinho.</small>
         </label>
-      </div>
-      <label class="adm-campo">
-        <span>Descrição</span>
-        <textarea id="aulaDescricao" rows="3" maxlength="600" placeholder="O que a pessoa aprende nesta aula."></textarea>
-      </label>
-      <label class="adm-check">
-        <input id="aulaAtivo" type="checkbox" checked>
-        <span>Aparecer para o cliente</span>
-      </label>
-      <div class="adm-form-acoes">
-        <button id="btSalvarAula" class="adm-bt adm-bt-forte" type="button">Salvar aula</button>
-        <button id="btCancelarAula" class="adm-bt adm-bt-fraco" type="button">Cancelar</button>
-      </div>
-    </form>
+        <div class="adm-grade-2">
+          <label class="adm-campo">
+            <span>Seção</span>
+            <input id="aulaSecao" type="text" list="secoesExistentes" maxlength="60" placeholder="Começando">
+            <datalist id="secoesExistentes"></datalist>
+          </label>
+          <label class="adm-campo">
+            <span>Ordem</span>
+            <input id="aulaOrdem" type="number" min="0" max="9999" value="100" inputmode="numeric">
+          </label>
+        </div>
+        <label class="adm-campo">
+          <span>Descrição</span>
+          <textarea id="aulaDescricao" rows="3" maxlength="600" placeholder="O que a pessoa aprende nesta aula."></textarea>
+        </label>
+        <label class="adm-check">
+          <input id="aulaAtivo" type="checkbox" checked>
+          <span>Aparecer para o cliente</span>
+        </label>
+        <div class="adm-form-acoes">
+          <button id="btSalvarAula" class="adm-bt adm-bt-forte" type="button">Salvar aula</button>
+          <button id="btCancelarAula" class="adm-bt adm-bt-fraco" type="button">Cancelar</button>
+        </div>
+      </form>
 
-    <div id="listaAulas" class="adm-aulas" aria-live="polite"></div>
-  </section>
+      <div id="listaAulas" class="adm-aulas" aria-live="polite"></div>
+    </section>
+
+    <!-- ============================ SUPORTE ============================ -->
+    <section id="secSuporte" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+      <div class="adm-chips" id="filtrosSuporte" role="group" aria-label="Filtrar chamados"></div>
+
+      <div class="adm-suporte">
+        <div id="listaChamados" class="adm-chamados" aria-live="polite"></div>
+
+        <article id="conversa" class="adm-conversa" hidden aria-live="polite">
+          <header class="adm-conversa-topo">
+            <div class="adm-conversa-cab">
+              <h2 id="conversaAssunto"></h2>
+              <p id="conversaQuem"></p>
+            </div>
+            <button id="btFecharConversa" class="adm-bt adm-bt-fraco adm-bt-sm adm-so-mobile" type="button">Voltar</button>
+          </header>
+          <div id="conversaMensagens" class="adm-mensagens"></div>
+          <form id="formResposta" class="adm-resposta">
+            <label class="adm-sr" for="textoResposta">Resposta</label>
+            <textarea id="textoResposta" rows="3" maxlength="4000" placeholder="Escreva a resposta. O cliente vê na conta dele."></textarea>
+            <div class="adm-resposta-acoes">
+              <label class="adm-status-sel">
+                <span class="adm-sr">Status depois de enviar</span>
+                <select id="statusResposta">
+                  <option value="respondido">Respondido — esperando o cliente</option>
+                  <option value="em_analise">Em análise — ainda não respondi tudo</option>
+                  <option value="resolvido">Resolvido — encerrar</option>
+                </select>
+              </label>
+              <button id="btResponder" class="adm-bt adm-bt-forte adm-bt-sm" type="submit">Enviar resposta</button>
+            </div>
+          </form>
+        </article>
+      </div>
+    </section>
+
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261010e"></script>
+<script src="/admin.js?v=20261010f"></script>
 </body>
 </html>

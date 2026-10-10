@@ -1,11 +1,11 @@
 /* Painel admin — ATIVAVID
  *
  * Quem decide o que cada chamada pode fazer é o Postgres, não esta página:
- *   - ativavid_admin_clientes()   leitura da ficha inteira (confere ativavid_is_admin)
- *   - ativavid_admin_license(...) ações de assinatura, e o whoami que abre o painel
- *   - ativavid_admin_aulas(...)   aulas
- *   - Edge Function admin-contas  criar login, apagar conta, bloquear computador
- *     (a service role mora lá, nunca aqui)
+ *   - ativavid_admin_clientes()    ficha inteira (confere ativavid_is_admin)
+ *   - ativavid_admin_license(...)  ações de assinatura e o whoami que abre o painel
+ *   - ativavid_admin_aulas(...)    aulas
+ *   - ativavid_admin_chamados / _chamado / _responder   suporte
+ *   - Edge Function admin-contas   criar login, apagar conta, bloquear computador
  *
  * A conta é a MESMA do aplicativo. A chave abaixo é a ANON, pública de propósito.
  */
@@ -17,11 +17,26 @@
   const TRIAL_DIAS = 7;
   const DIA = 86400000;
 
+  const SECOES = {
+    visao: { titulo: "Visão geral", sub: "O que precisa de atenção hoje." },
+    clientes: { titulo: "Clientes", sub: "Assinaturas, computadores e uso. Abra a ficha de quem quiser ver tudo." },
+    aulas: { titulo: "Aulas", sub: "O que aparece para o cliente. Cada aula é um vídeo do YouTube." },
+    suporte: { titulo: "Suporte", sub: "Chamados dos clientes. Responda aqui; a resposta aparece na conta dele." },
+  };
+
+  const STATUS_CHAMADO = {
+    aberto: { rot: "Aberto", tom: "mal" },
+    em_analise: { rot: "Em análise", tom: "atencao" },
+    respondido: { rot: "Aguardando cliente", tom: "neutro" },
+    resolvido: { rot: "Resolvido", tom: "ok" },
+  };
+
   const sb = window.supabase.createClient(URL_, ANON);
   const $ = (id) => document.getElementById(id);
   const $$ = (sel, raiz = document) => Array.from(raiz.querySelectorAll(sel));
 
   const estado = {
+    secao: "visao",
     clientes: [],
     semConta: [],
     filtro: "todos",
@@ -31,6 +46,9 @@
     editandoAula: null,
     prazoNovo: 365,
     emailTroca: "",
+    chamados: [],
+    filtroChamado: "ativos",
+    chamadoAberto: null,
   };
 
   // ============================================================ utilidades
@@ -54,12 +72,17 @@
     return new Date(t).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
-  /** "agora", "há 5 min", "há 3 h", "há 2 dias" — e data quando passa de 30 dias. */
+  const hora = (iso) => {
+    const t = ms(iso);
+    if (!t) return "";
+    return new Date(t).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  };
+
+  /** "agora", "há 5 min", "há 3 h", "há 2 dias" — e a data depois de 30 dias. */
   const rel = (iso) => {
     const t = ms(iso);
     if (!t) return "nunca";
     const d = Date.now() - t;
-    if (d < 0) return "agora";
     if (d < 60000) return "agora";
     if (d < 3600000) return `há ${Math.floor(d / 60000)} min`;
     if (d < DIA) return `há ${Math.floor(d / 3600000)} h`;
@@ -105,7 +128,6 @@
     return data || {};
   }
 
-  /** Ações de assinatura: o RPC de admin, com a ação no p_action. */
   const licenca = (acao, args) => rpc("ativavid_admin_license", Object.assign({ p_action: acao }, args || {}));
 
   async function fn(corpo) {
@@ -119,7 +141,7 @@
     return data || {};
   }
 
-  /** Trava o botão enquanto a tarefa roda; erro vai para o aviso que o chamador indicar. */
+  /** Trava o botão enquanto a tarefa roda; o erro vai para o aviso indicado. */
   async function ocupado(bt, tarefa, onde) {
     if (!bt || bt.disabled) return;
     const antes = bt.textContent;
@@ -161,7 +183,6 @@
 
   // ============================================================ regras
 
-  /** Plano pela duração da liberação — a mesma regra do painel do app. */
   function planoDe(c) {
     const restam = diasAte(c.validoAte);
     const total = (ms(c.validoAte) - ms(c.clienteDesde)) / DIA;
@@ -175,7 +196,6 @@
     return { nome, total, restam };
   }
 
-  /** Situação da conta. Ordem: bloqueada > sem login > vencida > vencendo > ativa. */
   function situacaoDe(c) {
     if (c.status === "revoked") return { k: "bloqueada", rot: "Bloqueada", tom: "mal" };
     if (!c.temLogin) return { k: "semlogin", rot: "Sem login", tom: "espera" };
@@ -191,7 +211,6 @@
     return max ? new Date(max).toISOString() : "";
   }
 
-  /** Estado de um computador. Sem conta ele pode estar em trial. */
   function estadoMaquina(m, c) {
     if (m.bloqueadoEm) return { rot: "Bloqueado", tom: "mal" };
     if (c) {
@@ -215,7 +234,7 @@
     return s;
   }
 
-  // ============================================================= entrar / sair
+  // ============================================================ entrar / sair
 
   async function abrirPainel() {
     let quem;
@@ -236,6 +255,7 @@
     $("painel").hidden = false;
     $("senha").value = "";
     await carregar();
+    rotear();
     return { ok: true };
   }
 
@@ -313,6 +333,32 @@
     }, "avisoTrocar");
   }
 
+  // ============================================================ navegação
+
+  function secaoDoHash() {
+    const h = location.hash.replace("#", "");
+    return Object.prototype.hasOwnProperty.call(SECOES, h) ? h : "visao";
+  }
+
+  function rotear() {
+    const s = secaoDoHash();
+    estado.secao = s;
+    $$(".adm-nav-item").forEach((a) => {
+      const on = a.dataset.secao === s;
+      a.classList.toggle("is-on", on);
+      if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+    ["visao", "clientes", "aulas", "suporte"].forEach((k) => {
+      $(`sec${k[0].toUpperCase()}${k.slice(1)}`).hidden = k !== s;
+    });
+    $("tituloSecao").textContent = SECOES[s].titulo;
+    $("subSecao").textContent = SECOES[s].sub;
+    document.title = `${SECOES[s].titulo} — Painel admin ATIVAVID`;
+    if (s === "aulas") carregarAulas().catch((e) => recado(e.message, "erro"));
+    if (s === "suporte") carregarChamados().catch((e) => recado(e.message, "erro"));
+    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  }
+
   // ============================================================ carregar
 
   async function carregar() {
@@ -321,48 +367,106 @@
     if (!data || data.ok === false) { recado((data && data.message) || "Sem permissão.", "erro"); return; }
     estado.clientes = Array.isArray(data.clientes) ? data.clientes : [];
     estado.semConta = Array.isArray(data.maquinasSemConta) ? data.maquinasSemConta : [];
-    desenharTudo();
-  }
-
-  function desenharTudo() {
-    desenharKpis();
+    desenharVisao();
     desenharFiltros();
     desenharClientes();
     desenharSemConta();
+    const n = $("navClientes");
+    n.textContent = String(estado.clientes.length);
+    n.hidden = false;
+    carregarChamados(true).catch(() => {});
   }
 
-  // ============================================================ indicadores
+  // ============================================================ visão geral
 
-  function desenharKpis() {
+  function desenharVisao() {
     const cs = estado.clientes;
     const comLogin = cs.filter((c) => c.temLogin && c.status !== "revoked");
+    const vencidos = comLogin.filter((c) => diasAte(c.validoAte) < 0);
     const vencendo = comLogin.filter((c) => {
       const r = diasAte(c.validoAte);
       return r >= 0 && r <= 30;
-    }).length;
-    const vencidos = comLogin.filter((c) => diasAte(c.validoAte) < 0).length;
-    const bloqueados = cs.filter((c) => c.status === "revoked").length;
+    });
+    const bloqueados = cs.filter((c) => c.status === "revoked");
     const maquinas = cs.flatMap((c) => c.computadores || []).concat(estado.semConta);
-    const umDia = maquinas.filter((m) => Date.now() - ms(m.ultimoAcesso) < DIA).length;
+    const hoje = maquinas.filter((m) => Date.now() - ms(m.ultimoAcesso) < DIA).length;
     const videosMes = cs.reduce((s, c) => s + Number(c.videosMes || 0), 0);
+    const chamadosAbertos = estado.chamados.filter((x) => x.status === "aberto" || x.status === "em_analise").length;
 
-    const itens = [
-      ["Clientes ativos", comLogin.length - vencidos, "ok", `de ${cs.length} cadastrados`],
-      ["Vencendo", vencendo, vencendo ? "atencao" : "neutro", "nos próximos 30 dias"],
-      ["Vencidos", vencidos, vencidos ? "mal" : "neutro", bloqueados ? `${bloqueados} bloqueado(s)` : "nenhum bloqueado"],
-      ["Online hoje", umDia, "ok", `de ${maquinas.length} computadores`],
-      ["Vídeos este mês", videosMes, "neutro", "editados pelos clientes"],
-    ];
     const kp = $("kpis");
     kp.innerHTML = "";
+    const itens = [
+      ["Clientes ativos", comLogin.length - vencidos.length, "ok", `de ${cs.length} cadastrados`],
+      ["Vencendo", vencendo.length, vencendo.length ? "atencao" : "neutro", "nos próximos 30 dias"],
+      ["Vencidos", vencidos.length, vencidos.length ? "mal" : "neutro", bloqueados.length ? `${bloqueados.length} bloqueado(s)` : "nenhum bloqueado"],
+      ["Online hoje", hoje, "ok", `de ${maquinas.length} computadores`],
+      ["Vídeos este mês", videosMes, "neutro", "editados pelos clientes"],
+    ];
     for (const [rot, n, tom, sub] of itens) {
       const k = el("div", `adm-kpi adm-kpi-${tom}`);
       k.append(el("span", "adm-kpi-rot", rot), el("strong", "adm-kpi-n", n), el("span", "adm-kpi-sub", sub));
       kp.appendChild(k);
     }
+
+    // ---- precisa de atenção
+    const at = $("atencao");
+    at.innerHTML = "";
+    const pendencias = [];
+    for (const c of vencidos) pendencias.push({ tom: "mal", titulo: c.email, texto: `Venceu ${dia(c.validoAte)}. Os computadores dele já não abrem.`, acao: "Ver ficha", id: c.id });
+    for (const c of vencendo.filter((x) => diasAte(x.validoAte) <= 14)) {
+      pendencias.push({ tom: "atencao", titulo: c.email, texto: `Vence em ${diasAte(c.validoAte)} dia(s). Bom momento para falar sobre renovação.`, acao: "Ver ficha", id: c.id });
+    }
+    for (const c of cs.filter((x) => !x.temLogin)) {
+      pendencias.push({ tom: "espera", titulo: c.email, texto: "Dias reservados, mas sem login: ainda não valem.", acao: "Ver ficha", id: c.id });
+    }
+    if (chamadosAbertos) {
+      pendencias.push({ tom: "mal", titulo: plural(chamadosAbertos, "chamado aguardando", "chamados aguardando"), texto: "Clientes esperando resposta.", acao: "Abrir suporte", secao: "suporte" });
+    }
+    const bloqMaq = maquinas.filter((m) => m.bloqueadoEm).length;
+    if (bloqMaq) {
+      pendencias.push({ tom: "espera", titulo: plural(bloqMaq, "computador bloqueado", "computadores bloqueados"), texto: "Continuam bloqueados até você desbloquear.", acao: "Ver clientes", secao: "clientes" });
+    }
+    if (!pendencias.length) {
+      at.appendChild(el("p", "adm-vazio adm-vazio-ok", "Nada pendente. Tudo em dia."));
+    }
+    for (const p of pendencias.slice(0, 12)) {
+      const item = el("div", `adm-pend adm-pend-${p.tom}`);
+      const corpo = el("div", "adm-pend-corpo");
+      corpo.append(el("strong", "", p.titulo), el("span", "", p.texto));
+      const bt = el("button", "adm-bt adm-bt-fraco adm-bt-sm", p.acao);
+      bt.type = "button";
+      bt.addEventListener("click", () => {
+        if (p.secao) { location.hash = p.secao; return; }
+        estado.abertos.add(p.id);
+        estado.filtro = "todos";
+        location.hash = "clientes";
+      });
+      item.append(corpo, bt);
+      at.appendChild(item);
+    }
+
+    // ---- acessaram por último
+    const rc = $("recentes");
+    rc.innerHTML = "";
+    const recentes = cs
+      .map((c) => ({ c, t: ms(ultimoAcessoDo(c)) }))
+      .filter((x) => x.t > 0)
+      .sort((a, b) => b.t - a.t)
+      .slice(0, 6);
+    if (!recentes.length) {
+      rc.appendChild(el("p", "adm-vazio", "Ninguém abriu o ATIVAVID ainda."));
+    }
+    for (const { c, t } of recentes) {
+      const linha = el("div", "adm-recente");
+      linha.append(el("span", "adm-avatar adm-avatar-mini", iniciais(c.email)));
+      const txt = el("div", "adm-recente-txt");
+      txt.append(el("strong", "", c.email), el("span", "", rel(new Date(t).toISOString())));
+      linha.appendChild(txt);
+      rc.appendChild(linha);
+    }
   }
 
-  // ============================================================ filtros
+  // ============================================================ clientes
 
   const FILTROS = [
     ["todos", "Todos"],
@@ -419,8 +523,6 @@
     return lista.slice().sort(cmp);
   }
 
-  // ============================================================ clientes
-
   function desenharClientes() {
     const q = $("busca").value.trim().toLowerCase();
     const alvo = $("listaClientes");
@@ -444,7 +546,6 @@
     const art = el("article", `adm-cli adm-cli-${s.tom}`);
     art.dataset.id = c.id;
 
-    // ---- topo: quem é e como está
     const topo = el("div", "adm-cli-topo");
     topo.append(el("span", `adm-avatar adm-avatar-${s.tom}`, iniciais(c.email)));
     const quem = el("div", "adm-cli-quem");
@@ -456,7 +557,6 @@
     topo.appendChild(chips);
     art.appendChild(topo);
 
-    // ---- validade
     const val = el("div", "adm-validade");
     const legenda = el("div", "adm-validade-leg");
     legenda.append(el("span", "", c.temLogin ? `Vence ${dia(c.validoAte)}` : "Dias reservados, sem login"));
@@ -471,7 +571,6 @@
     val.appendChild(trilho);
     art.appendChild(val);
 
-    // ---- números
     const numeros = el("dl", "adm-numeros");
     const numero = (rot, valor, sub) => {
       const w = el("div", "adm-numero");
@@ -487,7 +586,6 @@
     );
     art.appendChild(numeros);
 
-    // ---- expandir
     const bt = el("button", "adm-expandir", aberto ? "Fechar ficha" : "Abrir ficha");
     bt.type = "button";
     bt.setAttribute("aria-expanded", aberto ? "true" : "false");
@@ -507,15 +605,10 @@
     const maqs = c.computadores || [];
     const f = el("div", "adm-ficha");
 
-    // ---- coluna da assinatura
     const sub = el("section", "adm-ficha-col");
     sub.appendChild(el("h4", "adm-ficha-titulo", "Assinatura"));
     const dl = el("dl", "adm-ficha-dados");
-    const linha = (rot, valor) => {
-      const dt = el("dt", "", rot);
-      const dd = el("dd", "", valor);
-      dl.append(dt, dd);
-    };
+    const linha = (rot, valor) => dl.append(el("dt", "", rot), el("dd", "", valor));
     linha("Plano", p.nome);
     linha("Situação", s.rot);
     linha("Início", dia(c.clienteDesde));
@@ -531,7 +624,6 @@
         "Os dias estão reservados, mas só valem quando existir login com este e-mail. Use “Criar e liberar” ou peça que o cliente se cadastre."));
     }
 
-    // ---- ações da assinatura
     const acoes = el("div", "adm-acoes");
     const prazo = el("div", "adm-seg adm-seg-mini");
     prazo.setAttribute("role", "radiogroup");
@@ -542,7 +634,6 @@
       b.type = "button";
       b.setAttribute("role", "radio");
       b.setAttribute("aria-checked", d === escolhido ? "true" : "false");
-      b.dataset.dias = String(d);
       b.addEventListener("click", () => {
         escolhido = d;
         $$("button", prazo).forEach((x) => {
@@ -583,7 +674,6 @@
     sub.appendChild(acoes);
     f.appendChild(sub);
 
-    // ---- coluna dos computadores
     const col = el("section", "adm-ficha-col");
     col.appendChild(el("h4", "adm-ficha-titulo", maqs.length
       ? plural(maqs.length, "Computador ligado à conta", "Computadores ligados à conta")
@@ -597,29 +687,32 @@
     return f;
   }
 
-  /** Um computador, com o e-mail que usou nele, o uso e o que fazer com ele. */
-  function linhaMaquina(m, c) {
-    const st = estadoMaquina(m, c);
-    const box = el("div", `adm-maq adm-maq-${st.tom}`);
-
+  function cabecaMaquina(m, st) {
     const topo = el("div", "adm-maq-topo");
     const nome = el("div", "adm-maq-nome");
     nome.append(el("strong", "", m.label || m.host || shortId(m.deviceId)));
     nome.append(el("span", "adm-maq-id", [m.host, m.osUser].filter(Boolean).join(" · ") || shortId(m.deviceId)));
     topo.append(nome, chip(st.rot, st.tom));
-    box.appendChild(topo);
+    return topo;
+  }
 
+  function gradeMaquina(m, comTrial) {
     const grade = el("dl", "adm-maq-grade");
-    const campo = (rot, valor) => { grade.append(el("dt", "", rot), el("dd", "", valor)); };
+    const campo = (rot, valor) => grade.append(el("dt", "", rot), el("dd", "", valor));
     campo("Último e-mail que abriu", ultimoEmailDo(m) || "—");
     campo("Último acesso", rel(m.ultimoAcesso));
     campo("Aberturas", String(m.aberturas || 0));
     campo("Vídeos", `${m.videosMes || 0} este mês · ${m.videos || 0} no total`);
-    campo("Primeira vez", dia(m.primeiraVez));
+    if (comTrial) campo("Início do trial", m.trialInicio ? dia(m.trialInicio) : "sem trial");
+    else campo("Primeira vez", dia(m.primeiraVez));
     if (m.bloqueadoEm) campo("Bloqueado em", `${dia(m.bloqueadoEm)}${m.motivoBloqueio ? ` — ${m.motivoBloqueio}` : ""}`);
-    box.appendChild(grade);
+    return grade;
+  }
 
-    box.appendChild(botaoBloquearMaquina(m));
+  function linhaMaquina(m, c) {
+    const st = estadoMaquina(m, c);
+    const box = el("div", `adm-maq adm-maq-${st.tom}`);
+    box.append(cabecaMaquina(m, st), gradeMaquina(m, false), botaoBloquearMaquina(m));
     return box;
   }
 
@@ -646,8 +739,6 @@
     return s.length > 14 ? `${s.slice(0, 14)}…` : s;
   }
 
-  // ============================================================ sem conta
-
   function desenharSemConta() {
     const alvo = $("listaSemConta");
     alvo.innerHTML = "";
@@ -658,26 +749,10 @@
     for (const m of estado.semConta) {
       const st = estadoMaquina(m, null);
       const box = el("div", `adm-maq adm-maq-${st.tom}`);
-      const topo = el("div", "adm-maq-topo");
-      const nome = el("div", "adm-maq-nome");
-      nome.append(el("strong", "", m.label || m.host || shortId(m.deviceId)));
-      nome.append(el("span", "adm-maq-id", [m.host, m.osUser].filter(Boolean).join(" · ") || shortId(m.deviceId)));
-      topo.append(nome, chip(st.rot, st.tom));
-      box.appendChild(topo);
-      const grade = el("dl", "adm-maq-grade");
-      const campo = (rot, valor) => { grade.append(el("dt", "", rot), el("dd", "", valor)); };
-      campo("Último e-mail que abriu", ultimoEmailDo(m) || "—");
-      campo("Último acesso", rel(m.ultimoAcesso));
-      campo("Aberturas", String(m.aberturas || 0));
-      campo("Vídeos", `${m.videosMes || 0} este mês · ${m.videos || 0} no total`);
-      campo("Início do trial", m.trialInicio ? dia(m.trialInicio) : "sem trial");
-      box.appendChild(grade);
-      box.appendChild(botaoBloquearMaquina(m));
+      box.append(cabecaMaquina(m, st), gradeMaquina(m, true), botaoBloquearMaquina(m));
       alvo.appendChild(box);
     }
   }
-
-  // ============================================================ criar cliente
 
   function criarCliente(bt) {
     const email = $("novoEmail").value.trim().toLowerCase();
@@ -686,7 +761,6 @@
     if (!email.includes("@")) return recado("Informe o e-mail do cliente.", "erro");
     if (senha.length < 6) return recado("A senha provisória precisa de pelo menos 6 caracteres.", "erro");
     return ocupado(bt, async () => {
-      // Login primeiro: o grant_access só acha o user_id se a conta já existir.
       const login = await fn({ acao: "criar_login", email, senha });
       const acesso = await licenca("grant_access", { p_email: email, p_days: dias, p_max_devices: 1 });
       recado(`${login.message || "Login pronto."} ${acesso.message || ""}`.trim(),
@@ -705,6 +779,119 @@
       const on = x === bt;
       x.classList.toggle("is-on", on);
       x.setAttribute("aria-checked", on ? "true" : "false");
+    });
+  }
+
+  // ============================================================ suporte
+
+  const FILTROS_CHAMADO = [
+    ["ativos", "Em aberto"],
+    ["aberto", "Novos"],
+    ["em_analise", "Em análise"],
+    ["respondido", "Aguardando cliente"],
+    ["resolvido", "Resolvidos"],
+    ["todos", "Todos"],
+  ];
+
+  async function carregarChamados(silencioso) {
+    const r = await rpc("ativavid_admin_chamados", { p_status: null });
+    estado.chamados = Array.isArray(r.chamados) ? r.chamados : [];
+    const abertos = estado.chamados.filter((x) => x.status === "aberto" || x.status === "em_analise").length;
+    const n = $("navSuporte");
+    n.textContent = String(abertos);
+    n.hidden = abertos === 0;
+    if (estado.secao === "suporte") desenharSuporte();
+    if (!silencioso) desenharVisao();
+  }
+
+  function filtraChamados() {
+    const f = estado.filtroChamado;
+    return estado.chamados.filter((x) => {
+      if (f === "todos") return true;
+      if (f === "ativos") return x.status === "aberto" || x.status === "em_analise";
+      return x.status === f;
+    }).sort((a, b) => ms(b.atualizado_em) - ms(a.atualizado_em));
+  }
+
+  function desenharSuporte() {
+    const filtros = $("filtrosSuporte");
+    filtros.innerHTML = "";
+    for (const [k, rot] of FILTROS_CHAMADO) {
+      const b = el("button", "adm-chip-filtro", rot);
+      b.type = "button";
+      b.setAttribute("aria-pressed", estado.filtroChamado === k ? "true" : "false");
+      if (estado.filtroChamado === k) b.classList.add("is-on");
+      b.addEventListener("click", () => { estado.filtroChamado = k; desenharSuporte(); });
+      filtros.appendChild(b);
+    }
+
+    const alvo = $("listaChamados");
+    alvo.innerHTML = "";
+    const lista = filtraChamados();
+    if (!lista.length) {
+      alvo.appendChild(el("p", "adm-vazio", estado.chamados.length
+        ? "Nenhum chamado neste filtro."
+        : "Nenhum chamado ainda. Quando um cliente abrir um, ele aparece aqui."));
+      return;
+    }
+    for (const x of lista) {
+      const st = STATUS_CHAMADO[x.status] || { rot: x.status, tom: "neutro" };
+      const it = el("button", `adm-chamado ${estado.chamadoAberto === x.id ? "is-on" : ""}`);
+      it.type = "button";
+      it.dataset.id = String(x.id);
+      const topo = el("div", "adm-chamado-topo");
+      topo.append(el("strong", "adm-chamado-assunto", x.assunto), chip(st.rot, st.tom));
+      const quem = el("span", "adm-chamado-quem", x.email);
+      const previa = el("p", "adm-chamado-previa", `${x.ultimo_autor === "admin" ? "Você: " : ""}${x.ultima || ""}`);
+      const rodape = el("span", "adm-chamado-meta", `${rel(x.atualizado_em)} · ${x.mensagens} mensagem(ns)`);
+      it.append(topo, quem, previa, rodape);
+      it.addEventListener("click", () => abrirChamado(x.id));
+      alvo.appendChild(it);
+    }
+  }
+
+  async function abrirChamado(id) {
+    estado.chamadoAberto = id;
+    desenharSuporte();
+    const r = await rpc("ativavid_admin_chamado", { p_id: id });
+    const ch = r.chamado;
+    const conv = $("conversa");
+    conv.hidden = false;
+    conv.classList.add("is-aberta");
+    $("conversaAssunto").textContent = ch.assunto;
+    $("conversaQuem").textContent = `${ch.email} · aberto ${dia(ch.criado_em)}`;
+    const msgs = $("conversaMensagens");
+    msgs.innerHTML = "";
+    for (const m of r.mensagens || []) {
+      const linha = el("div", `adm-msg adm-msg-${m.autor === "admin" ? "eu" : "cliente"}`);
+      linha.append(el("p", "adm-msg-texto", m.texto), el("span", "adm-msg-hora", `${m.autor === "admin" ? "Você" : "Cliente"} · ${hora(m.criado_em)}`));
+      msgs.appendChild(linha);
+    }
+    msgs.scrollTop = msgs.scrollHeight;
+    $("statusResposta").value = ch.status === "resolvido" ? "resolvido" : "respondido";
+    $("textoResposta").value = "";
+    conv.dataset.id = String(id);
+  }
+
+  function fecharConversa() {
+    estado.chamadoAberto = null;
+    $("conversa").hidden = true;
+    $("conversa").classList.remove("is-aberta");
+    desenharSuporte();
+  }
+
+  async function responder(ev) {
+    ev.preventDefault();
+    const id = Number($("conversa").dataset.id);
+    const texto = $("textoResposta").value.trim();
+    const status = $("statusResposta").value;
+    if (!id) return;
+    if (!texto) return recado("Escreva a resposta antes de enviar.", "erro");
+    await ocupado($("btResponder"), async () => {
+      await rpc("ativavid_admin_responder", { p_id: id, p_texto: texto, p_status: status });
+      recado("Resposta enviada. O cliente vê na conta dele.", "ok");
+      await carregarChamados(true);
+      await abrirChamado(id);
     });
   }
 
@@ -816,19 +1003,6 @@
     });
   }
 
-  // ============================================================ abas
-
-  function trocarAba(nome) {
-    $$(".adm-aba").forEach((b) => {
-      const on = b.dataset.aba === nome;
-      b.classList.toggle("is-on", on);
-      b.setAttribute("aria-selected", on ? "true" : "false");
-    });
-    $("abaClientes").hidden = nome !== "clientes";
-    $("abaAulas").hidden = nome !== "aulas";
-    if (nome === "aulas") carregarAulas().catch((e) => recado(e.message, "erro"));
-  }
-
   // ============================================================ ligar
 
   $("formEntrar").addEventListener("submit", entrar);
@@ -842,13 +1016,14 @@
   $$("#novoPrazo button").forEach((b) => b.addEventListener("click", () => escolherPrazoNovo(b)));
   $("busca").addEventListener("input", desenharClientes);
   $("ordem").addEventListener("change", (e) => { estado.ordem = e.target.value; desenharClientes(); });
-  $$(".adm-aba").forEach((b) => b.addEventListener("click", () => trocarAba(b.dataset.aba)));
   $("btNovaAula").addEventListener("click", () => abrirFormAula(null));
   $("btCancelarAula").addEventListener("click", fecharFormAula);
   $("btSalvarAula").addEventListener("click", (e) => salvarAula(e.currentTarget));
+  $("btFecharConversa").addEventListener("click", fecharConversa);
+  $("formResposta").addEventListener("submit", responder);
+  window.addEventListener("hashchange", () => { if (!$("painel").hidden) rotear(); });
 
-  // Sessão guardada não é permissão: ela só evita redigitar a senha.
-  // Quem abre o painel continua sendo o whoami do servidor.
+  // Sessão guardada não é permissão: só evita redigitar a senha.
   sb.auth.getSession().then(({ data }) => {
     if (data && data.session) abrirPainel();
   });
