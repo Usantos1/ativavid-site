@@ -1950,3 +1950,12 @@ html.adm-sem-rolagem body { overflow: hidden; }
 .adm-sup-busca svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--texto-3); stroke-width: 2; stroke-linecap: round; }
 .adm-sup-busca input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--tinta); outline: none; }
 .adm-sup-itens { border-top: 1px solid var(--borda); }
+
+/* abas cabem na largura; Filtros fica na linha da busca */
+.adm-sup-filtros { overflow: hidden; }
+.adm-sup-aba { min-width: 0; padding: 8px 6px; font-size: 12.5px; }
+.adm-sup-aba > span { overflow: hidden; text-overflow: ellipsis; }
+.adm-sup-busca-linha { display: flex; align-items: center; gap: 8px; margin: 0 10px 10px; }
+.adm-sup-busca-linha .adm-sup-busca { flex: 1; margin: 0; min-width: 0; }
+.adm-sup-busca-linha .adm-sup-filtrar { flex: none; height: 40px; padding: 0 12px; background: var(--campo); border-color: var(--borda); }
+.adm-sup-busca-linha .adm-sup-filtrar.is-on { background: var(--azul-fundo); border-color: color-mix(in srgb, var(--azul) 35%, transparent); }

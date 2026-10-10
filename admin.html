@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261010w">
+  <link rel="stylesheet" href="/admin.css?v=20261010x">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -232,11 +232,14 @@
         <div class="adm-sup" id="suporteGrade">
           <aside class="adm-vidro adm-sup-lista" aria-label="Chamados">
             <div class="adm-sup-filtros" id="filtrosSuporte" role="group" aria-label="Filtrar chamados"></div>
-            <label class="adm-sup-busca">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
-              <span class="adm-sr">Buscar chamado</span>
-              <input id="buscaChamados" type="search" placeholder="Nome, e-mail ou nº do chamado" autocomplete="off" spellcheck="false">
-            </label>
+            <div class="adm-sup-busca-linha">
+              <label class="adm-sup-busca">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+                <span class="adm-sr">Buscar chamado</span>
+                <input id="buscaChamados" type="search" placeholder="Nome, e-mail ou nº" autocomplete="off" spellcheck="false">
+              </label>
+              <div id="filtrosMais"></div>
+            </div>
             <div id="listaChamados" class="adm-sup-itens" aria-live="polite"></div>
           </aside>
 
@@ -317,6 +320,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261010w"></script>
+<script src="/admin.js?v=20261010x"></script>
 </body>
 </html>

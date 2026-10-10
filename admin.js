@@ -1331,7 +1331,7 @@
       menu.appendChild(it);
     }
     caixa.append(abrir, menu);
-    filtros.appendChild(caixa);
+    $("filtrosMais").replaceChildren(caixa);
 
     const alvo = $("listaChamados");
     alvo.innerHTML = "";
