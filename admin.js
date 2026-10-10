@@ -5,6 +5,10 @@
  *     de qualquer ação, com o token de quem chamou;
  *   - Edge Function `admin-contas`, onde mora a service role (nunca aqui).
  *
+ * A conta é a MESMA do aplicativo: Windows, Mac e iPhone entram por este
+ * mesmo Auth, e a troca de senha usa o mesmo caminho (código no e-mail →
+ * /auth/v1/verify com type=recovery), igual a `app/auth.py`.
+ *
  * A chave abaixo é a ANON, pública de propósito: quem decide o que ela pode
  * fazer é o Postgres, não este arquivo.
  */
@@ -17,7 +21,7 @@
   const sb = window.supabase.createClient(URL_, ANON);
   const $ = (id) => document.getElementById(id);
 
-  const estado = { acessos: [], aparelhos: [], aba: "assinaturas" };
+  const estado = { acessos: [], aparelhos: [], emailTroca: "" };
 
   // ---------------------------------------------------------------- utilidades
 
@@ -36,6 +40,16 @@
     return !Number.isNaN(d.getTime()) && d.getTime() < Date.now();
   }
 
+  /** Mostra um aviso num <p>. `tom` "ok" pinta de verde; o padrão é erro. */
+  function avisar(id, msg, tom) {
+    const el = $(id);
+    if (!msg) { el.hidden = true; return; }
+    el.textContent = msg;
+    if (tom) el.dataset.tom = tom; else delete el.dataset.tom;
+    el.hidden = false;
+  }
+
+  /** Recado do painel. Só serve DEPOIS de entrar — o painel está escondido antes. */
   function recado(msg, tom) {
     const el = $("recado");
     if (!msg) { el.hidden = true; return; }
@@ -45,7 +59,6 @@
     el.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
-  /** Chama o RPC de admin. Ele reconfere quem somos a cada chamada. */
   async function rpc(acao, args) {
     const { data, error } = await sb.rpc("ativavid_admin_license",
       Object.assign({ p_action: acao }, args || {}));
@@ -54,11 +67,9 @@
     return data || {};
   }
 
-  /** Chama a Edge Function (a que tem a service role do lado de lá). */
   async function fn(corpo) {
     const { data, error } = await sb.functions.invoke("admin-contas", { body: corpo });
     if (error) {
-      // O corpo do erro traz a mensagem boa; o `error.message` sozinho diz só "non-2xx".
       let detalhe = "";
       try { detalhe = (await error.context?.json())?.message || ""; } catch { /* sem corpo */ }
       throw new Error(detalhe || error.message || "Falhou a chamada ao servidor.");
@@ -67,8 +78,9 @@
     return data || {};
   }
 
-  /** Roda uma ação travando o botão, para não disparar duas vezes no toque. */
-  async function comBotao(bt, tarefa) {
+  /** Roda a tarefa travando o botão. `ondeAvisar` é o id do <p> que mostra a
+   *  falha — sem ele o erro iria para o painel escondido e sumiria da vista. */
+  async function comBotao(bt, tarefa, ondeAvisar) {
     if (bt.disabled) return;
     const antes = bt.textContent;
     bt.disabled = true;
@@ -76,7 +88,9 @@
     try {
       await tarefa();
     } catch (e) {
-      recado(e.message || String(e), "erro");
+      const msg = (e && e.message) || String(e);
+      if (ondeAvisar) avisar(ondeAvisar, msg);
+      else recado(msg, "erro");
     } finally {
       bt.disabled = false;
       bt.textContent = antes;
@@ -87,52 +101,109 @@
 
   async function entrar(ev) {
     ev.preventDefault();
-    const err = $("erroEntrar");
-    err.hidden = true;
+    avisar("erroEntrar", "");
+    const email = $("email").value.trim().toLowerCase();
     await comBotao($("btEntrar"), async () => {
-      const { error } = await sb.auth.signInWithPassword({
-        email: $("email").value.trim().toLowerCase(),
-        password: $("senha").value,
-      });
+      const { error } = await sb.auth.signInWithPassword({ email, password: $("senha").value });
       if (error) {
-        err.textContent = /invalid/i.test(error.message || "")
-          ? "E-mail ou senha errados."
-          : (error.message || "Não consegui entrar.");
-        err.hidden = false;
-        return;
+        const m = (error.message || "").toLowerCase();
+        if (m.includes("invalid")) throw new Error("E-mail ou senha errados.");
+        if (m.includes("confirm")) throw new Error("Este e-mail ainda não foi confirmado.");
+        throw new Error(error.message || "Não consegui entrar.");
       }
-      const ok = await abrirPainel();
-      if (!ok) {
-        err.textContent = "Esta conta não é de admin.";
-        err.hidden = false;
+      const r = await abrirPainel();
+      if (r.ok) return;
+      if (r.motivo === "nao_admin") {
+        throw new Error(`A conta ${email} entrou, mas não é admin. Só e-mails da tabela "admins" abrem este painel.`);
       }
-    });
+      throw new Error(r.detalhe || "O servidor não confirmou quem é você. Tente de novo.");
+    }, "erroEntrar");
   }
 
-  /** Só o servidor decide se o painel abre. Sem isso, seria palpite do navegador. */
+  /** Só o servidor decide se o painel abre. Devolve o motivo quando não abre,
+   *  para a tela conseguir dizer o que houve em vez de ficar muda. */
   async function abrirPainel() {
     let quem;
     try {
       quem = await rpc("whoami");
-    } catch {
+    } catch (e) {
       await sb.auth.signOut();
-      return false;
+      const msg = (e && e.message) || "";
+      if (/forbidden|admin/i.test(msg)) return { ok: false, motivo: "nao_admin" };
+      return { ok: false, motivo: "erro", detalhe: msg };
     }
     if (!quem.admin) {
       await sb.auth.signOut();
-      return false;
+      return { ok: false, motivo: "nao_admin" };
     }
     $("quem").textContent = texto(quem.email);
     $("telaEntrar").hidden = true;
     $("painel").hidden = false;
     $("senha").value = "";
     await carregar();
-    return true;
+    return { ok: true };
   }
 
   async function sair() {
     await sb.auth.signOut();
     location.reload();
+  }
+
+  // ------------------------------------------------------- trocar a senha
+
+  function mostrarTrocar(mostrar) {
+    $("formEntrar").hidden = mostrar;
+    $("formTrocar").hidden = !mostrar;
+    avisar("avisoTrocar", "");
+    if (mostrar) $("emailTrocar").value = $("email").value.trim().toLowerCase();
+  }
+
+  function pedirCodigo(bt) {
+    const email = $("emailTrocar").value.trim().toLowerCase();
+    if (!email.includes("@")) return avisar("avisoTrocar", "Informe o e-mail da sua conta.");
+    return comBotao(bt, async () => {
+      // Mesma rota que o app usa (/auth/v1/recover). O modelo do e-mail tem
+      // {{ .Token }}, então chega CÓDIGO — não link.
+      const { error } = await sb.auth.resetPasswordForEmail(email);
+      if (error) throw new Error(error.message || "Não consegui mandar o código.");
+      estado.emailTroca = email;
+      $("passoPedir").hidden = true;
+      $("passoCodigo").hidden = false;
+      avisar("avisoTrocar",
+        `Se existir conta com ${email}, o código chega em instantes. Olhe também o spam.`, "ok");
+      $("codigo").focus();
+    }, "avisoTrocar");
+  }
+
+  function trocarSenha(bt) {
+    const codigo = $("codigo").value.replace(/\D/g, "");
+    const senha = $("senhaNova").value;
+    if (codigo.length < 4) return avisar("avisoTrocar", "Digite o código que chegou no e-mail.");
+    if (senha.length < 6) return avisar("avisoTrocar", "A senha nova precisa de pelo menos 6 caracteres.");
+
+    return comBotao(bt, async () => {
+      // verify (type=recovery) abre uma sessão de verdade; updateUser grava a
+      // senha nova. É o mesmo par que `app/auth.py` faz no computador.
+      const { error: e1 } = await sb.auth.verifyOtp({ email: estado.emailTroca, token: codigo, type: "recovery" });
+      if (e1) {
+        const m = (e1.message || "").toLowerCase();
+        if (m.includes("expired")) throw new Error("O código venceu. Peça um novo.");
+        throw new Error("Código errado ou vencido. Peça um código novo.");
+      }
+      const { error: e2 } = await sb.auth.updateUser({ password: senha });
+      if (e2) {
+        const m = (e2.message || "").toLowerCase();
+        if (m.includes("different")) throw new Error("A senha nova precisa ser diferente da antiga.");
+        throw new Error(e2.message || "Não consegui trocar a senha.");
+      }
+      // Trocou. Agora o painel só abre se esta conta for admin.
+      const r = await abrirPainel();
+      if (r.ok) return;
+      mostrarTrocar(false);
+      avisar("erroEntrar", r.motivo === "nao_admin"
+        ? `Senha trocada. Mas ${estado.emailTroca} não é admin, então este painel não abre — use a senha nova no aplicativo.`
+        : "Senha trocada, mas o servidor não confirmou quem é você. Entre de novo.", "ok");
+    }, "avisoTrocar");
   }
 
   // ------------------------------------------------------------------ carregar
@@ -144,7 +215,7 @@
       estado.acessos = Array.isArray(a.access) ? a.access : [];
       estado.aparelhos = Array.isArray(d.devices) ? d.devices : [];
     } catch (e) {
-      recado(e.message || String(e), "erro");
+      recado((e && e.message) || String(e), "erro");
       return;
     }
     desenhar();
@@ -158,11 +229,11 @@
 
   // ------------------------------------------------------------- assinaturas
 
-  function selo(acesso) {
-    if (acesso.status === "revoked") return ['<span class="adm-selo adm-selo-mal">Bloqueada</span>', "mal"];
-    if (!acesso.user_id) return ['<span class="adm-selo adm-selo-espera">Sem conta</span>', "espera"];
-    if (venceu(acesso.valid_until)) return ['<span class="adm-selo adm-selo-mal">Vencida</span>', "mal"];
-    return ['<span class="adm-selo adm-selo-ok">Ativa</span>', "ok"];
+  function selo(a) {
+    if (a.status === "revoked") return '<span class="adm-selo adm-selo-mal">Bloqueada</span>';
+    if (!a.user_id) return '<span class="adm-selo adm-selo-espera">Sem conta</span>';
+    if (venceu(a.valid_until)) return '<span class="adm-selo adm-selo-mal">Vencida</span>';
+    return '<span class="adm-selo adm-selo-ok">Ativa</span>';
   }
 
   function desenharAssinaturas() {
@@ -174,14 +245,13 @@
     }
     alvo.innerHTML = "";
     for (const a of itens) {
-      const [pastilha] = selo(a);
       const linha = document.createElement("div");
       linha.className = "adm-linha";
       linha.innerHTML = `
         <div>
           <div class="adm-linha-topo">
             <span class="adm-nome"></span>
-            ${pastilha}
+            ${selo(a)}
           </div>
           <p class="adm-dado">
             Vale até <b>${dia(a.valid_until)}</b> · ${a.max_devices || 1} computador(es)
@@ -268,7 +338,7 @@
       linha.querySelector(".adm-dono").textContent = texto(d.account_email) || "sem conta";
       const bt = linha.querySelector("button");
       bt.addEventListener("click", () => {
-        if (!confirm(`Bloquear este computador?\n\nO ATIVAVID para de abrir nele. A assinatura do cliente continua valendo nos outros.`)) return;
+        if (!confirm("Bloquear este computador?\n\nO ATIVAVID para de abrir nele. A assinatura do cliente continua valendo nos outros.")) return;
         comBotao(bt, async () => {
           const r = await fn({ acao: "bloquear_maquina", device_id: d.device_id });
           recado(r.message || "Computador bloqueado.", "ok");
@@ -298,10 +368,8 @@
       // ache o user_id e o acesso já valha. Invertido, cairia em "Sem conta".
       const login = await fn({ acao: "criar_login", email, senha });
       const acesso = await rpc("grant_access", { p_email: email, p_days: dias, p_max_devices: 1 });
-      recado(
-        `${login.message || "Login pronto."} ${acesso.message || ""}`.trim(),
-        acesso.pendingSignup ? "atencao" : "ok",
-      );
+      recado(`${login.message || "Login pronto."} ${acesso.message || ""}`.trim(),
+        acesso.pendingSignup ? "atencao" : "ok");
       $("novoEmail").value = "";
       $("novaSenha").value = "";
       await carregar();
@@ -311,7 +379,6 @@
   // -------------------------------------------------------------------- abas
 
   function trocarAba(nome) {
-    estado.aba = nome;
     document.querySelectorAll(".adm-aba").forEach((b) => {
       const on = b.dataset.aba === nome;
       b.classList.toggle("is-on", on);
@@ -324,6 +391,11 @@
   // ------------------------------------------------------------------- ligar
 
   $("formEntrar").addEventListener("submit", entrar);
+  $("btEsqueci").addEventListener("click", () => mostrarTrocar(true));
+  $("btVoltar").addEventListener("click", () => mostrarTrocar(false));
+  $("btPedirCodigo").addEventListener("click", (e) => pedirCodigo(e.currentTarget));
+  $("btReenviar").addEventListener("click", (e) => pedirCodigo(e.currentTarget));
+  $("btTrocar").addEventListener("click", (e) => trocarSenha(e.currentTarget));
   $("btSair").addEventListener("click", sair);
   $("btCriar").addEventListener("click", criarCliente);
   $("btRecarregar").addEventListener("click", (e) => comBotao(e.currentTarget, carregar));

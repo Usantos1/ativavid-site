@@ -13,12 +13,14 @@
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css?v=20261006b">
-  <link rel="stylesheet" href="/admin.css?v=20261010a">
+  <link rel="stylesheet" href="/admin.css?v=20261010b">
 </head>
 <body class="adm">
 
-<!-- Entrar. É a única coisa visível enquanto o servidor não confirmar quem é. -->
+<!-- Entrar. É a única coisa visível enquanto o servidor não confirmar quem é.
+     Mesma conta do aplicativo: o Windows, o Mac e o iPhone entram por aqui. -->
 <main id="telaEntrar" class="adm-entrar">
+
   <form id="formEntrar" class="adm-cartao" autocomplete="on">
     <h1 class="adm-marca">ATIVAVID</h1>
     <p class="adm-sub">Painel do dono</p>
@@ -33,8 +35,45 @@
              placeholder="Sua senha">
     </label>
     <button id="btEntrar" class="adm-bt adm-bt-forte" type="submit">Entrar</button>
-    <p id="erroEntrar" class="adm-erro" role="alert" hidden></p>
+    <button id="btEsqueci" class="adm-link" type="button">Esqueci minha senha</button>
+    <p id="erroEntrar" class="adm-aviso" role="alert" hidden></p>
+    <p class="adm-rodape">A mesma conta que você usa no ATIVAVID do computador e do iPhone.</p>
   </form>
+
+  <!-- Trocar a senha: o MESMO caminho do app (código no e-mail, senha nova
+       aqui) — /auth/v1/recover e depois verify com type=recovery. -->
+  <form id="formTrocar" class="adm-cartao" autocomplete="off" hidden>
+    <h1 class="adm-marca">ATIVAVID</h1>
+    <p class="adm-sub">Trocar a senha</p>
+
+    <div id="passoPedir">
+      <label class="adm-campo">
+        <span>E-mail da sua conta</span>
+        <input id="emailTrocar" type="email" autocomplete="username" inputmode="email"
+               autocapitalize="off" spellcheck="false" placeholder="voce@ativavid.com">
+      </label>
+      <button id="btPedirCodigo" class="adm-bt adm-bt-forte" type="button">Mandar o código</button>
+    </div>
+
+    <div id="passoCodigo" hidden>
+      <label class="adm-campo">
+        <span>Código que chegou no e-mail</span>
+        <input id="codigo" type="text" inputmode="numeric" autocomplete="one-time-code"
+               pattern="[0-9]*" maxlength="10" placeholder="000000">
+      </label>
+      <label class="adm-campo">
+        <span>Senha nova</span>
+        <input id="senhaNova" type="password" autocomplete="new-password"
+               placeholder="mínimo 6 caracteres">
+      </label>
+      <button id="btTrocar" class="adm-bt adm-bt-forte" type="button">Trocar a senha e entrar</button>
+      <button id="btReenviar" class="adm-link" type="button">Mandar o código de novo</button>
+    </div>
+
+    <p id="avisoTrocar" class="adm-aviso" role="alert" hidden></p>
+    <button id="btVoltar" class="adm-link" type="button">Voltar para a entrada</button>
+  </form>
+
 </main>
 
 <!-- O painel nasce escondido. Quem o mostra é a resposta do servidor, nunca o
@@ -92,6 +131,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261010a"></script>
+<script src="/admin.js?v=20261010b"></script>
 </body>
 </html>

@@ -234,12 +234,49 @@
   color: #ffb3b8;
 }
 
-.adm-erro {
-  margin: 4px 0 0;
+/* Aviso da tela de entrar. Fica DENTRO do cartão de login de propósito: o
+   `#recado` mora no painel, que está escondido enquanto ninguém entrou — erro
+   escrito lá vira "não acontece nada". */
+.adm-aviso {
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  border-radius: 12px;
   background: #2a171a;
   border: 1px solid #5a2a30;
   color: #ffb3b8;
   font-size: 13px;
+  line-height: 1.5;
+}
+.adm-aviso[data-tom="ok"] {
+  background: #11231f;
+  border-color: #1d4a3e;
+  color: #9fe8d2;
+}
+
+.adm-link {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  background: none;
+  border: 0;
+  color: var(--dim);
+  padding: 12px 4px 0;
+  min-height: 40px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.adm-link:hover { color: var(--text); }
+.adm-link:focus-visible { outline: 2px solid var(--red-2); outline-offset: 2px; border-radius: 8px; }
+
+.adm-rodape {
+  margin: 16px 0 0;
+  text-align: center;
+  color: var(--fine);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 /* ---------- listas ---------- */
