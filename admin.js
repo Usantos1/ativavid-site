@@ -1377,14 +1377,14 @@
     const f = estado.filtroChamado;
     const termo = String(estado.buscaChamado || "").trim().toLowerCase().replace(/^#/, "");
     return estado.chamados.filter((x) => {
-      if (!casaFiltro(x, f)) return false;
+      if (!casaFiltroChamado(x, f)) return false;
       if (!termo) return true;
       return [String(x.id), x.email, x.assunto, x.descricao, nomeDoCliente(x.email)]
         .some((v) => String(v || "").toLowerCase().includes(termo));
     }).sort((a, b) => ms(b.atualizado_em) - ms(a.atualizado_em));
   }
 
-  function casaFiltro(x, f) {
+  function casaFiltroChamado(x, f) {
     if (f === "todos") return true;
     if (f === "ativos") return x.status !== "resolvido";
     if (f === "equipe") return x.status === "aberto" || x.status === "em_analise";
@@ -1393,7 +1393,7 @@
   }
 
   function contaFiltro(k) {
-    return estado.chamados.filter((x) => casaFiltro(x, k)).length;
+    return estado.chamados.filter((x) => casaFiltroChamado(x, k)).length;
   }
 
   // Nome legível a partir do e-mail (o chamado só guarda o e-mail).
