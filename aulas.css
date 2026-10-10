@@ -167,3 +167,10 @@ p { margin: 0; }
   .alu-abas a { padding: 8px 10px; font-size: 14px; }
   h1 { font-size: 24px; }
 }
+
+/* dentro do painel admin (Academy): sem fundo próprio nem barra fixa */
+.alu--embutido { background: transparent; }
+.alu--embutido .alu-fundo { display: none; }
+.alu--embutido .alu-area { min-height: 0; }
+.alu--embutido .alu-topo { position: relative; padding-top: 6px; }
+.alu--embutido .alu-principal { padding-top: 12px; }

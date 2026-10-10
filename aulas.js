@@ -17,6 +17,9 @@
   const DIA = 86400000;
 
   const estado = { dados: null, email: "", emailTroca: "", aulaAberta: null };
+  // Dentro do painel admin (Academy) não há botão Sair: sair seria sair do painel.
+  const painel = new URLSearchParams(location.search).has("painel");
+  if (painel) document.body.classList.add("alu--embutido");
 
   const el = (tag, cls, txt) => {
     const n = document.createElement(tag);
@@ -114,6 +117,7 @@
   async function abrirArea() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return mostrar("entrar");
+    $("btSair").hidden = painel;
     mostrar("area");
     await carregar();
     rotear();

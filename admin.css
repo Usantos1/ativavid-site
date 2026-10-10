@@ -1585,3 +1585,7 @@
 
 /* opções da lista nativa: sem isto o texto herda a cor clara do tema escuro sobre fundo branco */
 .adm-campo select option { background: var(--painel-opaco); color: var(--tinta); }
+
+/* Academy: a área do aluno, dentro do painel, com a sessão de quem está logado */
+.adm-academy { display: block; width: 100%; height: calc(100vh - 150px); min-height: 640px; border: 0; border-radius: 26px; background: transparent; }
+@media (max-width: 959px) { .adm-academy { height: calc(100vh - 180px); min-height: 560px; } }

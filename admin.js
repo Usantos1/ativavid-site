@@ -30,7 +30,7 @@
     aulas: { titulo: "Aulas", sub: "O que o cliente vê na área de aulas. Cada aula é um vídeo do YouTube.", admin: true },
     suporte: { titulo: "Suporte", sub: "Chamados dos clientes. Responda aqui; a resposta aparece na conta dele.", admin: false },
     equipe: { titulo: "Equipe", sub: "Quem entra neste painel e o que cada pessoa pode fazer.", admin: true },
-    aluno: { titulo: "Área do aluno", sub: "Como o cliente vê as aulas.", admin: true },
+    academy: { titulo: "Academy", sub: "A área do aluno com a sua conta: o que o cliente vê.", admin: false },
   };
 
   const STATUS_CHAMADO = {
@@ -56,7 +56,6 @@
     ordem: "vencimento",
     abertos: new Set(),
     aulas: [],
-    aulasPublicas: [],
     emailTroca: "",
     chamados: [],
     filtroChamado: "ativos",
@@ -571,7 +570,7 @@
       a.classList.toggle("is-on", on);
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
-    const mapa = { visao: "secVisao", clientes: "secClientes", aulas: "secAulas", suporte: "secSuporte", equipe: "secEquipe", aluno: "secAluno" };
+    const mapa = { visao: "secVisao", clientes: "secClientes", aulas: "secAulas", suporte: "secSuporte", equipe: "secEquipe", academy: "secAcademy" };
     for (const [k, id] of Object.entries(mapa)) $(id).hidden = k !== s;
     $("tituloSecao").textContent = SECOES[s].titulo;
     $("subSecao").textContent = SECOES[s].sub;
@@ -580,7 +579,7 @@
     if (s === "suporte") carregarChamados().catch((e) => recado(e.message, "erro"));
     if (s === "equipe") carregarEquipe().catch((e) => recado(e.message, "erro"));
     if (s === "clientes") desenharClientes();
-    if (s === "aluno") carregarAlunoPublico().catch((e) => recado(e.message, "erro"));
+    if (s === "academy") abrirAcademy();
     window.scrollTo(0, 0);
   }
 
@@ -1188,35 +1187,14 @@
     abrirModal("Novo cliente", corpo);
   }
 
-  // ============================================================ aluno (prévia da área)
+  // ============================================================ academy (a área do aluno, com a sua conta)
 
-  async function carregarAlunoPublico() {
-    const { data, error } = await sb.rpc("ativavid_aulas");
-    if (error) throw new Error(error.message || "Não consegui carregar as aulas.");
-    estado.aulasPublicas = Array.isArray(data) ? data : ((data && data.aulas) || []);
-    desenharAluno();
+  function abrirAcademy() {
+    const f = $("academyFrame");
+    if (!f.getAttribute("src")) f.src = "/aulas?painel=1";
   }
 
-  function desenharAluno() {
-    const alvo = $("alunoLista");
-    alvo.innerHTML = "";
-    if (!estado.aulasPublicas.length) {
-      alvo.appendChild(el("p", "adm-vazio", "Ainda não há aulas visíveis. Cadastre uma na aba Aulas."));
-      return;
-    }
-    const grupos = new Map();
-    for (const a of estado.aulasPublicas) {
-      const k = a.secao || "Geral";
-      if (!grupos.has(k)) grupos.set(k, []);
-      grupos.get(k).push(a);
-    }
-    for (const [secao, aulas] of grupos) {
-      alvo.appendChild(el("h3", "adm-aluno-secao", secao));
-      const grade = el("div", "adm-aluno-grade");
-      for (const a of aulas) grade.appendChild(cartaoAluno(a));
-      alvo.appendChild(grade);
-    }
-  }
+  // ============================================================ cartão de aula (prévia)
 
   function cartaoAluno(a) {
     const card = el("article", "adm-vidro adm-aluno-card");
@@ -1685,7 +1663,6 @@
   $("btTrocar").addEventListener("click", (e) => trocarSenha(e.currentTarget));
   $("btSair").addEventListener("click", sair);
   $("btEditarPerfil").addEventListener("click", () => { fecharMenus(); editarPerfil(); });
-  $("btVerAluno").addEventListener("click", () => { fecharMenus(); location.hash = "aluno"; });
   $("btMenu").addEventListener("click", () => aplicarMenu($("painel").classList.contains("adm-app--fechado")));
   $("btTema").addEventListener("click", alternarTema);
   $("buscaGlobal").addEventListener("input", buscaGlobal);
@@ -1695,7 +1672,6 @@
   $("btFecharConversa").addEventListener("click", fecharConversa);
   $("formResposta").addEventListener("submit", responder);
   $("btNovoMembro").addEventListener("click", abrirNovoMembro);
-  $("btVoltarAluno").addEventListener("click", () => { location.hash = "visao"; });
   $("btVerSuporte").addEventListener("click", () => { fecharMenus(); location.hash = "suporte"; });
   $("btPerfil").addEventListener("click", (e) => {
     e.stopPropagation();

@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261010p">
+  <link rel="stylesheet" href="/admin.css?v=20261010q">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -97,6 +97,11 @@
         <span>Aulas</span>
       </a>
 
+      <a class="adm-nav-item" href="#academy" data-secao="academy" data-rotulo="Academy">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 9l5 3-5 3z"/></svg>
+        <span>Academy</span>
+      </a>
+
       <p class="adm-nav-grupo">Atendimento</p>
       <a class="adm-nav-item" href="#suporte" data-secao="suporte" data-rotulo="Suporte">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-4 3.5V16H4z"/></svg>
@@ -157,7 +162,6 @@
               </div>
             </div>
             <button id="btEditarPerfil" class="adm-menu-perfil-item" type="button">Editar perfil</button>
-            <button id="btVerAluno" class="adm-menu-perfil-item" type="button">Ver como aluno</button>
             <button id="btSair" class="adm-menu-perfil-item adm-menu-perigo" type="button">Sair</button>
           </div>
         </div>
@@ -265,12 +269,8 @@
         <div id="listaEquipe" class="adm-equipe" aria-live="polite"></div>
       </section>
 
-      <section id="secAluno" class="adm-secao" aria-labelledby="tituloSecao" hidden>
-        <div class="adm-vidro adm-aviso-aluno">
-          <p><strong>Você está vendo a área do aluno.</strong> É assim que o cliente vê as aulas. Nada aqui marca progresso.</p>
-          <button id="btVoltarAluno" class="adm-bt adm-bt-fraco adm-bt-sm" type="button">Voltar ao painel</button>
-        </div>
-        <div id="alunoLista" class="adm-aluno-lista" aria-live="polite"></div>
+      <section id="secAcademy" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+        <iframe id="academyFrame" class="adm-academy" title="Academy: a área do aluno com a sua conta" loading="lazy"></iframe>
       </section>
 
     </main>
@@ -292,6 +292,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261010p"></script>
+<script src="/admin.js?v=20261010q"></script>
 </body>
 </html>
