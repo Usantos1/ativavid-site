@@ -221,6 +221,51 @@
 .alu-embutido .adm-cab { display: none; }
 .alu-embutido .adm-principal { padding-top: 8px; }
 
+/* ==========================================================================
+ * Liquid Glass (estilo Apple). O vidro só aparece com fundo colorido por
+ * trás, então o fundo leva as cores da marca (azul, vermelho, verde) e o
+ * vidro ganha desfoque forte, saturação, borda de luz e cantos grandes.
+ * Não é o refrator real da Apple (isso não existe em CSS); é a mesma leitura
+ * visual: vidro translúcido, brilho na borda e forma arredondada.
+ * ========================================================================== */
+
+.adm {
+  --mesh-1: color-mix(in srgb, var(--azul) 42%, transparent);
+  --mesh-2: color-mix(in srgb, var(--vermelho) 26%, transparent);
+  --mesh-3: color-mix(in srgb, var(--verde) 24%, transparent);
+}
+
+.adm-vidro {
+  background: linear-gradient(160deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .03)), var(--vidro);
+  -webkit-backdrop-filter: blur(44px) saturate(210%);
+  backdrop-filter: blur(44px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 30px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .42),
+    inset 0 0 0 1px rgba(255, 255, 255, .05),
+    var(--sombra);
+}
+
+.adm-side {
+  border-radius: 38px;
+}
+
+.adm-topo-barra {
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .45),
+    inset 0 0 0 1px rgba(255, 255, 255, .06),
+    var(--sombra);
+}
+
+/* degradê: sólido sob a barra superior para esconder o que passa atrás dela,
+ * e some suave antes de chegar ao conteúdo. Vai até a borda, atrás da lateral. */
+#painel::before {
+  height: 156px;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg) 72%, transparent 100%);
+}
+
 /* o botão de concluir fica sempre no meio, mesmo sem anterior ou próxima */
 .aulas-aula-barra #btConcluir {
   grid-column: 2;
