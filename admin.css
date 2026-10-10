@@ -170,6 +170,7 @@
 
 .adm-campo input,
 .adm-campo textarea,
+.adm-campo select,
 .adm-ordem select,
 .adm-papel-sel,
 .adm-status-sel select,
@@ -195,6 +196,7 @@
 
 .adm-campo input:focus,
 .adm-campo textarea:focus,
+.adm-campo select:focus,
 .adm-ordem select:focus,
 .adm-papel-sel:focus,
 .adm-status-sel select:focus,

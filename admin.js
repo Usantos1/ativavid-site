@@ -761,35 +761,51 @@
     for (const s of semAss) alvo.appendChild(cartaoSemAssinatura(s));
   }
 
+  // Planos que o painel oferece ao mandar um link. Cada um é um Payment Link
+  // da Stripe. O preço de cada um TEM de estar em STRIPE_PRICE_ID (secret do
+  // payments-webhook), senão o pagamento não libera o acesso.
+  const PLANOS_VENDA = [
+    { id: "anual", nome: "Anual", valor: "R$ 799,00 por ano", url: CHECKOUT_ANUAL },
+    { id: "mensal", nome: "Mensal", valor: "R$ 79,90 por mês", url: CHECKOUT_MENSAL },
+    { id: "mensal-antigo", nome: "Mensal antigo", valor: "R$ 59,00 por mês", url: "https://buy.stripe.com/9B68wQgFH6HP2Tk6oodwc02" },
+  ];
+
   function linkAssinatura(email, plano) {
-    const base = plano === "mensal" ? CHECKOUT_MENSAL : CHECKOUT_ANUAL;
-    return `${base}?prefilled_email=${encodeURIComponent(email)}`;
+    const p = PLANOS_VENDA.find((x) => x.id === plano) || PLANOS_VENDA[0];
+    return `${p.url}?prefilled_email=${encodeURIComponent(email)}`;
   }
 
   function abrirLinkAssinatura(email) {
     const corpo = el("div", "adm-form-modal");
-    corpo.appendChild(el("p", "adm-ajuda", `Mande este link para ${email}. Ele abre a compra no navegador, com o e-mail dele já preenchido. Assim que pagar, o acesso é liberado sozinho.`));
-    for (const [plano, rot] of [["anual", "Anual"], ["mensal", "Mensal"]]) {
-      const url = linkAssinatura(email, plano);
-      const linha = el("div", "adm-link-linha");
-      const caixa = entrada("text", url, { readonly: "readonly" });
-      caixa.className = "adm-link-caixa";
-      caixa.addEventListener("focus", () => caixa.select());
-      const copiar = botao("Copiar", "adm-bt adm-bt-forte adm-bt-sm", async () => {
-        try {
-          await navigator.clipboard.writeText(url);
-          recado(`Link ${rot.toLowerCase()} copiado.`, "ok");
-        } catch {
-          caixa.select();
-          recado("Selecionei o link: copie com Ctrl+C.", "atencao");
-        }
-      });
-      const w = el("div", "adm-campo");
-      w.append(el("span", "", `Plano ${rot.toLowerCase()}`));
-      linha.append(caixa, copiar);
-      w.appendChild(linha);
-      corpo.appendChild(w);
+    corpo.appendChild(el("p", "adm-ajuda", `Escolha o plano e mande o link para ${email}. Ele abre a compra no navegador, com o e-mail já preenchido. Assim que pagar, o acesso é liberado sozinho.`));
+    const escolha = document.createElement("select");
+    for (const p of PLANOS_VENDA) {
+      const op = el("option", "", `${p.nome} · ${p.valor}`);
+      op.value = p.id;
+      escolha.appendChild(op);
     }
+    const caixa = entrada("text", "", { readonly: "readonly" });
+    caixa.className = "adm-link-caixa";
+    caixa.addEventListener("focus", () => caixa.select());
+    const atualizar = () => { caixa.value = linkAssinatura(email, escolha.value); };
+    escolha.addEventListener("change", atualizar);
+    atualizar();
+    const copiar = botao("Copiar", "adm-bt adm-bt-forte adm-bt-sm", async () => {
+      try {
+        await navigator.clipboard.writeText(caixa.value);
+        recado("Link copiado.", "ok");
+      } catch {
+        caixa.select();
+        recado("Selecionei o link: copie com Ctrl+C.", "atencao");
+      }
+    });
+    const wPlano = el("div", "adm-campo");
+    wPlano.append(el("span", "", "Plano"), escolha);
+    const wLink = el("div", "adm-campo");
+    const linha = el("div", "adm-link-linha");
+    linha.append(caixa, copiar);
+    wLink.append(el("span", "", "Link"), linha);
+    corpo.append(wPlano, wLink);
     abrirModal("Link de assinatura", corpo);
   }
 
