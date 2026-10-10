@@ -1,0 +1,3 @@
+# Atalhos de endereço. A área do aluno mora em /aulas; /academy leva para lá.
+/academy        /aulas        301
+/academy/*      /aulas        301
