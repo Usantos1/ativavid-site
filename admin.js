@@ -1225,13 +1225,16 @@
 
   // ============================================================ suporte
 
-  const FILTROS_CHAMADO = [
+  // Abas fixas em cima da lista; o resto fica no botão Filtros.
+  const ABAS_CHAMADO = [
     ["ativos", "Em aberto"],
-    ["aberto", "Novos"],
     ["em_analise", "Em atendimento"],
-    ["aguardando_cliente", "Aguardando cliente"],
     ["resolvido", "Resolvidos"],
+  ];
+  const MAIS_FILTROS = [
     ["todos", "Todos"],
+    ["aberto", "Novos"],
+    ["aguardando_cliente", "Aguardando cliente"],
   ];
   const ANEXO_TIPOS = ["image/png", "image/jpeg", "image/webp", "image/gif"];
   const ANEXO_MAX_BYTES = 8 * 1024 * 1024;
@@ -1275,10 +1278,13 @@
 
   function filtraChamados() {
     const f = estado.filtroChamado;
+    const termo = String(estado.buscaChamado || "").trim().toLowerCase().replace(/^#/, "");
     return estado.chamados.filter((x) => {
-      if (f === "todos") return true;
-      if (f === "ativos") return x.status !== "resolvido";
-      return x.status === f;
+      if (f === "ativos" && x.status === "resolvido") return false;
+      if (f !== "todos" && f !== "ativos" && x.status !== f) return false;
+      if (!termo) return true;
+      return [String(x.id), x.email, x.assunto, x.descricao, nomeDoCliente(x.email)]
+        .some((v) => String(v || "").toLowerCase().includes(termo));
     }).sort((a, b) => ms(b.atualizado_em) - ms(a.atualizado_em));
   }
 
@@ -1297,13 +1303,35 @@
   function desenharSuporte() {
     const filtros = $("filtrosSuporte");
     filtros.innerHTML = "";
-    for (const [k, rot] of FILTROS_CHAMADO) {
-      const b = botao("", "adm-chip-filtro", () => { estado.filtroChamado = k; desenharSuporte(); });
+    for (const [k, rot] of ABAS_CHAMADO) {
+      const b = botao("", "adm-sup-aba", () => { estado.filtroChamado = k; desenharSuporte(); });
       b.append(el("span", "", rot), el("em", "adm-sup-n", contaFiltro(k)));
       b.setAttribute("aria-pressed", estado.filtroChamado === k ? "true" : "false");
       if (estado.filtroChamado === k) b.classList.add("is-on");
       filtros.appendChild(b);
     }
+    // botão Filtros: abre os filtros que não têm aba
+    const extra = MAIS_FILTROS.find(([k]) => k === estado.filtroChamado);
+    const caixa = el("div", "adm-sup-mais");
+    const menu = el("div", "adm-sup-menu");
+    menu.hidden = true;
+    const abrir = botao("", `adm-sup-aba adm-sup-filtrar${extra ? " is-on" : ""}`, (e) => {
+      e.stopPropagation();
+      menu.hidden = !menu.hidden;
+    });
+    abrir.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>';
+    abrir.append(el("span", "", extra ? extra[1] : "Filtros"));
+    abrir.setAttribute("aria-haspopup", "true");
+    for (const [k, rot] of MAIS_FILTROS) {
+      const it = botao("", `adm-sup-menu-item${estado.filtroChamado === k ? " is-on" : ""}`, () => {
+        estado.filtroChamado = k;
+        desenharSuporte();
+      });
+      it.append(el("span", "", rot), el("em", "adm-sup-n", contaFiltro(k)));
+      menu.appendChild(it);
+    }
+    caixa.append(abrir, menu);
+    filtros.appendChild(caixa);
 
     const alvo = $("listaChamados");
     alvo.innerHTML = "";
@@ -1505,6 +1533,15 @@
     });
   }
 
+  $("buscaChamados").addEventListener("input", (e) => {
+    estado.buscaChamado = e.target.value;
+    desenharSuporte();
+  });
+  // clicar fora fecha o menu de filtros
+  document.addEventListener("click", () => {
+    const m = document.querySelector(".adm-sup-menu");
+    if (m) m.hidden = true;
+  });
   $("arquivosResposta").addEventListener("change", (e) => {
     adicionarAnexosResposta(e.target.files);
     e.target.value = "";

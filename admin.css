@@ -1875,3 +1875,78 @@
 html.adm-sem-rolagem,
 html.adm-sem-rolagem body { overflow: hidden; }
 .adm-sup-filtros { flex-wrap: wrap; overflow: visible; }
+
+/* suporte: abas Em aberto / Em atendimento / Resolvidos, botão Filtros e busca */
+.adm-sup-lista { grid-template-rows: auto auto minmax(0, 1fr); }
+.adm-sup-filtros { flex-wrap: nowrap; gap: 4px; padding: 10px 10px 8px; border-bottom: 0; overflow: visible; }
+.adm-sup-aba {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto-2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.adm-sup-aba:hover { background: var(--campo); }
+.adm-sup-aba.is-on {
+  background: var(--azul-fundo);
+  color: var(--azul);
+  border-color: color-mix(in srgb, var(--azul) 35%, transparent);
+}
+.adm-sup-aba.is-on .adm-sup-n { background: color-mix(in srgb, var(--azul) 18%, transparent); }
+.adm-sup-mais { position: relative; flex: none; display: flex; }
+.adm-sup-filtrar svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.adm-sup-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  min-width: 220px;
+  padding: 6px;
+  display: grid;
+  gap: 2px;
+  border-radius: 16px;
+  background: var(--painel-opaco);
+  border: 1px solid var(--borda);
+  box-shadow: var(--sombra);
+}
+.adm-sup-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--tinta);
+  cursor: pointer;
+  text-align: left;
+}
+.adm-sup-menu-item:hover { background: var(--campo); }
+.adm-sup-menu-item.is-on { background: var(--azul-fundo); color: var(--azul); font-weight: 700; }
+.adm-sup-busca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 10px 10px;
+  padding: 0 12px;
+  height: 40px;
+  border-radius: 14px;
+  background: var(--campo);
+  border: 1px solid var(--borda);
+}
+.adm-sup-busca svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--texto-3); stroke-width: 2; stroke-linecap: round; }
+.adm-sup-busca input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--tinta); outline: none; }
+.adm-sup-itens { border-top: 1px solid var(--borda); }
