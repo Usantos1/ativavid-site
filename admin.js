@@ -154,7 +154,7 @@
 
   async function ocupado(bt, tarefa, onde) {
     if (!bt || bt.disabled) return;
-    const antes = bt.textContent;
+    const antes = bt.innerHTML;
     bt.disabled = true;
     bt.setAttribute("aria-busy", "true");
     bt.textContent = "…";
@@ -166,7 +166,7 @@
     } finally {
       bt.disabled = false;
       bt.removeAttribute("aria-busy");
-      bt.textContent = antes;
+      bt.innerHTML = antes;
     }
   }
 
@@ -472,6 +472,7 @@
     if (estado.papel === "admin") await carregar();
     await carregarChamados(true).catch(() => {});
     rotear();
+    ouvirSuporte();
     return { ok: true };
   }
 
@@ -1229,9 +1230,13 @@
     ["resolvido", "Resolvidos"],
     ["todos", "Todos"],
   ];
+  const ANEXO_TIPOS = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+  const ANEXO_MAX_BYTES = 8 * 1024 * 1024;
+  const ANEXO_MAX_QTD = 4;
+  let anexosResposta = [];
 
   async function carregarChamados(silencioso) {
-    const r = await rpc("ativavid_admin_chamados", { p_status: null });
+    const r = await rpc("ativavid_admin_lista_chamados", { p_status: null });
     estado.chamados = Array.isArray(r.chamados) ? r.chamados : [];
     const abertos = estado.chamados.filter((x) => x.status === "aberto" || x.status === "em_analise").length;
     const n = $("navSuporte");
@@ -1260,7 +1265,7 @@
         location.hash = "suporte";
         abrirChamado(x.id);
       });
-      b.append(el("strong", "", x.assunto), el("span", "", `${x.email} · ${rel(x.atualizado_em)}`));
+      b.append(el("strong", "", `#${x.id} · ${x.assunto}`), el("span", "", `${x.email} · ${rel(x.atualizado_em)}`));
       lista.appendChild(b);
     }
   }
@@ -1274,32 +1279,24 @@
     }).sort((a, b) => ms(b.atualizado_em) - ms(a.atualizado_em));
   }
 
-  function desenharResumoSuporte() {
-    const alvo = $("resumoSuporte");
-    alvo.innerHTML = "";
-    const conta = (s) => estado.chamados.filter((x) => x.status === s).length;
-    const itens = [
-      ["aberto", "Novos", conta("aberto"), "mal", "Ninguém respondeu ainda"],
-      ["em_analise", "Em atendimento", conta("em_analise"), "atencao", "A equipe está trabalhando nele"],
-      ["aguardando_cliente", "Aguardando cliente", conta("aguardando_cliente"), "neutro", "A bola está com o cliente"],
-      ["resolvido", "Resolvidos", conta("resolvido"), "ok", "Encerrados"],
-    ];
-    for (const [chave, rot, n, tom, sub] of itens) {
-      const b = botao("", `adm-vidro adm-resumo-item adm-resumo-${tom}${estado.filtroChamado === chave ? " is-on" : ""}`, () => {
-        estado.filtroChamado = chave;
-        desenharSuporte();
-      });
-      b.append(el("span", "adm-resumo-rot", rot), el("strong", "adm-resumo-n", n), el("span", "adm-resumo-sub", sub));
-      alvo.appendChild(b);
-    }
+  function contaFiltro(k) {
+    if (k === "todos") return estado.chamados.length;
+    if (k === "ativos") return estado.chamados.filter((x) => x.status !== "resolvido").length;
+    return estado.chamados.filter((x) => x.status === k).length;
+  }
+
+  // Nome legível a partir do e-mail (o chamado só guarda o e-mail).
+  function nomeDoCliente(email) {
+    const base = String(email || "").split("@")[0].replace(/[._-]+/g, " ").trim();
+    return base ? base.replace(/\b\w/g, (c) => c.toUpperCase()) : "Cliente";
   }
 
   function desenharSuporte() {
-    desenharResumoSuporte();
     const filtros = $("filtrosSuporte");
     filtros.innerHTML = "";
     for (const [k, rot] of FILTROS_CHAMADO) {
-      const b = botao(rot, "adm-chip-filtro", () => { estado.filtroChamado = k; desenharSuporte(); });
+      const b = botao("", "adm-chip-filtro", () => { estado.filtroChamado = k; desenharSuporte(); });
+      b.append(el("span", "", rot), el("em", "adm-sup-n", contaFiltro(k)));
       b.setAttribute("aria-pressed", estado.filtroChamado === k ? "true" : "false");
       if (estado.filtroChamado === k) b.classList.add("is-on");
       filtros.appendChild(b);
@@ -1309,84 +1306,119 @@
     alvo.innerHTML = "";
     const lista = filtraChamados();
     if (!lista.length) {
-      const vazioSemChamado = !estado.chamados.length;
-      alvo.appendChild(el("p", "adm-vazio", vazioSemChamado
-        ? "Nenhum chamado ainda. Quando um cliente abrir um, ele aparece aqui."
-        : "Nada neste filtro. Escolha outro acima."));
+      alvo.appendChild(el("p", "adm-sup-lista-vazia", estado.chamados.length
+        ? "Nada neste filtro."
+        : "Nenhum chamado ainda. Quando um cliente abrir um, ele aparece aqui."));
       return;
     }
-    for (const x of lista) {
-      const st = STATUS_CHAMADO[x.status] || { rot: x.status, tom: "neutro" };
-      const it = el("button", `adm-vidro adm-chamado ${estado.chamadoAberto === x.id ? "is-on" : ""}`);
-      it.type = "button";
-      it.dataset.id = String(x.id);
-      const topo = el("div", "adm-chamado-topo");
-      topo.append(el("strong", "adm-chamado-assunto", x.assunto), chip(st.rot, st.tom));
-      const quem = el("span", "adm-chamado-quem", x.email);
-      const previa = el("p", "adm-chamado-previa", `${x.ultimo_autor === "admin" ? "Você: " : ""}${x.ultima || ""}`);
-      const rodape = el("span", "adm-chamado-meta", `${rel(x.atualizado_em)} · ${x.mensagens} mensagem(ns)`);
-      it.append(topo, quem, previa, rodape);
-      it.addEventListener("click", () => abrirChamado(x.id));
-      alvo.appendChild(it);
-    }
+    for (const x of lista) alvo.appendChild(itemChamado(x));
   }
 
-  async function abrirChamado(id) {
-    estado.chamadoAberto = id;
-    desenharSuporte();
-    const r = await rpc("ativavid_admin_chamado", { p_id: id });
-    const ch = r.chamado;
-    const conv = $("conversa");
-    conv.hidden = false;
-    conv.classList.add("is-aberta");
-    $("conversaAssunto").textContent = ch.assunto;
-    $("conversaQuem").textContent = `${ch.email} · aberto ${dia(ch.criado_em)}`;
-    const msgs = $("conversaMensagens");
-    msgs.innerHTML = "";
-    for (const m of r.mensagens || []) {
-      const linha = el("div", `adm-msg adm-msg-${m.autor === "admin" ? "eu" : "cliente"}`);
-      linha.append(el("p", "adm-msg-texto", m.texto), el("span", "adm-msg-hora", `${m.autor === "admin" ? "Equipe" : "Cliente"} · ${hora(m.criado_em)}`));
-      msgs.appendChild(linha);
-    }
-    try {
-      const anexosR = await rpc("ativavid_admin_anexos", { p_chamado_id: id });
-      const lista = (anexosR && anexosR.anexos) || [];
-      if (lista.length) {
-        const bloco = el("div", "adm-anexos-bloco");
-        bloco.append(el("span", "adm-msg-hora", `Prints enviados pelo cliente (${lista.length})`));
-        const grade = el("div", "adm-anexos-grade");
-        lista.forEach((a, i) => {
-          const link = el("a", "adm-anexo-foto");
-          link.target = "_blank";
-          link.rel = "noopener";
-          const img = document.createElement("img");
-          img.alt = a.nome || `Print ${i + 1}`;
-          img.loading = "lazy";
-          link.append(img, el("span", "adm-anexo-nome", a.nome || `Print ${i + 1}`));
-          grade.append(link);
-          // Imagem do bucket privado: link assinado, válido por 1 hora.
-          sb.storage.from("chamados").createSignedUrl(a.path, 3600).then(({ data }) => {
-            if (!data) return;
-            img.src = data.signedUrl;
-            link.href = data.signedUrl;
-          });
+  function itemChamado(x) {
+    const st = STATUS_CHAMADO[x.status] || { rot: x.status, tom: "neutro" };
+    const it = el("button", `adm-sup-item${estado.chamadoAberto === x.id ? " is-on" : ""}`);
+    it.type = "button";
+    const meio = el("div", "adm-sup-item-meio");
+    const l1 = el("div", "adm-sup-item-l1");
+    l1.append(el("strong", "", nomeDoCliente(x.email)), el("span", "adm-sup-item-hora", rel(x.atualizado_em)));
+    const l2 = el("div", "adm-sup-item-l2");
+    l2.append(el("span", "adm-sup-item-num", `#${x.id}`), el("span", "adm-sup-item-assunto", x.assunto));
+    const l3 = el("p", "adm-sup-item-desc", x.descricao || x.ultima || "");
+    meio.append(l1, l2, l3, chip(st.rot, st.tom));
+    it.append(el("span", `adm-avatar adm-avatar-mini adm-avatar-${st.tom}`, iniciais(x.email)), meio);
+    it.addEventListener("click", () => abrirChamado(x.id));
+    return it;
+  }
+
+  function horaCurta(iso) {
+    const t = ms(iso);
+    if (!t) return "";
+    return new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function rotuloDia(iso) {
+    const d = new Date(ms(iso));
+    const igual = (a, b) => a.toDateString() === b.toDateString();
+    if (igual(d, new Date())) return "Hoje";
+    if (igual(d, new Date(Date.now() - DIA))) return "Ontem";
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+  }
+
+  function bolhaAdmin(m) {
+    const eu = m.autor === "admin";
+    const b = el("div", `adm-sup-bolha ${eu ? "is-eu" : "is-cliente"}`);
+    if (m.anexos && m.anexos.length) {
+      const fotos = el("div", "adm-sup-fotos");
+      for (const a of m.anexos) {
+        const link = el("a", "adm-sup-foto");
+        link.target = "_blank";
+        link.rel = "noopener";
+        const img = document.createElement("img");
+        img.alt = a.nome || "Print";
+        img.loading = "lazy";
+        link.append(img);
+        fotos.append(link);
+        // bucket privado: link assinado, válido por 1 hora
+        sb.storage.from("chamados").createSignedUrl(a.path, 3600).then(({ data }) => {
+          if (!data) return;
+          img.src = data.signedUrl;
+          link.href = data.signedUrl;
         });
-        bloco.append(grade);
-        msgs.appendChild(bloco);
       }
-    } catch (e) {
-      recado(`Não consegui carregar os prints: ${(e && e.message) || e}`, "erro");
+      b.append(fotos);
     }
-    msgs.scrollTop = msgs.scrollHeight;
+    if (m.texto) b.append(el("p", "adm-sup-bolha-texto", m.texto));
+    b.append(el("span", "adm-sup-bolha-hora", `${eu ? "Equipe" : "Cliente"} · ${horaCurta(m.criado_em)}`));
+    return b;
+  }
+
+  function mostrarConversa(aberta) {
+    $("suporteGrade").classList.toggle("com-conversa", aberta);
+    $("conversaVazia").hidden = aberta;
+    $("conversaCab").hidden = !aberta;
+    $("conversaMensagens").hidden = !aberta;
+    $("formResposta").hidden = !aberta;
+  }
+
+  // aoVivo: atualização vinda do tempo real ou da troca de status; não apaga o
+  // rascunho nem os prints escolhidos, e só desce se já estava no fim.
+  async function abrirChamado(id, aoVivo = false) {
+    estado.chamadoAberto = id;
+    if (!aoVivo) desenharSuporte();
+    const r = await rpc("ativavid_admin_chamado_completo", { p_id: id });
+    const ch = r.chamado;
+    mostrarConversa(true);
+    $("conversaAvatar").textContent = iniciais(ch.email);
+    $("conversaAssunto").textContent = `#${ch.id} · ${ch.assunto}`;
+    $("conversaQuem").textContent = `${nomeDoCliente(ch.email)} · ${ch.email} · aberto em ${dia(ch.criado_em)}`;
+    const msgs = $("conversaMensagens");
+    const pertoDoFim = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 120;
+    msgs.innerHTML = "";
+    let diaAnterior = "";
+    for (const m of r.mensagens || []) {
+      const rotulo = rotuloDia(m.criado_em);
+      if (rotulo !== diaAnterior) {
+        msgs.appendChild(el("div", "adm-sup-dia", rotulo));
+        diaAnterior = rotulo;
+      }
+      msgs.appendChild(bolhaAdmin(m));
+    }
+    if (!aoVivo || pertoDoFim) msgs.scrollTop = msgs.scrollHeight;
     $("statusResposta").value = ch.status;
-    $("textoResposta").value = "";
-    conv.dataset.id = String(id);
+    if (!aoVivo) {
+      $("textoResposta").value = "";
+      $("textoResposta").style.height = "";
+      anexosResposta = [];
+      desenharAnexosResposta();
+      $("textoResposta").focus();
+    }
+    $("conversa").dataset.id = String(id);
   }
 
   function fecharConversa() {
     estado.chamadoAberto = null;
-    $("conversa").hidden = true;
-    $("conversa").classList.remove("is-aberta");
+    delete $("conversa").dataset.id;
+    mostrarConversa(false);
     desenharSuporte();
   }
 
@@ -1395,13 +1427,11 @@
     const id = Number($("conversa").dataset.id);
     const sel = ev.target;
     if (!id) return;
-    const rascunho = $("textoResposta").value;
     sel.disabled = true;
     try {
       await rpc("ativavid_admin_status", { p_id: id, p_status: sel.value });
       await carregarChamados(true);
-      await abrirChamado(id);
-      $("textoResposta").value = rascunho;
+      await abrirChamado(id, true);
       recado(`Status alterado para “${STATUS_CHAMADO[sel.value].rot}”. O cliente vê na conta dele.`, "ok");
     } catch (e) {
       recado((e && e.message) || "Não consegui mudar o status.", "erro");
@@ -1410,18 +1440,105 @@
     }
   }
 
+  function adicionarAnexosResposta(arquivos) {
+    for (const f of Array.from(arquivos)) {
+      if (!ANEXO_TIPOS.includes(f.type)) return recado(`"${f.name}" não é imagem. Envie PNG, JPG, WebP ou GIF.`, "atencao");
+      if (f.size > ANEXO_MAX_BYTES) return recado(`"${f.name}" passa de 8 MB.`, "atencao");
+      if (anexosResposta.length >= ANEXO_MAX_QTD) return recado("No máximo 4 imagens por mensagem.", "atencao");
+      anexosResposta.push(f);
+    }
+    desenharAnexosResposta();
+  }
+
+  function desenharAnexosResposta() {
+    const ul = $("respostaAnexosAdm");
+    ul.innerHTML = "";
+    anexosResposta.forEach((f, i) => {
+      const item = el("li", "adm-sup-anexo");
+      const tirar = botao("Remover", "adm-sup-anexo-x", () => {
+        anexosResposta.splice(i, 1);
+        desenharAnexosResposta();
+      });
+      item.append(el("span", "", f.name), tirar);
+      ul.appendChild(item);
+    });
+  }
+
+  // Prints da equipe ficam na pasta do chamado: <id>/<arquivo>.
+  async function enviarAnexosAdmin(chamadoId, mensagemId, arquivos) {
+    for (const f of arquivos) {
+      const seguro = f.name.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.-]+/g, "_").slice(-80) || "print.png";
+      const caminho = `${chamadoId}/${Date.now()}-${seguro}`;
+      const { error } = await sb.storage.from("chamados").upload(caminho, f, { contentType: f.type, upsert: false });
+      if (error) throw new Error(`Não consegui enviar "${f.name}". Tente de novo.`);
+      await rpc("ativavid_admin_anexar", {
+        p_chamado_id: chamadoId,
+        p_mensagem_id: mensagemId,
+        p_path: caminho,
+        p_nome: f.name,
+        p_tipo: f.type,
+        p_tamanho: f.size,
+      });
+    }
+  }
+
   async function responder(ev) {
     ev.preventDefault();
     const id = Number($("conversa").dataset.id);
     const texto = $("textoResposta").value.trim();
     if (!id) return;
-    if (!texto) return recado("Escreva a resposta antes de enviar.", "erro");
+    if (!texto) return recado(anexosResposta.length ? "Escreva uma mensagem junto com o print." : "Escreva a resposta antes de enviar.", "atencao");
     await ocupado($("btResponder"), async () => {
-      await rpc("ativavid_admin_responder", { p_id: id, p_texto: texto });
-      recado("Resposta enviada. O cliente vê na conta dele.", "ok");
+      const r = await rpc("ativavid_admin_responder", { p_id: id, p_texto: texto });
+      await enviarAnexosAdmin(id, r.mensagemId, anexosResposta);
+      $("textoResposta").value = "";
+      $("textoResposta").style.height = "";
+      anexosResposta = [];
+      desenharAnexosResposta();
       await carregarChamados(true);
-      await abrirChamado(id);
+      await abrirChamado(id, true);
+      const msgs = $("conversaMensagens");
+      msgs.scrollTop = msgs.scrollHeight;
     });
+  }
+
+  $("arquivosResposta").addEventListener("change", (e) => {
+    adicionarAnexosResposta(e.target.files);
+    e.target.value = "";
+  });
+  // Enter envia; Shift+Enter quebra a linha. O campo cresce com o texto.
+  $("textoResposta").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      $("formResposta").requestSubmit();
+    }
+  });
+  $("textoResposta").addEventListener("input", (e) => {
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
+  });
+
+  // Tempo real: chamado, mensagem ou print novo atualiza a lista e a conversa aberta.
+  let suporteAoVivo = null;
+  let suporteAgendado = null;
+
+  function ouvirSuporte() {
+    if (suporteAoVivo) return;
+    const quando = { event: "*", schema: "public" };
+    const agendar = () => {
+      clearTimeout(suporteAgendado);
+      suporteAgendado = setTimeout(async () => {
+        try {
+          await carregarChamados(true);
+          if (estado.chamadoAberto) await abrirChamado(estado.chamadoAberto, true);
+        } catch { /* a próxima mudança tenta de novo */ }
+      }, 300);
+    };
+    suporteAoVivo = sb.channel("suporte-equipe")
+      .on("postgres_changes", { ...quando, table: "chamados" }, agendar)
+      .on("postgres_changes", { ...quando, table: "chamados_mensagens" }, agendar)
+      .on("postgres_changes", { ...quando, table: "chamados_anexos" }, agendar)
+      .subscribe();
   }
 
   // ============================================================ equipe

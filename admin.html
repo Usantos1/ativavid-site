@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261010t">
+  <link rel="stylesheet" href="/admin.css?v=20261010u">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -227,33 +227,51 @@
       </section>
 
       <section id="secSuporte" class="adm-secao" aria-labelledby="tituloSecao" hidden>
-        <div class="adm-resumo" id="resumoSuporte"></div>
-        <div class="adm-chips" id="filtrosSuporte" role="group" aria-label="Filtrar chamados"></div>
-        <div class="adm-suporte">
-          <div id="listaChamados" class="adm-chamados" aria-live="polite"></div>
-          <article id="conversa" class="adm-vidro adm-conversa" hidden aria-live="polite">
-            <header class="adm-conversa-topo">
-              <div class="adm-conversa-cab">
-                <h2 id="conversaAssunto"></h2>
-                <p id="conversaQuem"></p>
+        <!-- Lista estreita à esquerda; conversa tipo WhatsApp à direita, com a
+             caixa de texto fixa embaixo. A rolagem fica dentro de cada lado. -->
+        <div class="adm-sup" id="suporteGrade">
+          <aside class="adm-vidro adm-sup-lista" aria-label="Chamados">
+            <div class="adm-sup-filtros" id="filtrosSuporte" role="group" aria-label="Filtrar chamados"></div>
+            <div id="listaChamados" class="adm-sup-itens" aria-live="polite"></div>
+          </aside>
+
+          <article id="conversa" class="adm-vidro adm-sup-chat" aria-live="polite">
+            <div id="conversaVazia" class="adm-sup-vazio">
+              <p>Escolha um chamado na lista para atender.</p>
+            </div>
+            <header class="adm-sup-cab" id="conversaCab" hidden>
+              <button id="btFecharConversa" class="adm-icone-bt adm-sup-voltar" type="button" aria-label="Voltar para a lista">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+              </button>
+              <span id="conversaAvatar" class="adm-avatar adm-avatar-mini"></span>
+              <div class="adm-sup-cab-texto">
+                <strong id="conversaAssunto"></strong>
+                <span id="conversaQuem"></span>
               </div>
-              <button id="btFecharConversa" class="adm-bt adm-bt-fraco adm-bt-sm adm-so-mobile" type="button">Voltar</button>
+              <label class="adm-status-sel">
+                <span class="adm-sr">Status do chamado</span>
+                <select id="statusResposta" aria-label="Status do chamado">
+                  <option value="aberto">Novo</option>
+                  <option value="em_analise">Em atendimento</option>
+                  <option value="aguardando_cliente">Aguardando cliente</option>
+                  <option value="resolvido">Resolvido</option>
+                </select>
+              </label>
             </header>
-            <div id="conversaMensagens" class="adm-mensagens"></div>
-            <form id="formResposta" class="adm-resposta">
-              <label class="adm-sr" for="textoResposta">Resposta</label>
-              <textarea id="textoResposta" rows="3" maxlength="4000" placeholder="Escreva a resposta. O cliente vê na conta dele."></textarea>
-              <div class="adm-resposta-acoes">
-                <label class="adm-status-sel">
-                  <span class="adm-sr">Status do chamado</span>
-                  <select id="statusResposta" aria-label="Status do chamado">
-                    <option value="aberto">Novo</option>
-                    <option value="em_analise">Em atendimento</option>
-                    <option value="aguardando_cliente">Aguardando cliente</option>
-                    <option value="resolvido">Resolvido</option>
-                  </select>
+            <div id="conversaMensagens" class="adm-sup-msgs" hidden></div>
+            <form id="formResposta" class="adm-sup-composer" hidden>
+              <ul id="respostaAnexosAdm" class="adm-sup-anexos"></ul>
+              <div class="adm-sup-linha">
+                <label class="adm-sup-clip" title="Anexar print">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.6 19.9a5.2 5.2 0 0 1-7.4-7.4l8.5-8.5a3.5 3.5 0 0 1 5 5l-8.5 8.5a1.8 1.8 0 0 1-2.5-2.5l7.8-7.8"/></svg>
+                  <span class="adm-sr">Anexar print</span>
+                  <input id="arquivosResposta" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
                 </label>
-                <button id="btResponder" class="adm-bt adm-bt-forte adm-bt-sm" type="submit">Enviar resposta</button>
+                <label class="adm-sr" for="textoResposta">Resposta</label>
+                <textarea id="textoResposta" rows="1" maxlength="4000" placeholder="Escreva a resposta"></textarea>
+                <button id="btResponder" class="adm-sup-enviar" type="submit" aria-label="Enviar resposta">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-4 16-4-6.5z"/></svg>
+                </button>
               </div>
             </form>
           </article>
@@ -294,6 +312,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261010t"></script>
+<script src="/admin.js?v=20261010u"></script>
 </body>
 </html>
