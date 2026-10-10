@@ -534,3 +534,17 @@ a.adm-bt { text-decoration: none; }
 }
 .aulas-tela-cheia svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .aulas-tela-cheia:hover { background: rgba(0, 0, 0, .65); }
+
+/* chamado resolvido: aviso no lugar da caixa de mensagem */
+.aulas-chat-encerrado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  border-top: 1px solid var(--borda);
+  background: color-mix(in srgb, var(--verde) 10%, transparent);
+}
+.aulas-chat-encerrado p { margin: 0; font-size: 14.5px; color: var(--texto-2); max-width: 70ch; }
+.aulas-chat-encerrado strong { color: var(--tinta); }

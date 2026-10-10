@@ -615,6 +615,13 @@
     const chip = $("ticketStatus");
     chip.textContent = s.rot;
     chip.className = `adm-chip adm-chip-${s.tom}`;
+    // resolvido: some a caixa de mensagem e aparece o aviso de encerramento
+    const encerrado = c.status === "resolvido";
+    $("formResposta").hidden = encerrado;
+    $("chamadoEncerrado").hidden = !encerrado;
+    if (encerrado) {
+      $("chamadoEncerradoTexto").textContent = `A equipe encerrou este chamado em ${dia(c.atualizadoEm)}. Se precisar de mais ajuda, abra um novo chamado.`;
+    }
     const conversa = $("ticketConversa");
     const pertoDoFim = conversa.scrollHeight - conversa.scrollTop - conversa.clientHeight < 120;
     conversa.replaceChildren();

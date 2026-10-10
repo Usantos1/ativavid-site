@@ -13,7 +13,7 @@
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
   <link rel="stylesheet" href="/admin.css?v=20261010t">
-  <link rel="stylesheet" href="/aulas.css?v=20261010q">
+  <link rel="stylesheet" href="/aulas.css?v=20261011a">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -234,6 +234,11 @@
               <span id="ticketStatus" class="adm-chip"></span>
             </header>
             <div id="ticketConversa" class="aulas-chat-msgs" aria-live="polite"></div>
+            <!-- chamado resolvido: o cliente não responde mais; abre outro -->
+            <div id="chamadoEncerrado" class="aulas-chat-encerrado" hidden>
+              <p><strong>Atendimento encerrado.</strong> <span id="chamadoEncerradoTexto"></span></p>
+              <a class="adm-bt adm-bt-forte adm-bt-sm" href="#suporte/novo">Abrir novo chamado</a>
+            </div>
             <form id="formResposta" class="aulas-chat-composer">
               <ul id="respostaAnexos" class="aulas-chat-anexos"></ul>
               <div class="aulas-chat-linha">
@@ -265,6 +270,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/aulas.js?v=20261010r"></script>
+<script src="/aulas.js?v=20261011a"></script>
 </body>
 </html>
