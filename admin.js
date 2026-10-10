@@ -862,6 +862,10 @@
     const n = $("navSuporte");
     n.textContent = String(abertos);
     n.hidden = abertos === 0;
+    const sino = $("sinoBadge");
+    sino.textContent = abertos > 9 ? "9+" : String(abertos);
+    sino.hidden = abertos === 0;
+    $("btSino").setAttribute("aria-label", abertos ? `${plural(abertos, "chamado aberto", "chamados abertos")}` : "Chamados de suporte");
     if (estado.secao === "suporte") desenharSuporte();
     if (!silencioso && estado.papel === "admin") desenharVisao();
   }
@@ -1168,8 +1172,24 @@
   $("btReenviar").addEventListener("click", (e) => pedirCodigo(e.currentTarget));
   $("btTrocar").addEventListener("click", (e) => trocarSenha(e.currentTarget));
   $("btSair").addEventListener("click", sair);
+  $("btSairMenu").addEventListener("click", sair);
   $("btMenu").addEventListener("click", () => aplicarMenu($("painel").classList.contains("adm-app--fechado")));
   $("btTema").addEventListener("click", alternarTema);
+  $("btSino").addEventListener("click", () => { location.hash = "suporte"; });
+  $("btPerfil").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const menu = $("menuPerfil");
+    const abrir = menu.hidden;
+    menu.hidden = !abrir;
+    $("btPerfil").setAttribute("aria-expanded", abrir ? "true" : "false");
+  });
+  document.addEventListener("click", (e) => {
+    const menu = $("menuPerfil");
+    if (!menu.hidden && !menu.contains(e.target) && e.target !== $("btPerfil")) {
+      menu.hidden = true;
+      $("btPerfil").setAttribute("aria-expanded", "false");
+    }
+  });
   $("buscaGlobal").addEventListener("input", buscaGlobal);
   $("btCriar").addEventListener("click", (e) => criarCliente(e.currentTarget));
   $$("#novoPrazo button").forEach((b) => b.addEventListener("click", () => {
