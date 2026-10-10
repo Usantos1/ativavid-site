@@ -507,3 +507,30 @@ a.adm-bt { text-decoration: none; }
   .aulas-chat { height: calc(100dvh - 200px); min-height: 380px; }
   .aulas-bolha { max-width: 88%; }
 }
+
+/* máscaras do player do YouTube: o aluno assiste sem sair para o YouTube */
+.aulas-mascara { position: absolute; left: 0; right: 0; z-index: 2; }
+.aulas-mascara-topo {
+  top: 0;
+  height: 80px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 14px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .6), transparent);
+}
+.aulas-mascara-canto { top: auto; left: auto; right: 0; bottom: 52px; width: 210px; height: 64px; }
+.aulas-tela-cheia {
+  pointer-events: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: rgba(0, 0, 0, .45);
+  color: #fff;
+  cursor: pointer;
+}
+.aulas-tela-cheia svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.aulas-tela-cheia:hover { background: rgba(0, 0, 0, .65); }

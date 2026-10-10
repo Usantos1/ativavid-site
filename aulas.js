@@ -451,7 +451,7 @@
     if (!aulaAtual || aulaAtual.id !== a.id) {
       const f = $("aulaVideo");
       f.title = a.titulo || "Aula";
-      f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(a.youtubeId)}?rel=0&autoplay=1`;
+      f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(a.youtubeId)}?rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&autoplay=1`;
       $("aulaTitulo").textContent = a.titulo || "Aula";
       const desc = $("aulaDescricao");
       desc.replaceChildren();
@@ -477,6 +477,13 @@
     bt.textContent = feita ? "Desmarcar concluída" : "Marcar como concluída";
     bt.dataset.feita = feita ? "1" : "0";
   }
+
+  // Tela cheia da própria área do vídeo, para as máscaras continuarem por cima.
+  $("btTelaCheia").addEventListener("click", () => {
+    const area = $("aulaPlayer");
+    const pedir = area.requestFullscreen || area.webkitRequestFullscreen;
+    if (pedir) pedir.call(area);
+  });
 
   $("btConcluir").addEventListener("click", async () => {
     if (!aulaAtual) return;
