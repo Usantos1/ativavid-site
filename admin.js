@@ -883,7 +883,7 @@
   };
   const GATEWAYS = [
     { id: "stripe", nome: "Stripe", ajuda: "Cartão. Taxa menor; o dinheiro do cartão cai em uns 30 dias." },
-    { id: "hotmart", nome: "Hotmart", ajuda: "Cartão em até 12x no anual, e as outras formas que a Hotmart liberar. Taxa maior." },
+    { id: "hotmart", nome: "Hotmart", ajuda: "Cartão (12x no anual), Pix, boleto ou PayPal. Taxa maior: 9,9% + R$ 2,49." },
   ];
 
   function configCobranca() {
