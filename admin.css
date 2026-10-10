@@ -2253,3 +2253,5 @@ html.adm-sem-rolagem body { overflow: hidden; }
   .adm-int-padrao { margin-left: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .adm-int-switch, .adm-int-switch::after { transition: none; } }
+/* botão que é link: texto centrado como os outros */
+.adm-int-card a.adm-bt { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; justify-self: start; }
