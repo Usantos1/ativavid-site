@@ -236,6 +236,67 @@
     return '<span class="adm-selo adm-selo-ok">Ativa</span>';
   }
 
+  /** Os computadores daquela conta. O vínculo é o `account_access_id`, que o
+   *  `rpc_license` grava quando a máquina entra pela CONTA; quem entrou pelo
+   *  caminho antigo, de chave, fica sem dono — por isso a ficha diz quantos. */
+  function maquinasDe(email) {
+    const e = texto(email).toLowerCase();
+    return estado.aparelhos.filter((d) => texto(d.account_email).toLowerCase() === e);
+  }
+
+  function ultimoAcesso(maquinas) {
+    const ts = maquinas
+      .map((d) => (d.last_seen ? new Date(d.last_seen).getTime() : 0))
+      .filter((n) => n > 0);
+    return ts.length ? new Date(Math.max(...ts)).toISOString() : "";
+  }
+
+  function montarFicha(a) {
+    const maqs = maquinasDe(a.email);
+    const visto = ultimoAcesso(maqs);
+    const ficha = document.createElement("div");
+    ficha.className = "adm-ficha";
+
+    const linhas = [
+      ["Situação", a.status === "revoked" ? "Bloqueada" : "Ativa"],
+      ["Vale até", dia(a.valid_until)],
+      ["Último acesso", visto ? dia(visto) : "nunca abriu o app"],
+      ["Computadores", `${maqs.length} de ${a.max_devices || 1} permitido(s)`],
+      ["Cliente desde", dia(a.created_at)],
+      ["Mexido pela última vez", dia(a.updated_at)],
+    ];
+    if (a.notes) linhas.push(["Anotação", a.notes]);
+    if (!a.user_id) linhas.push(["Login", "ainda não existe — os dias não valem"]);
+
+    const dl = document.createElement("dl");
+    dl.className = "adm-ficha-dados";
+    for (const [rotulo, valor] of linhas) {
+      const dt = document.createElement("dt");
+      dt.textContent = rotulo;
+      const dd = document.createElement("dd");
+      dd.textContent = valor;
+      dl.append(dt, dd);
+    }
+    ficha.appendChild(dl);
+
+    const titulo = document.createElement("p");
+    titulo.className = "adm-ficha-titulo";
+    titulo.textContent = maqs.length ? "Computadores desta conta" : "Nenhum computador vinculado a esta conta";
+    ficha.appendChild(titulo);
+
+    for (const d of maqs) {
+      const m = document.createElement("div");
+      m.className = "adm-maquina";
+      const nome = document.createElement("b");
+      nome.textContent = texto(d.label) || texto(d.device_id).slice(0, 16) || "Computador";
+      const quando = document.createElement("span");
+      quando.textContent = d.last_seen ? `visto em ${dia(d.last_seen)}` : "nunca visto";
+      m.append(nome, quando);
+      ficha.appendChild(m);
+    }
+    return ficha;
+  }
+
   function desenharAssinaturas() {
     const alvo = $("listaAssinaturas");
     const itens = filtrados(estado.acessos, "email");
@@ -245,6 +306,7 @@
     }
     alvo.innerHTML = "";
     for (const a of itens) {
+      const maqs = maquinasDe(a.email);
       const linha = document.createElement("div");
       linha.className = "adm-linha";
       linha.innerHTML = `
@@ -254,11 +316,12 @@
             ${selo(a)}
           </div>
           <p class="adm-dado">
-            Vale até <b>${dia(a.valid_until)}</b> · ${a.max_devices || 1} computador(es)
+            Vale até <b>${dia(a.valid_until)}</b> · ${maqs.length} de ${a.max_devices || 1} computador(es)
             ${a.user_id ? "" : '<br>Os dias estão reservados, mas <b>só valem depois que existir login com este e-mail</b>.'}
           </p>
         </div>
         <div class="adm-verbos">
+          <button class="adm-verbo" type="button" data-fazer="ficha" aria-expanded="false">Ficha</button>
           <button class="adm-verbo" type="button" data-fazer="renovar">Renovar</button>
           <button class="adm-verbo" type="button" data-fazer="bloquear">Bloquear</button>
           <button class="adm-verbo adm-verbo-perigo" type="button" data-fazer="excluir">Excluir</button>
@@ -266,6 +329,15 @@
       // textContent, não innerHTML: e-mail é dado de fora e não vira marcação.
       linha.querySelector(".adm-nome").textContent = texto(a.email);
       linha.querySelectorAll("[data-fazer]").forEach((bt) => {
+        if (bt.dataset.fazer === "ficha") {
+          bt.addEventListener("click", () => {
+            const aberta = linha.querySelector(".adm-ficha");
+            if (aberta) { aberta.remove(); bt.setAttribute("aria-expanded", "false"); return; }
+            linha.appendChild(montarFicha(a));
+            bt.setAttribute("aria-expanded", "true");
+          });
+          return;
+        }
         bt.addEventListener("click", () => verboAssinatura(bt, bt.dataset.fazer, a));
       });
       alvo.appendChild(linha);

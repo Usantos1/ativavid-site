@@ -343,6 +343,48 @@
 .adm-selo-mal    { background: #3a1a1e; color: #ff8d95; }
 .adm-selo-espera { background: #332814; color: #f5c069; }
 
+/* Ficha: ocupa a linha inteira embaixo, inclusive no desktop (a .adm-linha
+   vira 2 colunas lá em cima). */
+.adm-ficha {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.adm-ficha-dados {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 0 0 14px;
+  font-size: 13px;
+}
+.adm-ficha-dados dt { color: var(--fine); }
+.adm-ficha-dados dd { margin: 0; color: var(--text); overflow-wrap: anywhere; }
+
+.adm-ficha-titulo {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--fine);
+}
+
+.adm-maquina {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 9px 11px;
+  margin-bottom: 6px;
+  background: var(--bg-2);
+  border-radius: 10px;
+  font-size: 13px;
+}
+.adm-maquina b { overflow-wrap: anywhere; }
+.adm-maquina span { color: var(--dim); white-space: nowrap; }
+
 .adm-vazio {
   color: var(--fine);
   font-size: 14px;
