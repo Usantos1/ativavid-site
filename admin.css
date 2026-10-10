@@ -2003,3 +2003,8 @@ html.adm-sem-rolagem body { overflow: hidden; }
 /* a barra lateral fica acima da superior: a dica "Recolher menu" do botão
  * aparecia por trás da barra superior */
 .adm-side { z-index: 50; }
+
+/* indicadores da visão geral numa linha só (antes: 2 colunas e um card sobrando) */
+@media (min-width: 960px) {
+  .adm-kpis { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+}
