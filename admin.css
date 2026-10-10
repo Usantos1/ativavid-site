@@ -2042,3 +2042,55 @@ html.adm-sem-rolagem body { overflow: hidden; }
   .adm-cli-fixo { top: 64px; }
   .adm-cli-fixo-l2 { flex-wrap: wrap; }
 }
+
+/* clientes: uma linha só (filtros, busca, ordenar, novo cliente) */
+.adm-cli-fixo { gap: 12px; }
+.adm-cli-barra { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.adm-cli-chips { flex: none; display: flex; align-items: center; gap: 6px; overflow: visible; padding: 0; }
+.adm-cli-filtrar { display: inline-flex; align-items: center; gap: 6px; }
+.adm-cli-filtrar svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.adm-cli-busca {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--campo);
+  border: 1px solid var(--borda);
+}
+.adm-cli-busca svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--texto-3); stroke-width: 2; stroke-linecap: round; }
+.adm-cli-busca input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 14.5px; color: var(--tinta); outline: none; }
+.adm-cli-barra .adm-ordem { flex: none; margin: 0; }
+.adm-cli-barra .adm-ordem select { height: 42px; }
+
+/* botão vermelho mais leve, de vidro */
+.adm-bt-vidro {
+  flex: none;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--vermelho) 78%, transparent), color-mix(in srgb, var(--vermelho) 58%, transparent));
+  border: 1px solid color-mix(in srgb, var(--vermelho) 55%, rgba(255, 255, 255, .35));
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 8px 22px -12px color-mix(in srgb, var(--vermelho) 70%, transparent);
+}
+.adm-bt-vidro:hover { background: linear-gradient(160deg, color-mix(in srgb, var(--vermelho) 88%, transparent), color-mix(in srgb, var(--vermelho) 70%, transparent)); }
+
+@media (max-width: 1100px) {
+  .adm-cli-barra { flex-wrap: wrap; }
+  .adm-cli-busca { order: 5; flex-basis: 100%; }
+}
+
+/* logo centralizado na barra lateral; recolhida, ele volta para o lugar do ícone */
+.adm-side-logo img:not(.adm-logo-icone) {
+  left: calc(50% - 88px);
+  transition: left .38s cubic-bezier(.2, .8, .2, 1), transform .38s cubic-bezier(.2, .8, .2, 1), opacity .3s ease;
+}
+.adm-app--fechado .adm-side-logo img:not(.adm-logo-icone) { left: 14px; }

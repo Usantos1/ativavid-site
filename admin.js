@@ -757,11 +757,14 @@
 
   // ============================================================ clientes
 
-  const FILTROS = [
+  // Na barra: os quatro mais usados. O resto fica no botão Filtros.
+  const FILTROS_CLIENTE = [
     ["todos", "Todos"],
     ["ativos", "Ativos"],
     ["vencendo", "Vencendo"],
     ["vencidos", "Vencidos"],
+  ];
+  const MAIS_FILTROS_CLIENTE = [
     ["bloqueados", "Bloqueados"],
     ["semlogin", "Sem login"],
     ["anual", "Anual"],
@@ -772,12 +775,30 @@
   function desenharFiltros() {
     const alvo = $("filtros");
     alvo.innerHTML = "";
-    for (const [k, rot] of FILTROS) {
-      const b = botao(rot, "adm-chip-filtro", () => { estado.filtro = k; desenharFiltros(); desenharClientes(); });
+    const trocarFiltro = (k) => { estado.filtro = k; desenharFiltros(); desenharClientes(); };
+    for (const [k, rot] of FILTROS_CLIENTE) {
+      const b = botao(rot, "adm-chip-filtro", () => trocarFiltro(k));
       b.setAttribute("aria-pressed", estado.filtro === k ? "true" : "false");
       if (estado.filtro === k) b.classList.add("is-on");
       alvo.appendChild(b);
     }
+    const extra = MAIS_FILTROS_CLIENTE.find(([k]) => k === estado.filtro);
+    const caixa = el("div", "adm-sup-mais");
+    const menu = el("div", "adm-sup-menu");
+    menu.hidden = true;
+    const abrir = botao("", `adm-chip-filtro adm-cli-filtrar${extra ? " is-on" : ""}`, (e) => {
+      e.stopPropagation();
+      menu.hidden = !menu.hidden;
+    });
+    abrir.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>';
+    abrir.append(el("span", "", extra ? extra[1] : "Filtros"));
+    abrir.setAttribute("aria-haspopup", "true");
+    for (const [k, rot] of MAIS_FILTROS_CLIENTE) {
+      const it = botao(rot, `adm-sup-menu-item${estado.filtro === k ? " is-on" : ""}`, () => trocarFiltro(k));
+      menu.appendChild(it);
+    }
+    caixa.append(abrir, menu);
+    alvo.appendChild(caixa);
   }
 
   function casaFiltro(c) {
@@ -814,7 +835,7 @@
   }
 
   function desenharClientes() {
-    const q = $("buscaGlobal").value.trim().toLowerCase();
+    const q = $("buscaClientes").value.trim().toLowerCase();
     const alvo = $("listaClientes");
     const mostraSemAss = estado.filtro === "todos" || estado.filtro === "semassinatura";
     const lista = ordenar(estado.clientes.filter((c) => casaFiltro(c) && casaBusca(c, q)));
@@ -824,7 +845,7 @@
     alvo.innerHTML = "";
     const total = lista.length + semAss.length;
     $("clientesResumo").textContent = q
-      ? `${plural(total, "cliente encontrado", "clientes encontrados")} para “${$("buscaGlobal").value.trim()}”`
+      ? `${plural(total, "cliente encontrado", "clientes encontrados")} para “${$("buscaClientes").value.trim()}”`
       : plural(total, "cliente", "clientes");
     if (!lista.length && !semAss.length) {
       alvo.appendChild(el("p", "adm-vazio", estado.clientes.length || estado.semAssinatura.length
@@ -1638,8 +1659,7 @@
   });
   // clicar fora fecha o menu de filtros
   document.addEventListener("click", () => {
-    const m = document.querySelector(".adm-sup-menu");
-    if (m) m.hidden = true;
+    document.querySelectorAll(".adm-sup-menu").forEach((m) => { m.hidden = true; });
   });
   $("arquivosResposta").addEventListener("change", (e) => {
     adicionarAnexosResposta(e.target.files);
@@ -2107,6 +2127,7 @@
       return;
     }
     if (estado.papel !== "admin") return;
+    $("buscaClientes").value = q;
     if (estado.secao !== "clientes") {
       if (q.trim()) irPara("clientes");
       return;
@@ -2136,6 +2157,7 @@
   $("btMenu").addEventListener("click", () => aplicarMenu($("painel").classList.contains("adm-app--fechado")));
   $("btTema").addEventListener("click", alternarTema);
   $("buscaGlobal").addEventListener("input", buscaGlobal);
+  $("buscaClientes").addEventListener("input", () => desenharClientes());
   $("btNovoCliente").addEventListener("click", abrirNovoCliente);
   $("ordem").addEventListener("change", (e) => { estado.ordem = e.target.value; desenharClientes(); });
   $("btNovaAula").addEventListener("click", () => abrirFormAula(null));

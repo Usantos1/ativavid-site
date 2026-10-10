@@ -4,5 +4,5 @@
 
 # Rotas do painel e da área do aluno: qualquer endereço abaixo delas abre a
 # mesma página, que decide a tela pelo endereço.
-/admin/*        /admin.html   200
-/aulas/*        /aulas.html   200
+/admin/*        /admin        200
+/aulas/*        /aulas        200

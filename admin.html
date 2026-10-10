@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261011e">
+  <link rel="stylesheet" href="/admin.css?v=20261011f">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -194,15 +194,17 @@
 
       <section id="secClientes" class="adm-secao" aria-labelledby="tituloClientes" hidden>
         <div class="adm-cli-fixo">
-          <div class="adm-cli-fixo-l1">
-            <div>
-              <h1 id="tituloClientes" class="adm-cli-titulo">Clientes</h1>
-              <p class="adm-ajuda" id="clientesResumo"></p>
-            </div>
-            <button id="btNovoCliente" class="adm-bt adm-bt-forte" type="button">+ Novo cliente</button>
+          <div>
+            <h1 id="tituloClientes" class="adm-cli-titulo">Clientes</h1>
+            <p class="adm-ajuda" id="clientesResumo"></p>
           </div>
-          <div class="adm-cli-fixo-l2">
-            <div class="adm-chips" id="filtros" role="group" aria-label="Filtrar clientes"></div>
+          <div class="adm-cli-barra">
+            <div class="adm-chips adm-cli-chips" id="filtros" role="group" aria-label="Filtrar clientes"></div>
+            <label class="adm-cli-busca">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+              <span class="adm-sr">Buscar cliente</span>
+              <input id="buscaClientes" type="search" placeholder="Buscar por nome, e-mail ou computador" autocomplete="off" spellcheck="false">
+            </label>
             <label class="adm-ordem">
               <span class="adm-sr">Ordenar</span>
               <select id="ordem">
@@ -213,6 +215,7 @@
                 <option value="nome">Nome</option>
               </select>
             </label>
+            <button id="btNovoCliente" class="adm-bt adm-bt-vidro" type="button">+ Novo cliente</button>
           </div>
         </div>
 
@@ -325,6 +328,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261011e"></script>
+<script src="/admin.js?v=20261011f"></script>
 </body>
 </html>
