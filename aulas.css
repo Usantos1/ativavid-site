@@ -76,3 +76,7 @@
 #listaAulas .adm-aluno-grade {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
+
+.alu-embutido .adm-cab {
+  display: none;
+}
