@@ -1726,7 +1726,7 @@
 
     const vendas = cartaoInt("Últimas vendas", "Cada transação que a Hotmart avisou.");
     vendas.append(tabelaInt(["Quando", "Comprador", "Produto", "Valor", "Afiliado", "Acesso"],
-      (h.vendas || []).map((v) => [
+      (h.vendas || []).filter((v) => /^PURCHASE_/.test(v.evento || "")).map((v) => [
         hora(v.criado_em),
         v.nome ? `${v.nome} · ${v.email}` : v.email,
         [v.produto_nome, v.oferta].filter(Boolean).join(" · "),
