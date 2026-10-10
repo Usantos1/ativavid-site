@@ -1178,3 +1178,316 @@
 .adm-logo-icone { display: none !important; }
 .adm-app--fechado .adm-side-logo img:not(.adm-logo-icone) { display: none !important; }
 .adm-app--fechado .adm-logo-icone { display: block !important; width: 40px; height: 40px; margin: 0 auto; }
+
+/* ============================================================ rodada 3: modal, perfil, aluno, suporte, equipe, aulas */
+
+/* bolinha de recolher: sempre visível de leve, forte ao passar o cursor */
+.adm-side-bolinha { opacity: .55; }
+.adm-side:hover .adm-side-bolinha,
+.adm-side-bolinha:focus-visible { opacity: 1; }
+
+/* menu recolhido: o nome aparece ao passar o cursor no ícone */
+.adm-app--fechado .adm-side { overflow: visible; }
+.adm-app--fechado .adm-nav-lista { overflow: visible; }
+.adm-app--fechado .adm-nav-item { position: relative; }
+.adm-app--fechado .adm-nav-item::after {
+  content: attr(data-rotulo);
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  padding: 7px 12px;
+  border-radius: 12px;
+  background: var(--vidro-forte);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--borda-2);
+  box-shadow: var(--sombra);
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s ease, transform .15s ease;
+  z-index: 80;
+}
+.adm-app--fechado .adm-nav-item:hover::after,
+.adm-app--fechado .adm-nav-item:focus-visible::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+.adm-app--fechado .adm-nav-item span { display: none; }
+
+/* o logo recolhido: só o símbolo */
+.adm-app--fechado .adm-side-logo { padding: 22px 0 18px; display: flex; justify-content: center; }
+.adm-app--fechado .adm-side-logo a { display: block; }
+.adm-app--fechado .adm-side-logo .adm-logo-icone { display: block !important; width: 44px; height: 44px; margin: 0 auto; object-fit: contain; }
+.adm-app--fechado .adm-side-logo img:not(.adm-logo-icone) { display: none !important; }
+
+/* ---------- modal */
+
+.adm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  box-sizing: border-box;
+}
+.adm-modal-fundo {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 9, 18, .46);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: adm-sobe-leve .2s ease;
+}
+.adm[data-tema="claro"] .adm-modal-fundo { background: rgba(230, 235, 245, .5); }
+.adm-modal-caixa {
+  position: relative;
+  width: min(620px, 100%);
+  max-height: min(88dvh, 880px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 28px;
+  overflow: hidden;
+  animation: adm-sobe .24s ease;
+}
+.adm-modal-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 14px 24px;
+  border-bottom: 1px solid var(--borda);
+}
+.adm-modal-topo h2 { margin: 0; font-family: var(--display); font-size: 18px; font-weight: 800; }
+.adm-modal-corpo { overflow-y: auto; padding: 20px 24px 24px; }
+.adm-travado { overflow: hidden; }
+
+.adm-form-modal { display: grid; gap: 6px; }
+.adm-ajuda { margin: 0 0 6px; font-size: 13.5px; color: var(--texto-2); line-height: 1.5; }
+.adm-ajuda-forte { font-weight: 700; color: var(--tinta); }
+.adm-form-modal .adm-campo { margin-bottom: 14px; }
+.adm-form-acoes { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; margin-top: 8px; }
+.adm-check { display: flex; align-items: center; gap: 10px; margin: 2px 0 6px; font-size: 14.5px; cursor: pointer; }
+
+/* foto de perfil */
+.adm-foto-quadro { display: flex; align-items: center; gap: 18px; margin-bottom: 12px; }
+.adm-foto-previa {
+  width: 96px; height: 96px; flex: none;
+  border-radius: 999px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 30px;
+  background: linear-gradient(135deg, #ff3b3e, #3d82ff);
+  color: #fff;
+  box-shadow: 0 0 0 3px var(--borda-2);
+}
+.adm-foto-previa img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.adm-foto-acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* avatar: foto de verdade quando existe */
+.adm-avatar { overflow: hidden; }
+.adm-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.adm-avatar-grande { width: 52px; height: 52px; font-size: 18px; flex: none; }
+.adm-menu-perfil-quem { display: flex; gap: 12px; align-items: center; padding: 8px 10px 12px; }
+.adm-menu-perfil-quem strong { display: block; font-size: 15px; }
+.adm-menu-perfil-quem > div > span { display: block; font-size: 12.5px; color: var(--texto-3); overflow-wrap: anywhere; }
+.adm-papel-tag {
+  display: inline-block;
+  margin-top: 6px;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--azul-fundo);
+  color: var(--azul);
+}
+.adm-menu-perfil-item { font-weight: 600; color: var(--tinta); }
+.adm-menu-perfil-item:hover { background: var(--cinza-fundo); }
+.adm-menu-perigo { color: var(--vermelho) !important; }
+.adm-menu-perigo:hover { background: var(--vermelho-fundo) !important; }
+
+/* menu de avisos (sino) */
+.adm-sino-wrap { position: relative; }
+.adm-menu-sino { width: 340px; max-width: calc(100vw - 24px); padding: 10px; }
+.adm-menu-titulo { margin: 4px 10px 8px; font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--texto-3); }
+.adm-sino-lista { display: grid; gap: 4px; }
+.adm-sino-item {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.adm-sino-item:hover { background: var(--cinza-fundo); }
+.adm-sino-item strong { font-size: 14px; overflow-wrap: anywhere; }
+.adm-sino-item span { font-size: 12.5px; color: var(--texto-3); }
+.adm-sino-vazio { margin: 8px 10px 12px; font-size: 13.5px; color: var(--texto-3); }
+.adm-menu-ver { margin-top: 6px; color: var(--azul) !important; border-top: 1px solid var(--borda); border-radius: 0 0 12px 12px; }
+
+/* novo cliente: botão de vidro */
+.adm-novo-botao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 52px;
+  padding: 0 20px;
+  margin-bottom: 14px;
+  border: 1px solid var(--borda);
+  border-radius: 22px;
+  color: var(--tinta);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.adm-novo-botao span:last-child { font-size: 22px; font-weight: 400; color: var(--azul); line-height: 1; }
+.adm-novo-botao:hover { border-color: var(--borda-2); }
+
+/* ---------- suporte: resumo */
+
+.adm-resumo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+@media (min-width: 900px) { .adm-resumo { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.adm-resumo-item {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  padding: 14px 16px;
+  border: 1px solid var(--borda);
+  border-radius: 22px;
+  color: var(--tinta);
+  font: inherit;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.adm-resumo-item::before {
+  content: "";
+  position: absolute; left: 16px; right: 16px; top: 0; height: 2px;
+  border-radius: 0 0 3px 3px;
+  background: var(--texto-3);
+  opacity: .5;
+}
+.adm-resumo-item:hover { transform: translateY(-1px); border-color: var(--borda-2); }
+.adm-resumo-item.is-on { border-color: color-mix(in srgb, var(--azul) 60%, transparent); }
+.adm-resumo-mal::before { background: var(--vermelho); opacity: 1; }
+.adm-resumo-atencao::before { background: var(--ambar); opacity: 1; }
+.adm-resumo-ok::before { background: var(--verde); opacity: 1; }
+.adm-resumo-rot { font-size: 12.5px; font-weight: 600; color: var(--texto-3); }
+.adm-resumo-n { font-family: var(--display); font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.adm-resumo-sub { font-size: 12.5px; color: var(--texto-2); }
+
+/* ---------- ficha: aulas assistidas */
+
+.adm-aulas-feitas { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
+.adm-aulas-feitas li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  background: var(--campo);
+  border: 1px solid var(--borda);
+  font-size: 14px;
+}
+.adm-aulas-feitas li span { overflow-wrap: anywhere; }
+.adm-aulas-feitas li small { color: var(--texto-3); white-space: nowrap; }
+.adm-ficha-dica { margin: 8px 0 0; font-size: 13.5px; color: var(--ambar); line-height: 1.45; }
+.adm-ficha-dica:empty { display: none; }
+
+/* ---------- área do aluno (prévia) */
+
+.adm-aviso-aluno {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  border-radius: 22px;
+}
+.adm-aviso-aluno p { margin: 0; font-size: 14.5px; color: var(--texto-2); line-height: 1.5; }
+.adm-aviso-aluno strong { color: var(--tinta); }
+
+.adm-aluno-secao { margin: 22px 4px 10px; font-family: var(--display); font-size: 17px; font-weight: 800; }
+.adm-aluno-grade { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 700px) { .adm-aluno-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.adm-aluno-card { overflow: hidden; border-radius: 22px; }
+.adm-aluno-capa { aspect-ratio: 16 / 9; background: var(--campo); }
+.adm-aluno-capa img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.adm-aluno-corpo { padding: 14px 16px 16px; display: grid; gap: 6px; }
+.adm-aluno-corpo h4 { margin: 0; font-size: 16.5px; font-weight: 700; line-height: 1.3; }
+.adm-aluno-corpo p { margin: 0; font-size: 14px; color: var(--texto-2); line-height: 1.5; }
+.adm-aluno-assistir { justify-self: start; margin-top: 4px; text-decoration: none; }
+
+/* ---------- equipe: cartões de papel */
+
+.adm-papeis { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 560px) { .adm-papeis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.adm-papel-card {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 14px 15px;
+  border: 1px solid var(--borda);
+  border-radius: 18px;
+  background: var(--campo);
+  color: var(--tinta);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.adm-papel-card strong { font-size: 15px; }
+.adm-papel-card span { font-size: 13px; color: var(--texto-2); line-height: 1.45; }
+.adm-papel-card.is-on { border-color: color-mix(in srgb, var(--azul) 70%, transparent); background: var(--azul-fundo); }
+
+/* ---------- aulas: editor com prévia */
+
+.adm-aula-tags { display: flex; }
+.adm-aula-oculta { color: var(--texto-3); }
+.adm-aula-visivel { color: var(--verde); }
+
+.adm-aula-editor { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .adm-aula-editor { grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); align-items: start; } }
+.adm-aula-form { display: grid; gap: 4px; }
+.adm-aula-form .adm-grade-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 110px); gap: 12px; }
+.adm-aula-form .adm-grade-2 .adm-campo { margin-bottom: 14px; }
+.adm-aula-previa-wrap { display: grid; gap: 8px; align-content: start; }
+.adm-aula-previa-wrap .adm-ajuda { margin: 0; }
+.adm-aula-acoes { justify-content: space-between; }
+.adm-aula-acoes .adm-bt-perigo { margin-left: auto; }
+
+/* ---------- mobile: modal ocupa a tela */
+
+@media (max-width: 559px) {
+  .adm-modal { padding: 0; place-items: end center; }
+  .adm-modal-caixa { width: 100%; max-height: 92dvh; border-radius: 26px 26px 0 0; }
+  .adm-menu-sino { width: calc(100vw - 24px); }
+}

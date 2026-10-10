@@ -1,15 +1,18 @@
 /* Painel admin — ATIVAVID
  *
  * Quem decide o que cada chamada pode fazer é o Postgres, não esta página:
- *   - ativavid_quem_sou()          papel de quem entrou (admin, suporte ou nada)
- *   - ativavid_admin_clientes()    ficha inteira (só admin)
- *   - ativavid_admin_license(...)  ações de assinatura (só admin)
- *   - ativavid_admin_aulas(...)    aulas (só admin)
- *   - ativavid_admin_chamados / _chamado / _responder   suporte (admin e suporte)
- *   - ativavid_admin_equipe*(...)  equipe (só admin)
- *   - Edge Function admin-contas   criar login, apagar conta, bloquear computador
+ *   ativavid_quem_sou()                 papel, nome e foto de quem entrou
+ *   ativavid_admin_clientes()           ficha inteira (só admin)
+ *   ativavid_admin_license(...)         prazo e bloqueio de assinatura (só admin)
+ *   ativavid_admin_editar_conta(...)    computadores e anotação (só admin)
+ *   ativavid_admin_aulas(...)           aulas (só admin)
+ *   ativavid_aulas()                    a lista que o cliente vê (pública)
+ *   ativavid_admin_chamados / _chamado / _responder   suporte (equipe)
+ *   ativavid_admin_equipe*(...)         equipe (só admin)
+ *   ativavid_admin_perfil_salvar(...)   nome e foto de quem está logado
+ *   Edge Function admin-contas          criar login, apagar conta, bloquear computador
  *
- * A conta é a MESMA do aplicativo. A chave abaixo é a ANON, pública de propósito.
+ * A chave abaixo é a ANON, pública de propósito.
  */
 (() => {
   "use strict";
@@ -21,14 +24,15 @@
 
   const SECOES = {
     visao: { titulo: "Visão geral", sub: "O que precisa de atenção hoje.", admin: true },
-    clientes: { titulo: "Clientes", sub: "Assinaturas, computadores e uso. Abra a ficha de quem quiser ver tudo.", admin: true },
-    aulas: { titulo: "Aulas", sub: "O que aparece para o cliente. Cada aula é um vídeo do YouTube.", admin: true },
+    clientes: { titulo: "Clientes", sub: "Assinaturas, computadores, uso e aulas assistidas.", admin: true },
+    aulas: { titulo: "Aulas", sub: "O que o cliente vê na área de aulas. Cada aula é um vídeo do YouTube.", admin: true },
     suporte: { titulo: "Suporte", sub: "Chamados dos clientes. Responda aqui; a resposta aparece na conta dele.", admin: false },
-    equipe: { titulo: "Equipe", sub: "Quem entra neste painel e o que cada um pode fazer.", admin: true },
+    equipe: { titulo: "Equipe", sub: "Quem entra neste painel e o que cada pessoa pode fazer.", admin: true },
+    aluno: { titulo: "Área do aluno", sub: "Como o cliente vê as aulas.", admin: true },
   };
 
   const STATUS_CHAMADO = {
-    aberto: { rot: "Aberto", tom: "mal" },
+    aberto: { rot: "Novo", tom: "mal" },
     em_analise: { rot: "Em análise", tom: "atencao" },
     respondido: { rot: "Aguardando cliente", tom: "neutro" },
     resolvido: { rot: "Resolvido", tom: "ok" },
@@ -41,22 +45,21 @@
   const estado = {
     papel: "",
     email: "",
+    nome: "",
+    foto: "",
     secao: "visao",
     clientes: [],
     semConta: [],
     filtro: "todos",
-    busca: "",
     ordem: "vencimento",
     abertos: new Set(),
     aulas: [],
-    editandoAula: null,
-    prazoNovo: 365,
+    aulasPublicas: [],
     emailTroca: "",
     chamados: [],
     filtroChamado: "ativos",
     chamadoAberto: null,
     equipe: [],
-    papelNovo: "admin",
   };
 
   // ============================================================ utilidades
@@ -86,7 +89,6 @@
     return new Date(t).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   };
 
-  /** "agora", "há 5 min", "há 3 h", "há 2 dias" — e a data depois de 30 dias. */
   const rel = (iso) => {
     const t = ms(iso);
     if (!t) return "nunca";
@@ -103,8 +105,8 @@
 
   const diasAte = (iso) => Math.ceil((ms(iso) - Date.now()) / DIA);
 
-  const iniciais = (email) => {
-    const base = String(email || "?").split("@")[0].replace(/[^a-zA-Z0-9]/g, " ").trim();
+  const iniciais = (texto) => {
+    const base = String(texto || "?").split("@")[0].replace(/[^a-zA-Z0-9 ]/g, " ").trim();
     const p = base.split(/\s+/).filter(Boolean);
     return ((p[0] || "?")[0] + (p[1] || p[0] || "")[0]).toUpperCase();
   };
@@ -149,7 +151,6 @@
     return data || {};
   }
 
-  /** Trava o botão enquanto a tarefa roda; o erro vai para o aviso indicado. */
   async function ocupado(bt, tarefa, onde) {
     if (!bt || bt.disabled) return;
     const antes = bt.textContent;
@@ -168,7 +169,6 @@
     }
   }
 
-  /** Ação destrutiva em dois toques: o primeiro vira "Confirmar?" por 4 s. */
   function doisToques(bt, acao) {
     if (bt.dataset.armado === "1") {
       clearTimeout(bt._t);
@@ -189,7 +189,56 @@
     }, 4000);
   }
 
-  // ============================================================ preferências (por navegador)
+  // ============================================================ modal
+
+  function abrirModal(titulo, corpo) {
+    $("modalTitulo").textContent = titulo;
+    const alvo = $("modalCorpo");
+    alvo.innerHTML = "";
+    alvo.appendChild(corpo);
+    $("modal").hidden = false;
+    document.body.classList.add("adm-travado");
+    setTimeout(() => {
+      const f = alvo.querySelector("input, textarea, select");
+      if (f) f.focus();
+    }, 40);
+  }
+
+  function fecharModal() {
+    $("modal").hidden = true;
+    $("modalCorpo").innerHTML = "";
+    document.body.classList.remove("adm-travado");
+  }
+
+  function campo(rotulo, input, ajuda) {
+    const w = el("label", "adm-campo");
+    w.append(el("span", "", rotulo), input);
+    if (ajuda) w.append(el("small", "", ajuda));
+    return w;
+  }
+
+  function entrada(tipo, valor, attrs) {
+    const i = document.createElement("input");
+    i.type = tipo;
+    if (valor != null) i.value = valor;
+    if (attrs) Object.entries(attrs).forEach(([k, v]) => i.setAttribute(k, v));
+    return i;
+  }
+
+  function botoes(...bts) {
+    const d = el("div", "adm-form-acoes");
+    d.append(...bts);
+    return d;
+  }
+
+  function botao(texto, classe, onClick) {
+    const b = el("button", classe, texto);
+    b.type = "button";
+    if (onClick) b.addEventListener("click", onClick);
+    return b;
+  }
+
+  // ============================================================ preferências
 
   function aplicarTema(tema) {
     if (tema) document.body.dataset.tema = tema; else delete document.body.dataset.tema;
@@ -203,13 +252,14 @@
   function alternarTema() {
     const novo = temaEfetivo() === "claro" ? "escuro" : "claro";
     aplicarTema(novo);
+    $("btTema").setAttribute("aria-label", novo === "claro" ? "Usar tema escuro" : "Usar tema claro");
     try { localStorage.setItem("adm-tema", novo); } catch { /* sem armazenamento */ }
   }
 
   function aplicarMenu(aberto) {
     $("painel").classList.toggle("adm-app--fechado", !aberto);
     $("btMenu").setAttribute("aria-expanded", aberto ? "true" : "false");
-    $("btMenu").title = aberto ? "Ocultar menu" : "Mostrar menu";
+    $("btMenu").title = aberto ? "Recolher menu" : "Abrir menu";
     try { localStorage.setItem("adm-menu", aberto ? "aberto" : "fechado"); } catch { /* sem armazenamento */ }
   }
 
@@ -281,41 +331,146 @@
     return el("span", `adm-avatar adm-avatar-${tom || "neutro"}${extra ? " " + extra : ""}`, texto);
   }
 
-  // ============================================================ entrar / sair
+  function shortId(id) {
+    const s = String(id || "");
+    return s.length > 14 ? `${s.slice(0, 14)}…` : s;
+  }
 
-  /** Só o servidor diz quem é você e o que pode. Sem papel, a conta não entra. */
-  async function abrirPainel() {
-    let quem;
-    try {
-      quem = await rpc("ativavid_quem_sou");
-    } catch (e) {
-      await sb.auth.signOut();
-      return { ok: false, motivo: "erro", detalhe: (e && e.message) || "" };
+  // ============================================================ perfil
+
+  function desenharPerfil() {
+    const nome = estado.nome && estado.nome !== "owner" ? estado.nome : (estado.email.split("@")[0] || "Admin");
+    const iniciaisTxt = iniciais(nome);
+    for (const id of ["avatarUsuario", "avatarMenu"]) {
+      const alvo = $(id);
+      alvo.innerHTML = "";
+      if (estado.foto) {
+        const img = document.createElement("img");
+        img.src = estado.foto;
+        img.alt = "";
+        alvo.appendChild(img);
+      } else {
+        alvo.textContent = iniciaisTxt;
+      }
     }
-    if (!quem.papel) {
-      await sb.auth.signOut();
-      return { ok: false, motivo: "nao_equipe" };
-    }
+    $("nomeMenu").textContent = nome;
+    $("quem").textContent = estado.email;
+    $("papelUsuario").textContent = estado.papel === "admin" ? "Admin" : "Suporte";
+  }
+
+  function editarPerfil() {
+    let fotoNova = null;
+    let removeu = false;
+    const corpo = el("form", "adm-form-modal");
+    const nome = entrada("text", estado.nome === "owner" ? "" : estado.nome, { maxlength: "60", placeholder: "Como você quer ser chamado" });
+
+    const quadro = el("div", "adm-foto-quadro");
+    const previa = el("div", "adm-foto-previa");
+    const reexibir = () => {
+      previa.innerHTML = "";
+      const url = removeu ? "" : (fotoNova != null ? fotoNova : estado.foto);
+      if (url) {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "";
+        previa.appendChild(img);
+      } else {
+        previa.textContent = iniciais(nome.value || estado.email);
+      }
+    };
+    const escolher = entrada("file", null, { accept: "image/*", class: "adm-sr", id: "fotoArquivo" });
+    const trocar = botao("Trocar foto", "adm-bt adm-bt-fraco adm-bt-sm", () => escolher.click());
+    const remover = botao("Remover foto", "adm-bt adm-bt-perigo adm-bt-sm", () => {
+      removeu = true; fotoNova = null; reexibir();
+    });
+    quadro.append(previa, el("div", "adm-foto-acoes", ""));
+    quadro.lastChild.append(trocar, remover);
+
+    escolher.addEventListener("change", () => {
+      const arq = escolher.files && escolher.files[0];
+      if (!arq) return;
+      if (!arq.type.startsWith("image/")) return recado("Escolha uma imagem.", "erro");
+      const leitor = new FileReader();
+      leitor.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const lado = 256;
+          const c = document.createElement("canvas");
+          c.width = lado; c.height = lado;
+          const ctx = c.getContext("2d");
+          const m = Math.min(img.width, img.height);
+          ctx.drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, lado, lado);
+          fotoNova = c.toDataURL("image/jpeg", 0.86);
+          removeu = false;
+          reexibir();
+        };
+        img.src = leitor.result;
+      };
+      leitor.readAsDataURL(arq);
+    });
+    nome.addEventListener("input", () => { if (!estado.foto && !fotoNova && !removeu) reexibir(); });
+    reexibir();
+
+    const salvar = botao("Salvar perfil", "adm-bt adm-bt-forte", null);
+    salvar.type = "submit";
+    corpo.append(
+      quadro,
+      escolher,
+      campo("Nome", nome, "É como o seu nome aparece no painel e nas respostas do suporte."),
+      el("p", "adm-ajuda", `E-mail: ${estado.email}. Para trocar o e-mail, peça ao admin.`),
+      botoes(salvar)
+    );
+    corpo.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      ocupado(salvar, async () => {
+        const foto = removeu ? "" : fotoNova;
+        const r = await rpc("ativavid_admin_perfil_salvar", {
+          p_nome: nome.value.trim(),
+          p_foto: foto,
+        });
+        await carregarQuemSou();
+        fecharModal();
+        recado(r.message || "Perfil salvo.", "ok");
+      });
+    });
+    abrirModal("Editar perfil", corpo);
+  }
+
+  async function carregarQuemSou() {
+    const quem = await rpc("ativavid_quem_sou");
     estado.papel = quem.papel;
     estado.email = String(quem.email || "");
+    estado.nome = String(quem.nome || "");
+    estado.foto = String(quem.foto || "");
     aplicarPapel();
-    $("telaEntrar").hidden = true;
-    $("painel").hidden = false;
-    $("senha").value = "";
-    if (estado.papel === "admin") {
-      await carregar();
-    }
-    await carregarChamados(true).catch(() => {});
-    rotear();
-    return { ok: true };
+    desenharPerfil();
   }
 
   function aplicarPapel() {
     const admin = estado.papel === "admin";
-    $("quem").textContent = estado.email;
-    $("avatarUsuario").textContent = iniciais(estado.email);
-    $("papelUsuario").textContent = admin ? "Admin" : "Suporte";
     $$("[data-so-admin]").forEach((n) => { n.hidden = !admin; });
+  }
+
+  // ============================================================ entrar / sair
+
+  async function abrirPainel() {
+    try {
+      await carregarQuemSou();
+    } catch (e) {
+      await sb.auth.signOut();
+      return { ok: false, motivo: "erro", detalhe: (e && e.message) || "" };
+    }
+    if (!estado.papel) {
+      await sb.auth.signOut();
+      return { ok: false, motivo: "nao_equipe" };
+    }
+    $("telaEntrar").hidden = true;
+    $("painel").hidden = false;
+    $("senha").value = "";
+    if (estado.papel === "admin") await carregar();
+    await carregarChamados(true).catch(() => {});
+    rotear();
+    return { ok: true };
   }
 
   async function entrar(ev) {
@@ -414,10 +569,8 @@
       a.classList.toggle("is-on", on);
       if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
-    for (const k of Object.keys(SECOES)) {
-      const sec = $(`sec${k[0].toUpperCase()}${k.slice(1)}`);
-      if (sec) sec.hidden = k !== s;
-    }
+    const mapa = { visao: "secVisao", clientes: "secClientes", aulas: "secAulas", suporte: "secSuporte", equipe: "secEquipe", aluno: "secAluno" };
+    for (const [k, id] of Object.entries(mapa)) $(id).hidden = k !== s;
     $("tituloSecao").textContent = SECOES[s].titulo;
     $("subSecao").textContent = SECOES[s].sub;
     document.title = `${SECOES[s].titulo} — Painel admin ATIVAVID`;
@@ -425,6 +578,7 @@
     if (s === "suporte") carregarChamados().catch((e) => recado(e.message, "erro"));
     if (s === "equipe") carregarEquipe().catch((e) => recado(e.message, "erro"));
     if (s === "clientes") desenharClientes();
+    if (s === "aluno") carregarAlunoPublico().catch((e) => recado(e.message, "erro"));
     window.scrollTo(0, 0);
   }
 
@@ -498,9 +652,7 @@
       const item = el("div", `adm-pend adm-pend-${p.tom}`);
       const corpo = el("div", "adm-pend-corpo");
       corpo.append(el("strong", "", p.titulo), el("span", "", p.texto));
-      const bt = el("button", "adm-bt adm-bt-fraco adm-bt-sm", p.acao);
-      bt.type = "button";
-      bt.addEventListener("click", () => {
+      const bt = botao(p.acao, "adm-bt adm-bt-fraco adm-bt-sm", () => {
         if (p.secao) { location.hash = p.secao; return; }
         estado.abertos.add(p.id);
         estado.filtro = "todos";
@@ -545,11 +697,9 @@
     const alvo = $("filtros");
     alvo.innerHTML = "";
     for (const [k, rot] of FILTROS) {
-      const b = el("button", "adm-chip-filtro", rot);
-      b.type = "button";
+      const b = botao(rot, "adm-chip-filtro", () => { estado.filtro = k; desenharFiltros(); desenharClientes(); });
       b.setAttribute("aria-pressed", estado.filtro === k ? "true" : "false");
       if (estado.filtro === k) b.classList.add("is-on");
-      b.addEventListener("click", () => { estado.filtro = k; desenharFiltros(); desenharClientes(); });
       alvo.appendChild(b);
     }
   }
@@ -580,13 +730,14 @@
       vencimento: (a, b) => ms(a.validoAte) - ms(b.validoAte),
       acesso: (a, b) => ms(ultimoAcessoDo(b)) - ms(ultimoAcessoDo(a)),
       videos: (a, b) => Number(b.videosTotal || 0) - Number(a.videosTotal || 0),
+      aulas: (a, b) => Number(b.aulasAssistidas || 0) - Number(a.aulasAssistidas || 0),
       nome: (a, b) => String(a.email).localeCompare(String(b.email), "pt-BR"),
     }[estado.ordem];
     return lista.slice().sort(cmp);
   }
 
   function desenharClientes() {
-    const q = estado.busca;
+    const q = $("buscaGlobal").value.trim().toLowerCase();
     const alvo = $("listaClientes");
     const lista = ordenar(estado.clientes.filter((c) => casaFiltro(c) && casaBusca(c, q)));
     alvo.innerHTML = "";
@@ -616,6 +767,9 @@
     topo.appendChild(quem);
     const chips = el("div", "adm-cli-chips");
     chips.append(chip(p.nome, "plano", "adm-chip-plano"), chip(s.rot, s.tom));
+    const aulas = Number(c.aulasAssistidas || 0);
+    const totalAulas = Number(c.aulasTotal || 0);
+    chips.append(chip(`${aulas}/${totalAulas} aulas`, aulas ? "ok" : "espera"));
     topo.appendChild(chips);
     art.appendChild(topo);
 
@@ -643,18 +797,16 @@
     numeros.append(
       numero("Computadores", `${maqs.length}/${c.maxComputadores || 1}`, maqs.length ? "ligados à conta" : "nenhum ainda"),
       numero("Vídeos", String(c.videosTotal || 0), `${c.videosMes || 0} este mês`),
-      numero("Aberturas", String(c.aberturasTotal || 0), c.ultimaAbertura ? `última ${rel(c.ultimaAbertura)}` : "nunca abriu"),
-      numero("Último vídeo", c.ultimoVideo ? rel(c.ultimoVideo) : "—", c.ultimoVideo ? dia(c.ultimoVideo) : ""),
+      numero("Aulas", `${aulas}/${totalAulas}`, c.ultimaAula ? `última ${rel(c.ultimaAula)}` : "nenhuma assistida"),
+      numero("Último acesso", rel(ultimoAcessoDo(c)), c.ultimaAbertura ? `aberturas: ${c.aberturasTotal || 0}` : "nunca abriu"),
     );
     art.appendChild(numeros);
 
-    const bt = el("button", "adm-expandir", aberto ? "Fechar ficha" : "Abrir ficha");
-    bt.type = "button";
-    bt.setAttribute("aria-expanded", aberto ? "true" : "false");
-    bt.addEventListener("click", () => {
+    const bt = botao(aberto ? "Fechar ficha" : "Abrir ficha", "adm-expandir", () => {
       if (estado.abertos.has(c.id)) estado.abertos.delete(c.id); else estado.abertos.add(c.id);
       desenharClientes();
     });
+    bt.setAttribute("aria-expanded", aberto ? "true" : "false");
     art.appendChild(bt);
 
     if (aberto) art.appendChild(fichaCliente(c));
@@ -675,66 +827,55 @@
     linha("Situação", s.rot);
     linha("Início", dia(c.clienteDesde));
     linha("Vence em", dia(c.validoAte));
-    linha("Último acesso", rel(ultimoAcessoDo(c)));
-    linha("Último vídeo", c.ultimoVideo ? `${dia(c.ultimoVideo)} (${rel(c.ultimoVideo)})` : "nenhum ainda");
-    linha("Mexido em", dia(c.atualizadoEm));
+    linha("Computadores", `${maqs.length} de ${c.maxComputadores || 1} permitidos`);
     if (c.anotacao) linha("Anotação", c.anotacao);
     sub.appendChild(dl);
 
     if (!c.temLogin) {
       sub.appendChild(el("p", "adm-ficha-alerta",
-        "Os dias estão reservados, mas só valem quando existir login com este e-mail. Use “Criar e liberar” ou peça que o cliente se cadastre."));
+        "Os dias estão reservados, mas só valem quando existir login com este e-mail."));
     }
 
     const acoes = el("div", "adm-acoes");
-    const prazo = el("div", "adm-seg adm-seg-mini");
-    prazo.setAttribute("role", "radiogroup");
-    prazo.setAttribute("aria-label", "Dias a liberar");
-    let escolhido = 30;
-    for (const d of [30, 90, 180, 365]) {
-      const b = el("button", d === escolhido ? "is-on" : "", d === 365 ? "1 ano" : `${d} dias`);
-      b.type = "button";
-      b.setAttribute("role", "radio");
-      b.setAttribute("aria-checked", d === escolhido ? "true" : "false");
-      b.addEventListener("click", () => {
-        escolhido = d;
-        $$("button", prazo).forEach((x) => {
-          const on = x === b;
-          x.classList.toggle("is-on", on);
-          x.setAttribute("aria-checked", on ? "true" : "false");
-        });
-      });
-      prazo.appendChild(b);
-    }
-    const liberar = el("button", "adm-bt adm-bt-forte adm-bt-sm", c.temLogin ? "Renovar" : "Liberar");
-    liberar.type = "button";
-    liberar.addEventListener("click", () => ocupado(liberar, async () => {
-      const r = await licenca("grant_access", { p_email: c.email, p_days: escolhido, p_max_devices: c.maxComputadores || 1 });
-      recado(r.message || "Acesso liberado.", r.pendingSignup ? "atencao" : "ok");
-      await carregar();
-    }));
-
-    const bloquear = el("button", "adm-bt adm-bt-fraco adm-bt-sm", c.status === "revoked" ? "Já bloqueada" : "Bloquear acesso");
-    bloquear.type = "button";
+    const adicionar = botao("+ Dias", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirAdicionarDias(c));
+    const editar = botao("Editar", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirEditarConta(c));
+    const bloquear = botao(c.status === "revoked" ? "Já bloqueada" : "Bloquear acesso", "adm-bt adm-bt-fraco adm-bt-sm", null);
     bloquear.disabled = c.status === "revoked";
     bloquear.addEventListener("click", () => doisToques(bloquear, () => ocupado(bloquear, async () => {
       const r = await licenca("revoke_access", { p_email: c.email });
       recado(r.message || "Acesso bloqueado.", "ok");
       await carregar();
     })));
-
-    const excluir = el("button", "adm-bt adm-bt-perigo adm-bt-sm", "Excluir cliente");
-    excluir.type = "button";
+    const excluir = botao("Excluir cliente", "adm-bt adm-bt-perigo adm-bt-sm", null);
     excluir.addEventListener("click", () => doisToques(excluir, () => ocupado(excluir, async () => {
       const r = await fn({ acao: "apagar_conta", email: c.email });
       recado(r.message || "Conta apagada.", "ok");
       estado.abertos.delete(c.id);
       await carregar();
     })));
-
-    acoes.append(prazo, liberar, bloquear, excluir);
+    acoes.append(adicionar, editar, bloquear, excluir);
     sub.appendChild(acoes);
     f.appendChild(sub);
+
+    const aulasCol = el("section", "adm-ficha-col");
+    aulasCol.appendChild(el("h4", "adm-ficha-titulo", `Aulas assistidas · ${c.aulasAssistidas || 0} de ${c.aulasTotal || 0}`));
+    const lista = Array.isArray(c.aulas) ? c.aulas : [];
+    if (!lista.length) {
+      aulasCol.appendChild(el("p", "adm-ficha-vazia", "Nenhuma aula registrada ainda. Assim que o cliente assistir a uma, ela aparece aqui."));
+    } else {
+      const ul = el("ul", "adm-aulas-feitas");
+      for (const a of lista.slice(0, 12)) {
+        const li = el("li");
+        li.append(el("span", "", a.titulo || "Aula"), el("small", "", dia(a.quando)));
+        ul.appendChild(li);
+      }
+      aulasCol.appendChild(ul);
+    }
+    const dicas = el("p", "adm-ficha-dica", (c.aulasAssistidas || 0) === 0 && (c.videosTotal || 0) > 0
+      ? "Editou vídeos mas nunca viu uma aula: vale indicar a aula de como montar o corte."
+      : "");
+    aulasCol.appendChild(dicas);
+    f.appendChild(aulasCol);
 
     const col = el("section", "adm-ficha-col");
     col.appendChild(el("h4", "adm-ficha-titulo", maqs.length
@@ -749,6 +890,71 @@
     return f;
   }
 
+  function abrirAdicionarDias(c) {
+    const corpo = el("div", "adm-form-modal");
+    const restam = Math.max(0, diasAte(c.validoAte));
+    corpo.append(el("p", "adm-ajuda", c.temLogin
+      ? `Hoje vence ${dia(c.validoAte)}, com ${restam} dia(s) restantes. Os dias que você somar vêm depois do que ele já tem.`
+      : "Este cliente ainda não tem login. Os dias somam, mas só valem depois que ele tiver conta."));
+    const escolhido = { dias: 30 };
+    const presets = el("div", "adm-seg adm-seg-mini");
+    presets.setAttribute("role", "radiogroup");
+    const destaque = (on) => { $$("button", presets).forEach((x) => { x.classList.toggle("is-on", x === on); x.setAttribute("aria-checked", x === on ? "true" : "false"); }); };
+    for (const d of [7, 15, 30, 60, 90]) {
+      const b = botao(`${d} dias`, d === 30 ? "is-on" : "", () => { escolhido.dias = d; destaque(b); resumo(); });
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-checked", d === 30 ? "true" : "false");
+      presets.appendChild(b);
+    }
+    const resumoTxt = el("p", "adm-ajuda adm-ajuda-forte", "");
+    const resumo = () => {
+      const nova = restam + escolhido.dias;
+      resumoTxt.textContent = `Nova validade: ${dia(new Date(Date.now() + nova * DIA).toISOString())} (${nova} dias a partir de hoje).`;
+    };
+    resumo();
+    const salvar = botao("Adicionar dias", "adm-bt adm-bt-forte", null);
+    salvar.addEventListener("click", () => ocupado(salvar, async () => {
+      const total = Math.max(1, restam + escolhido.dias);
+      const r = await licenca("grant_access", { p_email: c.email, p_days: total, p_max_devices: c.maxComputadores || 1 });
+      fecharModal();
+      recado(`Prazo estendido em ${escolhido.dias} dias.`, r.pendingSignup ? "atencao" : "ok");
+      await carregar();
+    }));
+    corpo.append(presets, resumoTxt, botoes(salvar));
+    abrirModal(`Adicionar dias · ${c.email}`, corpo);
+  }
+
+  function abrirEditarConta(c) {
+    const corpo = el("form", "adm-form-modal");
+    const maxi = entrada("number", c.maxComputadores || 1, { min: "1", max: "10", inputmode: "numeric" });
+    const notas = el("textarea");
+    notas.rows = 3;
+    notas.maxLength = 400;
+    notas.placeholder = "Ex.: cliente da turma de outubro, pediu desconto";
+    notas.value = c.anotacao || "";
+    const salvar = botao("Salvar", "adm-bt adm-bt-forte", null);
+    salvar.type = "submit";
+    corpo.append(
+      campo("Computadores permitidos", maxi, "Quantos computadores essa conta pode ligar ao mesmo tempo."),
+      campo("Anotação", notas, "Só a equipe vê."),
+      botoes(salvar)
+    );
+    corpo.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      ocupado(salvar, async () => {
+        const r = await rpc("ativavid_admin_editar_conta", {
+          p_email: c.email,
+          p_max: Math.max(1, Math.min(10, parseInt(maxi.value, 10) || 1)),
+          p_notas: notas.value.trim(),
+        });
+        fecharModal();
+        recado(r.message || "Conta atualizada.", "ok");
+        await carregar();
+      });
+    });
+    abrirModal(`Editar · ${c.email}`, corpo);
+  }
+
   function cabecaMaquina(m, st) {
     const topo = el("div", "adm-maq-topo");
     const nome = el("div", "adm-maq-nome");
@@ -760,14 +966,14 @@
 
   function gradeMaquina(m, comTrial) {
     const grade = el("dl", "adm-maq-grade");
-    const campo = (rot, valor) => grade.append(el("dt", "", rot), el("dd", "", valor));
-    campo("Último e-mail que abriu", ultimoEmailDo(m) || "—");
-    campo("Último acesso", rel(m.ultimoAcesso));
-    campo("Aberturas", String(m.aberturas || 0));
-    campo("Vídeos", `${m.videosMes || 0} este mês · ${m.videos || 0} no total`);
-    if (comTrial) campo("Início do trial", m.trialInicio ? dia(m.trialInicio) : "sem trial");
-    else campo("Primeira vez", dia(m.primeiraVez));
-    if (m.bloqueadoEm) campo("Bloqueado em", `${dia(m.bloqueadoEm)}${m.motivoBloqueio ? ` — ${m.motivoBloqueio}` : ""}`);
+    const campo2 = (rot, valor) => grade.append(el("dt", "", rot), el("dd", "", valor));
+    campo2("Último e-mail que abriu", ultimoEmailDo(m) || "—");
+    campo2("Último acesso", rel(m.ultimoAcesso));
+    campo2("Aberturas", String(m.aberturas || 0));
+    campo2("Vídeos", `${m.videosMes || 0} este mês · ${m.videos || 0} no total`);
+    if (comTrial) campo2("Início do trial", m.trialInicio ? dia(m.trialInicio) : "sem trial");
+    else campo2("Primeira vez", dia(m.primeiraVez));
+    if (m.bloqueadoEm) campo2("Bloqueado em", `${dia(m.bloqueadoEm)}${m.motivoBloqueio ? ` — ${m.motivoBloqueio}` : ""}`);
     return grade;
   }
 
@@ -780,9 +986,8 @@
 
   function botaoBloquearMaquina(m) {
     const bloqueada = Boolean(m.bloqueadoEm);
-    const bt = el("button", bloqueada ? "adm-bt adm-bt-fraco adm-bt-sm" : "adm-bt adm-bt-perigo adm-bt-sm",
-      bloqueada ? "Desbloquear" : "Bloquear computador");
-    bt.type = "button";
+    const bt = botao(bloqueada ? "Desbloquear" : "Bloquear computador",
+      bloqueada ? "adm-bt adm-bt-fraco adm-bt-sm" : "adm-bt adm-bt-perigo adm-bt-sm", null);
     bt.addEventListener("click", () => doisToques(bt, () => ocupado(bt, async () => {
       const r = await fn({
         acao: "bloquear_maquina",
@@ -794,11 +999,6 @@
       await carregar();
     })));
     return bt;
-  }
-
-  function shortId(id) {
-    const s = String(id || "");
-    return s.length > 14 ? `${s.slice(0, 14)}…` : s;
   }
 
   function desenharSemConta() {
@@ -816,32 +1016,97 @@
     }
   }
 
-  function criarCliente(bt) {
-    const email = $("novoEmail").value.trim().toLowerCase();
-    const senha = $("novaSenha").value.trim();
-    const dias = estado.prazoNovo;
-    if (!email.includes("@")) return recado("Informe o e-mail do cliente.", "erro");
-    if (senha.length < 6) return recado("A senha provisória precisa de pelo menos 6 caracteres.", "erro");
-    return ocupado(bt, async () => {
-      const login = await fn({ acao: "criar_login", email, senha });
-      const acesso = await licenca("grant_access", { p_email: email, p_days: dias, p_max_devices: 1 });
-      recado(`${login.message || "Login pronto."} ${acesso.message || ""}`.trim(),
-        acesso.pendingSignup ? "atencao" : "ok");
-      $("novoEmail").value = "";
-      $("novaSenha").value = "";
-      const novo = $("secClientes").querySelector(".adm-novo");
-      if (novo) novo.open = false;
-      await carregar();
+  function abrirNovoCliente() {
+    const corpo = el("form", "adm-form-modal");
+    const email = entrada("email", null, { placeholder: "cliente@email.com", autocapitalize: "off", spellcheck: "false", inputmode: "email" });
+    const senha = entrada("text", null, { placeholder: "mínimo 6 caracteres", autocomplete: "off" });
+    let dias = 365;
+    const prazo = el("div", "adm-seg");
+    prazo.setAttribute("role", "radiogroup");
+    const marcar = (on) => $$("button", prazo).forEach((x) => { x.classList.toggle("is-on", x === on); x.setAttribute("aria-checked", x === on ? "true" : "false"); });
+    for (const [d, rot] of [[30, "30 dias"], [90, "90 dias"], [365, "1 ano"]]) {
+      const b = botao(rot, d === 365 ? "is-on" : "", () => { dias = d; marcar(b); });
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-checked", d === 365 ? "true" : "false");
+      prazo.appendChild(b);
+    }
+    const salvar = botao("Criar e liberar", "adm-bt adm-bt-forte", null);
+    salvar.type = "submit";
+    const campoPrazo = el("div", "adm-campo");
+    campoPrazo.append(el("span", "", "Acesso por"), prazo);
+    corpo.append(
+      campo("E-mail do cliente", email),
+      campo("Senha provisória", senha, "O cliente entra com ela e troca depois em “Esqueci minha senha”."),
+      campoPrazo,
+      botoes(salvar)
+    );
+    corpo.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const e = email.value.trim().toLowerCase();
+      const s = senha.value.trim();
+      if (!e.includes("@")) return recado("Informe o e-mail do cliente.", "erro");
+      if (s.length < 6) return recado("A senha provisória precisa de pelo menos 6 caracteres.", "erro");
+      ocupado(salvar, async () => {
+        const login = await fn({ acao: "criar_login", email: e, senha: s });
+        const acesso = await licenca("grant_access", { p_email: e, p_days: dias, p_max_devices: 1 });
+        fecharModal();
+        recado(`${login.message || "Login pronto."} ${acesso.message || ""}`.trim(), acesso.pendingSignup ? "atencao" : "ok");
+        await carregar();
+      });
     });
+    abrirModal("Novo cliente", corpo);
   }
 
-  function escolherSeg(container, atributo, valor, cb) {
-    $$("button", container).forEach((x) => {
-      const on = x.dataset[atributo] === String(valor);
-      x.classList.toggle("is-on", on);
-      x.setAttribute("aria-checked", on ? "true" : "false");
-    });
-    if (cb) cb(valor);
+  // ============================================================ aluno (prévia da área)
+
+  async function carregarAlunoPublico() {
+    const { data, error } = await sb.rpc("ativavid_aulas");
+    if (error) throw new Error(error.message || "Não consegui carregar as aulas.");
+    estado.aulasPublicas = Array.isArray(data) ? data : ((data && data.aulas) || []);
+    desenharAluno();
+  }
+
+  function desenharAluno() {
+    const alvo = $("alunoLista");
+    alvo.innerHTML = "";
+    if (!estado.aulasPublicas.length) {
+      alvo.appendChild(el("p", "adm-vazio", "Ainda não há aulas visíveis. Cadastre uma na aba Aulas."));
+      return;
+    }
+    const grupos = new Map();
+    for (const a of estado.aulasPublicas) {
+      const k = a.secao || "Geral";
+      if (!grupos.has(k)) grupos.set(k, []);
+      grupos.get(k).push(a);
+    }
+    for (const [secao, aulas] of grupos) {
+      alvo.appendChild(el("h3", "adm-aluno-secao", secao));
+      const grade = el("div", "adm-aluno-grade");
+      for (const a of aulas) grade.appendChild(cartaoAluno(a));
+      alvo.appendChild(grade);
+    }
+  }
+
+  function cartaoAluno(a) {
+    const card = el("article", "adm-vidro adm-aluno-card");
+    const capa = el("div", "adm-aluno-capa");
+    if (a.youtubeId) {
+      const img = document.createElement("img");
+      img.src = `https://i.ytimg.com/vi/${encodeURIComponent(a.youtubeId)}/mqdefault.jpg`;
+      img.alt = "";
+      img.loading = "lazy";
+      capa.appendChild(img);
+    }
+    const corpo = el("div", "adm-aluno-corpo");
+    corpo.append(el("h4", "", a.titulo || "Aula"));
+    if (a.descricao) corpo.append(el("p", "", a.descricao));
+    const link = el("a", "adm-bt adm-bt-forte adm-bt-sm adm-aluno-assistir", "Assistir");
+    link.href = `https://www.youtube.com/watch?v=${encodeURIComponent(a.youtubeId || "")}`;
+    link.target = "_blank";
+    link.rel = "noopener";
+    corpo.appendChild(link);
+    card.append(capa, corpo);
+    return card;
   }
 
   // ============================================================ suporte
@@ -865,9 +1130,29 @@
     const sino = $("sinoBadge");
     sino.textContent = abertos > 9 ? "9+" : String(abertos);
     sino.hidden = abertos === 0;
-    $("btSino").setAttribute("aria-label", abertos ? `${plural(abertos, "chamado aberto", "chamados abertos")}` : "Chamados de suporte");
+    $("btSino").setAttribute("aria-label", abertos ? plural(abertos, "chamado aguardando", "chamados aguardando") : "Avisos");
+    desenharSino();
     if (estado.secao === "suporte") desenharSuporte();
     if (!silencioso && estado.papel === "admin") desenharVisao();
+  }
+
+  function desenharSino() {
+    const lista = $("sinoLista");
+    lista.innerHTML = "";
+    const pendentes = estado.chamados.filter((x) => x.status === "aberto" || x.status === "em_analise").slice(0, 5);
+    if (!pendentes.length) {
+      lista.appendChild(el("p", "adm-sino-vazio", "Nenhum chamado esperando resposta."));
+      return;
+    }
+    for (const x of pendentes) {
+      const b = botao("", "adm-sino-item", () => {
+        fecharMenus();
+        location.hash = "suporte";
+        abrirChamado(x.id);
+      });
+      b.append(el("strong", "", x.assunto), el("span", "", `${x.email} · ${rel(x.atualizado_em)}`));
+      lista.appendChild(b);
+    }
   }
 
   function filtraChamados() {
@@ -879,15 +1164,34 @@
     }).sort((a, b) => ms(b.atualizado_em) - ms(a.atualizado_em));
   }
 
+  function desenharResumoSuporte() {
+    const alvo = $("resumoSuporte");
+    alvo.innerHTML = "";
+    const conta = (s) => estado.chamados.filter((x) => x.status === s).length;
+    const itens = [
+      ["aberto", "Novos", conta("aberto"), "mal", "Ninguém respondeu ainda"],
+      ["em_analise", "Em análise", conta("em_analise"), "atencao", "Você já começou a responder"],
+      ["respondido", "Aguardando cliente", conta("respondido"), "neutro", "A bola está com o cliente"],
+      ["resolvido", "Resolvidos", conta("resolvido"), "ok", "Encerrados"],
+    ];
+    for (const [chave, rot, n, tom, sub] of itens) {
+      const b = botao("", `adm-vidro adm-resumo-item adm-resumo-${tom}${estado.filtroChamado === chave ? " is-on" : ""}`, () => {
+        estado.filtroChamado = chave;
+        desenharSuporte();
+      });
+      b.append(el("span", "adm-resumo-rot", rot), el("strong", "adm-resumo-n", n), el("span", "adm-resumo-sub", sub));
+      alvo.appendChild(b);
+    }
+  }
+
   function desenharSuporte() {
+    desenharResumoSuporte();
     const filtros = $("filtrosSuporte");
     filtros.innerHTML = "";
     for (const [k, rot] of FILTROS_CHAMADO) {
-      const b = el("button", "adm-chip-filtro", rot);
-      b.type = "button";
+      const b = botao(rot, "adm-chip-filtro", () => { estado.filtroChamado = k; desenharSuporte(); });
       b.setAttribute("aria-pressed", estado.filtroChamado === k ? "true" : "false");
       if (estado.filtroChamado === k) b.classList.add("is-on");
-      b.addEventListener("click", () => { estado.filtroChamado = k; desenharSuporte(); });
       filtros.appendChild(b);
     }
 
@@ -895,9 +1199,10 @@
     alvo.innerHTML = "";
     const lista = filtraChamados();
     if (!lista.length) {
-      alvo.appendChild(el("p", "adm-vazio", estado.chamados.length
-        ? "Nenhum chamado neste filtro."
-        : "Nenhum chamado ainda. Quando um cliente abrir um, ele aparece aqui."));
+      const vazioSemChamado = !estado.chamados.length;
+      alvo.appendChild(el("p", "adm-vazio", vazioSemChamado
+        ? "Nenhum chamado ainda. Quando um cliente abrir um, ele aparece aqui."
+        : "Nada neste filtro. Escolha outro acima."));
       return;
     }
     for (const x of lista) {
@@ -981,12 +1286,11 @@
       const eu = p.email.toLowerCase() === estado.email.toLowerCase();
       const cartao = el("article", "adm-vidro adm-membro");
       const topo = el("div", "adm-membro-topo");
-      topo.append(avatar(iniciais(p.email), p.papel === "admin" ? "ok" : "neutro"));
-      const quem = el("div", "adm-membro-quem");
-      const nome = el("strong", "", p.label || p.email);
-      quem.append(nome);
-      if (p.label) quem.append(el("span", "adm-membro-mail", p.email));
-      topo.appendChild(quem);
+      topo.append(avatar(iniciais(p.label || p.email), p.papel === "admin" ? "ok" : "neutro"));
+      const quem2 = el("div", "adm-membro-quem");
+      quem2.append(el("strong", "", p.label && p.label !== "owner" ? p.label : p.email));
+      quem2.append(el("span", "adm-membro-mail", p.email));
+      topo.appendChild(quem2);
       const tags = el("div", "adm-membro-tags");
       tags.append(chip(p.papel === "admin" ? "Admin" : "Suporte", p.papel === "admin" ? "ok" : "plano"));
       if (eu) tags.append(chip("Você", "neutro"));
@@ -1005,8 +1309,7 @@
         recado(r.message || "Papel atualizado.", "ok");
         await carregarEquipe();
       }));
-      const remover = el("button", "adm-bt adm-bt-perigo adm-bt-sm", "Remover");
-      remover.type = "button";
+      const remover = botao("Remover", "adm-bt adm-bt-perigo adm-bt-sm", null);
       remover.disabled = eu;
       remover.addEventListener("click", () => doisToques(remover, () => ocupado(remover, async () => {
         const r = await rpc("ativavid_admin_equipe_remover", { p_email: p.email });
@@ -1019,30 +1322,66 @@
     }
   }
 
-  async function adicionarEquipe(ev) {
-    ev.preventDefault();
-    const bt = $("btAddEquipe");
-    const email = $("equipeEmail").value.trim().toLowerCase();
-    const nome = $("equipeNome").value.trim();
-    const senha = $("equipeSenha").value.trim();
-    const papel = estado.papelNovo;
-    if (!email.includes("@")) return recado("Informe o e-mail da pessoa.", "erro");
-    if (senha && senha.length < 6) return recado("A senha provisória precisa de pelo menos 6 caracteres.", "erro");
-    await ocupado(bt, async () => {
-      let aviso = "";
-      if (senha) {
-        const login = await fn({ acao: "criar_login", email, senha });
-        aviso = login.created ? "Login criado. " : "A conta já existia. ";
-      }
-      const r = await rpc("ativavid_admin_equipe_salvar", { p_email: email, p_papel: papel, p_label: nome || null });
-      recado(`${aviso}${r.message || "Equipe atualizada."}`, senha || r.ok ? "ok" : "atencao");
-      $("equipeEmail").value = "";
-      $("equipeNome").value = "";
-      $("equipeSenha").value = "";
-      const det = $("secEquipe").querySelector(".adm-novo");
-      if (det) det.open = false;
-      await carregarEquipe();
+  function abrirNovoMembro() {
+    const corpo = el("form", "adm-form-modal");
+    const email = entrada("email", null, { placeholder: "nome@ativavid.com", autocapitalize: "off", spellcheck: "false", inputmode: "email" });
+    const nome = entrada("text", null, { maxlength: "60", placeholder: "Ex.: Ice" });
+    const senha = entrada("text", null, { autocomplete: "off", placeholder: "só se ainda não tem login" });
+    let papel = "suporte";
+
+    const cards = el("div", "adm-papeis");
+    cards.setAttribute("role", "radiogroup");
+    const marcar = (valor) => {
+      papel = valor;
+      $$(".adm-papel-card", cards).forEach((x) => {
+        const on = x.dataset.papel === valor;
+        x.classList.toggle("is-on", on);
+        x.setAttribute("aria-checked", on ? "true" : "false");
+      });
+    };
+    const opcoes = [
+      ["suporte", "Suporte", "Atende os chamados dos clientes. Não vê nem muda assinaturas, aulas ou equipe."],
+      ["admin", "Admin", "Vê e faz tudo: clientes, prazos, aulas, suporte e a própria equipe."],
+    ];
+    for (const [valor, rot, desc] of opcoes) {
+      const c = botao("", "adm-papel-card", () => marcar(valor));
+      c.dataset.papel = valor;
+      c.setAttribute("role", "radio");
+      c.append(el("strong", "", rot), el("span", "", desc));
+      cards.appendChild(c);
+    }
+    marcar("suporte");
+
+    const salvar = botao("Adicionar à equipe", "adm-bt adm-bt-forte", null);
+    salvar.type = "submit";
+    const campoPapel = el("div", "adm-campo");
+    campoPapel.append(el("span", "", "Papel"), cards);
+    corpo.append(
+      campo("E-mail da pessoa", email),
+      campo("Nome (opcional)", nome, "Aparece no lugar do e-mail na lista da equipe."),
+      campo("Senha provisória", senha, "Só se a pessoa ainda não tem login no ATIVAVID. Ela troca a senha depois."),
+      campoPapel,
+      botoes(salvar)
+    );
+    corpo.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const e = email.value.trim().toLowerCase();
+      if (!e.includes("@")) return recado("Informe o e-mail da pessoa.", "erro");
+      const s = senha.value.trim();
+      if (s && s.length < 6) return recado("A senha provisória precisa de pelo menos 6 caracteres.", "erro");
+      ocupado(salvar, async () => {
+        let aviso = "";
+        if (s) {
+          const login = await fn({ acao: "criar_login", email: e, senha: s });
+          aviso = login.created ? "Login criado. " : "A conta já existia. ";
+        }
+        const r = await rpc("ativavid_admin_equipe_salvar", { p_email: e, p_papel: papel, p_label: nome.value.trim() || null });
+        fecharModal();
+        recado(`${aviso}${r.message || "Equipe atualizada."}`, "ok");
+        await carregarEquipe();
+      });
     });
+    abrirModal("Adicionar pessoa à equipe", corpo);
   }
 
   // ============================================================ aulas
@@ -1064,15 +1403,8 @@
   function desenharAulas() {
     const alvo = $("listaAulas");
     alvo.innerHTML = "";
-    const secoes = [...new Set(estado.aulas.map((a) => a.secao).filter(Boolean))];
-    $("secoesExistentes").innerHTML = "";
-    for (const s of secoes) {
-      const o = document.createElement("option");
-      o.value = s;
-      $("secoesExistentes").appendChild(o);
-    }
     if (!estado.aulas.length) {
-      alvo.appendChild(el("p", "adm-vazio", "Nenhuma aula cadastrada. Use “Nova aula” para começar."));
+      alvo.appendChild(el("p", "adm-vazio", "Nenhuma aula cadastrada ainda. Use “Nova aula” para começar."));
       return;
     }
     const ordenadas = estado.aulas.slice().sort((a, b) => (a.ordem ?? 100) - (b.ordem ?? 100));
@@ -1091,76 +1423,125 @@
       corpo.append(el("h3", "", a.titulo || "Sem título"));
       if (a.descricao) corpo.append(el("p", "", a.descricao));
       const meta = el("p", "adm-aula-meta");
-      meta.append(el("span", "", `Ordem ${a.ordem ?? 100}`));
-      meta.append(el("span", "", a.ativo === false ? "oculta para o cliente" : "visível para o cliente"));
+      meta.append(el("span", "", `Posição ${a.ordem ?? 100}`));
+      meta.append(el("span", a.ativo === false ? "adm-aula-oculta" : "adm-aula-visivel", a.ativo === false ? "Oculta: o cliente não vê" : "Visível para o cliente"));
       corpo.appendChild(meta);
       const acoes = el("div", "adm-acoes");
-      const editar = el("button", "adm-bt adm-bt-fraco adm-bt-sm", "Editar");
-      editar.type = "button";
-      editar.addEventListener("click", () => abrirFormAula(a));
-      const apagar = el("button", "adm-bt adm-bt-perigo adm-bt-sm", "Excluir");
-      apagar.type = "button";
-      apagar.addEventListener("click", () => doisToques(apagar, () => ocupado(apagar, async () => {
-        await rpc("ativavid_admin_aulas", { p_action: "delete", p_id: a.id });
-        recado("Aula excluída.", "ok");
-        await carregarAulas();
-      })));
-      acoes.append(editar, apagar);
+      acoes.append(
+        botao("Editar", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirFormAula(a)),
+        botao("Ver como o cliente vê", "adm-bt adm-bt-fraco adm-bt-sm", () => abrirPreviaAula(a)),
+      );
       corpo.appendChild(acoes);
       linha.append(capa, corpo);
       alvo.appendChild(linha);
     }
   }
 
+  function abrirPreviaAula(a) {
+    const corpo = el("div", "adm-form-modal");
+    corpo.appendChild(el("p", "adm-ajuda", "É assim que o cliente vê esta aula na área de aulas."));
+    corpo.appendChild(cartaoAluno({ titulo: a.titulo, descricao: a.descricao, youtubeId: a.youtubeId }));
+    abrirModal("Prévia da aula", corpo);
+  }
+
   function abrirFormAula(a) {
-    estado.editandoAula = a ? a.id : null;
-    $("tituloFormAula").textContent = a ? "Editar aula" : "Nova aula";
-    $("aulaTitulo").value = a ? a.titulo || "" : "";
-    $("aulaLink").value = a && a.youtubeId ? `https://youtu.be/${a.youtubeId}` : "";
-    $("aulaSecao").value = a ? a.secao || "" : "";
-    $("aulaOrdem").value = a ? String(a.ordem ?? 100) : "100";
-    $("aulaDescricao").value = a ? a.descricao || "" : "";
-    $("aulaAtivo").checked = a ? a.ativo !== false : true;
-    $("formAula").hidden = false;
-    $("formAula").scrollIntoView({ block: "start", behavior: "smooth" });
-    $("aulaTitulo").focus();
-  }
+    const editando = Boolean(a);
+    const corpo = el("div", "adm-aula-editor");
+    const form = el("form", "adm-aula-form");
+    const titulo = entrada("text", a ? a.titulo || "" : "", { maxlength: "120", required: "required", placeholder: "Como importar do YouTube" });
+    const link = entrada("text", a && a.youtubeId ? `https://youtu.be/${a.youtubeId}` : "", { placeholder: "https://youtu.be/…", autocapitalize: "off", spellcheck: "false" });
+    const secao = entrada("text", a ? a.secao || "" : "Começando", { maxlength: "60", list: "secoesAulas", placeholder: "Começando" });
+    const lista = document.createElement("datalist");
+    lista.id = "secoesAulas";
+    [...new Set(estado.aulas.map((x) => x.secao).filter(Boolean))].forEach((s) => { const o = document.createElement("option"); o.value = s; lista.appendChild(o); });
+    const ordem = entrada("number", a ? String(a.ordem ?? 100) : "100", { min: "0", max: "9999", inputmode: "numeric" });
+    const desc = el("textarea");
+    desc.rows = 3;
+    desc.maxLength = 600;
+    desc.placeholder = "O que a pessoa aprende nesta aula.";
+    desc.value = a ? a.descricao || "" : "";
+    const visivel = entrada("checkbox", null, {});
+    visivel.checked = a ? a.ativo !== false : true;
+    const rotuloVisivel = el("label", "adm-check");
+    rotuloVisivel.append(visivel, el("span", "", "Aparecer para o cliente"));
 
-  function fecharFormAula() {
-    $("formAula").hidden = true;
-    estado.editandoAula = null;
-  }
+    const previa = el("div", "adm-aula-previa-wrap");
+    const atualizarPrevia = () => {
+      const yt = youtubeId(link.value) || (a ? a.youtubeId : "");
+      previa.innerHTML = "";
+      previa.appendChild(el("p", "adm-ajuda", "Como aparece para o cliente"));
+      previa.appendChild(cartaoAluno({ titulo: titulo.value || "Título da aula", descricao: desc.value, youtubeId: yt }));
+    };
+    [titulo, link, desc].forEach((x) => x.addEventListener("input", atualizarPrevia));
+    atualizarPrevia();
 
-  function salvarAula(bt) {
-    const titulo = $("aulaTitulo").value.trim();
-    const yt = youtubeId($("aulaLink").value);
-    if (!titulo) return recado("A aula precisa de título.", "erro");
-    if (!yt) return recado("Não achei o código do YouTube nesse link. Cole o link inteiro.", "erro");
-    return ocupado(bt, async () => {
-      await rpc("ativavid_admin_aulas", {
-        p_action: "upsert",
-        p_id: estado.editandoAula,
-        p_titulo: titulo,
-        p_descricao: $("aulaDescricao").value.trim(),
-        p_youtube: yt,
-        p_secao: $("aulaSecao").value.trim() || "Geral",
-        p_ordem: Math.max(0, Math.min(9999, parseInt($("aulaOrdem").value, 10) || 100)),
-        p_ativo: $("aulaAtivo").checked,
-      });
-      recado("Aula salva.", "ok");
-      fecharFormAula();
+    const salvar = botao("Salvar aula", "adm-bt adm-bt-forte", null);
+    salvar.type = "submit";
+    const cancelar = botao("Cancelar", "adm-bt adm-bt-fraco", () => fecharModal());
+    const apagar = botao("Excluir aula", "adm-bt adm-bt-perigo", null);
+    apagar.addEventListener("click", () => doisToques(apagar, () => ocupado(apagar, async () => {
+      await rpc("ativavid_admin_aulas", { p_action: "delete", p_id: a.id });
+      fecharModal();
+      recado("Aula excluída.", "ok");
       await carregarAulas();
+    })));
+    const acoes = el("div", "adm-form-acoes adm-aula-acoes");
+    acoes.append(salvar, cancelar);
+    if (editando) acoes.append(apagar);
+
+    form.append(
+      campo("Título", titulo),
+      campo("Link do YouTube", link, "Cole o link inteiro; o código do vídeo sai sozinho."),
+      el("div", "adm-grade-2"),
+      campo("Descrição", desc),
+      rotuloVisivel,
+      acoes
+    );
+    const grade = form.querySelector(".adm-grade-2");
+    grade.append(campo("Seção", secao, "Agrupa as aulas. Ex.: Começando, Edição, Conta."), campo("Posição", ordem, "Menor aparece primeiro."));
+    form.insertBefore(lista, grade);
+    form.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const yt = youtubeId(link.value) || (a ? a.youtubeId : "");
+      if (!titulo.value.trim()) return recado("A aula precisa de título.", "erro");
+      if (!yt) return recado("Não achei o código do YouTube nesse link. Cole o link inteiro.", "erro");
+      ocupado(salvar, async () => {
+        await rpc("ativavid_admin_aulas", {
+          p_action: "upsert",
+          p_id: a ? a.id : null,
+          p_titulo: titulo.value.trim(),
+          p_descricao: desc.value.trim(),
+          p_youtube: yt,
+          p_secao: secao.value.trim() || "Geral",
+          p_ordem: Math.max(0, Math.min(9999, parseInt(ordem.value, 10) || 100)),
+          p_ativo: visivel.checked,
+        });
+        fecharModal();
+        recado("Aula salva.", "ok");
+        await carregarAulas();
+      });
     });
+
+    corpo.append(form, previa);
+    abrirModal(editando ? "Editar aula" : "Nova aula", corpo);
   }
 
   // ============================================================ busca global
 
   function buscaGlobal(ev) {
-    estado.busca = ev.target.value.trim().toLowerCase();
-    if (estado.busca && estado.papel === "admin") {
-      if (location.hash !== "#clientes") location.hash = "clientes";
-      else desenharClientes();
-    }
+    if (!ev.target.value.trim()) return;
+    if (estado.papel !== "admin") return;
+    if (location.hash !== "#clientes") location.hash = "clientes";
+    else desenharClientes();
+  }
+
+  // ============================================================ menus
+
+  function fecharMenus() {
+    $("menuPerfil").hidden = true;
+    $("btPerfil").setAttribute("aria-expanded", "false");
+    $("menuSino").hidden = true;
+    $("btSino").setAttribute("aria-expanded", "false");
   }
 
   // ============================================================ ligar
@@ -1172,52 +1553,53 @@
   $("btReenviar").addEventListener("click", (e) => pedirCodigo(e.currentTarget));
   $("btTrocar").addEventListener("click", (e) => trocarSenha(e.currentTarget));
   $("btSair").addEventListener("click", sair);
-  $("btSairMenu").addEventListener("click", sair);
+  $("btEditarPerfil").addEventListener("click", () => { fecharMenus(); editarPerfil(); });
+  $("btVerAluno").addEventListener("click", () => { fecharMenus(); location.hash = "aluno"; });
   $("btMenu").addEventListener("click", () => aplicarMenu($("painel").classList.contains("adm-app--fechado")));
   $("btTema").addEventListener("click", alternarTema);
-  $("btSino").addEventListener("click", () => { location.hash = "suporte"; });
+  $("buscaGlobal").addEventListener("input", buscaGlobal);
+  $("btNovoCliente").addEventListener("click", abrirNovoCliente);
+  $("ordem").addEventListener("change", (e) => { estado.ordem = e.target.value; desenharClientes(); });
+  $("btNovaAula").addEventListener("click", () => abrirFormAula(null));
+  $("btFecharConversa").addEventListener("click", fecharConversa);
+  $("formResposta").addEventListener("submit", responder);
+  $("btNovoMembro").addEventListener("click", abrirNovoMembro);
+  $("btVoltarAluno").addEventListener("click", () => { location.hash = "visao"; });
+  $("btVerSuporte").addEventListener("click", () => { fecharMenus(); location.hash = "suporte"; });
   $("btPerfil").addEventListener("click", (e) => {
     e.stopPropagation();
     const menu = $("menuPerfil");
     const abrir = menu.hidden;
+    fecharMenus();
     menu.hidden = !abrir;
     $("btPerfil").setAttribute("aria-expanded", abrir ? "true" : "false");
   });
-  document.addEventListener("click", (e) => {
-    const menu = $("menuPerfil");
-    if (!menu.hidden && !menu.contains(e.target) && e.target !== $("btPerfil")) {
-      menu.hidden = true;
-      $("btPerfil").setAttribute("aria-expanded", "false");
-    }
+  $("btSino").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const menu = $("menuSino");
+    const abrir = menu.hidden;
+    fecharMenus();
+    menu.hidden = !abrir;
+    $("btSino").setAttribute("aria-expanded", abrir ? "true" : "false");
   });
-  $("buscaGlobal").addEventListener("input", buscaGlobal);
-  $("btCriar").addEventListener("click", (e) => criarCliente(e.currentTarget));
-  $$("#novoPrazo button").forEach((b) => b.addEventListener("click", () => {
-    estado.prazoNovo = Number(b.dataset.dias);
-    escolherSeg($("novoPrazo"), "dias", b.dataset.dias);
-  }));
-  $$("#equipePapel button").forEach((b) => b.addEventListener("click", () => {
-    estado.papelNovo = b.dataset.papel;
-    escolherSeg($("equipePapel"), "papel", b.dataset.papel);
-  }));
-  $("formEquipe").addEventListener("submit", adicionarEquipe);
-  $("ordem").addEventListener("change", (e) => { estado.ordem = e.target.value; desenharClientes(); });
-  $("btNovaAula").addEventListener("click", () => abrirFormAula(null));
-  $("btCancelarAula").addEventListener("click", fecharFormAula);
-  $("btSalvarAula").addEventListener("click", (e) => salvarAula(e.currentTarget));
-  $("btFecharConversa").addEventListener("click", fecharConversa);
-  $("formResposta").addEventListener("submit", responder);
-  window.addEventListener("hashchange", () => { if (!$("painel").hidden) rotear(); });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".adm-perfil")) fecharMenus();
+  });
+  $("modal").addEventListener("click", (e) => {
+    if (e.target.closest("[data-fechar]")) fecharModal();
+  });
   document.addEventListener("keydown", (ev) => {
-    if (ev.key === "/" && !/input|textarea|select/i.test(ev.target.tagName)) {
+    if (ev.key === "Escape" && !$("modal").hidden) fecharModal();
+    if (ev.key === "/" && !/input|textarea|select/i.test(ev.target.tagName) && !$("painel").hidden) {
       ev.preventDefault();
       $("buscaGlobal").focus();
     }
   });
+  window.addEventListener("hashchange", () => { if (!$("painel").hidden) rotear(); });
 
   lerPreferencias();
+  $("btTema").setAttribute("aria-label", temaEfetivo() === "claro" ? "Usar tema escuro" : "Usar tema claro");
 
-  // Sessão guardada não é permissão: só evita redigitar a senha.
   sb.auth.getSession().then(({ data }) => {
     if (data && data.session) abrirPainel();
   });

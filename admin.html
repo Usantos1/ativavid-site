@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Painel admin — ATIVAVID</title>
-  <meta name="description" content="Painel admin do ATIVAVID: clientes, computadores, aulas, suporte e equipe.">
+  <meta name="description" content="Painel admin do ATIVAVID: clientes, aulas, suporte e equipe.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0b0f1a">
   <meta name="color-scheme" content="dark light">
@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261010j">
+  <link rel="stylesheet" href="/admin.css?v=20261010k">
 </head>
 <body class="adm">
 <div class="adm-fundo" aria-hidden="true"></div>
@@ -24,8 +24,7 @@
     <p class="adm-sub">Painel admin</p>
     <label class="adm-campo">
       <span>E-mail</span>
-      <input id="email" type="email" name="email" autocomplete="username" required
-             inputmode="email" autocapitalize="off" spellcheck="false" placeholder="voce@ativavid.com">
+      <input id="email" type="email" name="email" autocomplete="username" required inputmode="email" autocapitalize="off" spellcheck="false" placeholder="voce@ativavid.com">
     </label>
     <label class="adm-campo">
       <span>Senha</span>
@@ -37,15 +36,13 @@
     <p class="adm-rodape">A mesma conta que você usa no ATIVAVID do computador e do iPhone.</p>
   </form>
 
-  <!-- TROCAR A SENHA: o mesmo caminho do aplicativo (código no e-mail → senha nova). -->
   <form id="formTrocar" class="adm-vidro adm-cartao" autocomplete="off" hidden>
     <img class="adm-logo-entrar" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
     <p class="adm-sub">Trocar a senha</p>
     <div id="passoPedir">
       <label class="adm-campo">
         <span>E-mail da sua conta</span>
-        <input id="emailTrocar" type="email" autocomplete="username" inputmode="email"
-               autocapitalize="off" spellcheck="false" placeholder="voce@ativavid.com">
+        <input id="emailTrocar" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="voce@ativavid.com">
       </label>
       <button id="btPedirCodigo" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Mandar o código</button>
     </div>
@@ -69,7 +66,6 @@
 <!-- PAINEL. Nasce escondido; quem o mostra é a resposta do servidor (ativavid_quem_sou). -->
 <div id="painel" class="adm-app" hidden>
 
-  <!-- MENU LATERAL: vidro flutuante, logo dentro dele, bolinha na borda para recolher. -->
   <aside id="menuLateral" class="adm-side adm-vidro" aria-label="Seções do painel">
     <button id="btMenu" class="adm-side-bolinha" type="button" aria-expanded="true" aria-controls="menuLateral" title="Recolher menu">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
@@ -79,53 +75,45 @@
     <div class="adm-side-logo">
       <a href="#visao" aria-label="ATIVAVID, visão geral">
         <img src="/assets/logo.png" alt="ATIVAVID" width="190" height="61">
-        <img class="adm-logo-icone" src="/assets/icon.png" alt="" width="40" height="40">
+        <img class="adm-logo-icone" src="/assets/icon.png" alt="" width="44" height="44">
       </a>
     </div>
 
     <nav class="adm-nav-lista">
       <p class="adm-nav-grupo">Gestão</p>
-      <a class="adm-nav-item" href="#visao" data-secao="visao" data-so-admin>
+      <a class="adm-nav-item" href="#visao" data-secao="visao" data-rotulo="Visão geral" data-so-admin>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
         <span>Visão geral</span>
       </a>
-      <a class="adm-nav-item" href="#clientes" data-secao="clientes" data-so-admin>
+      <a class="adm-nav-item" href="#clientes" data-secao="clientes" data-rotulo="Clientes" data-so-admin>
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.4 3.3-5.5 6.5-5.5s5.9 2.1 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.7c1.9.8 3 2.7 3 5.3"/></svg>
         <span>Clientes</span>
         <em class="adm-nav-n" id="navClientes" hidden></em>
       </a>
 
       <p class="adm-nav-grupo">Conteúdo</p>
-      <a class="adm-nav-item" href="#aulas" data-secao="aulas" data-so-admin>
+      <a class="adm-nav-item" href="#aulas" data-secao="aulas" data-rotulo="Aulas" data-so-admin>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9.5 12 5l10 4.5-10 4.5z"/><path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
         <span>Aulas</span>
       </a>
 
       <p class="adm-nav-grupo">Atendimento</p>
-      <a class="adm-nav-item" href="#suporte" data-secao="suporte">
+      <a class="adm-nav-item" href="#suporte" data-secao="suporte" data-rotulo="Suporte">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-4 3.5V16H4z"/></svg>
         <span>Suporte</span>
         <em class="adm-nav-n adm-nav-n-alerta" id="navSuporte" hidden></em>
       </a>
 
       <p class="adm-nav-grupo" data-so-admin>Administração</p>
-      <a class="adm-nav-item" href="#equipe" data-secao="equipe" data-so-admin>
+      <a class="adm-nav-item" href="#equipe" data-secao="equipe" data-rotulo="Equipe" data-so-admin>
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.5 3.5-5.5 7-5.5s6.2 2 7 5.5"/><path d="M19 8v4M17 10h4"/></svg>
         <span>Equipe</span>
       </a>
     </nav>
-
-    <div class="adm-side-rodape">
-      <button id="btSairMenu" class="adm-nav-item adm-nav-sair" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l-4 4 4 4M6 12h10"/></svg>
-        <span>Sair</span>
-      </button>
-    </div>
   </aside>
 
   <div class="adm-coluna">
 
-    <!-- BARRA SUPERIOR: pílula de vidro com busca, tema, avisos e perfil. -->
     <header class="adm-topo">
       <div class="adm-topo-barra adm-vidro">
         <label class="adm-busca-pill">
@@ -142,19 +130,35 @@
           <svg class="ic-lua" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
         </button>
 
-        <button id="btSino" class="adm-icone-bt" type="button" aria-label="Chamados de suporte" title="Chamados de suporte">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>
-          <span id="sinoBadge" class="adm-sino-badge" hidden></span>
-        </button>
+        <div class="adm-perfil adm-sino-wrap">
+          <button id="btSino" class="adm-icone-bt" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menuSino" aria-label="Avisos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>
+            <span id="sinoBadge" class="adm-sino-badge" hidden></span>
+          </button>
+          <div id="menuSino" class="adm-menu-perfil adm-menu-sino adm-vidro" hidden>
+            <p class="adm-menu-titulo">Chamados aguardando</p>
+            <div id="sinoLista" class="adm-sino-lista"></div>
+            <button id="btVerSuporte" class="adm-menu-perfil-item adm-menu-ver" type="button">Abrir o suporte</button>
+          </div>
+        </div>
 
         <div class="adm-perfil">
           <button id="btPerfil" class="adm-avatar-bt" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menuPerfil">
             <span id="avatarUsuario" class="adm-avatar">AD</span>
-            <span class="adm-sr">Conta</span>
+            <span class="adm-sr">Perfil e conta</span>
           </button>
           <div id="menuPerfil" class="adm-menu-perfil adm-vidro" hidden>
-            <p class="adm-menu-perfil-quem"><strong id="papelUsuario">Admin</strong><span id="quem"></span></p>
-            <button id="btSair" class="adm-menu-perfil-item" type="button">Sair</button>
+            <div class="adm-menu-perfil-quem">
+              <span id="avatarMenu" class="adm-avatar adm-avatar-grande">AD</span>
+              <div>
+                <strong id="nomeMenu">Admin</strong>
+                <span id="quem"></span>
+                <em id="papelUsuario" class="adm-papel-tag">Admin</em>
+              </div>
+            </div>
+            <button id="btEditarPerfil" class="adm-menu-perfil-item" type="button">Editar perfil</button>
+            <button id="btVerAluno" class="adm-menu-perfil-item" type="button">Ver como aluno</button>
+            <button id="btSair" class="adm-menu-perfil-item adm-menu-perigo" type="button">Sair</button>
           </div>
         </div>
       </div>
@@ -169,7 +173,6 @@
 
       <p id="recado" class="adm-recado" role="status" hidden></p>
 
-      <!-- ============================ VISÃO GERAL ============================ -->
       <section id="secVisao" class="adm-secao" aria-labelledby="tituloSecao" hidden>
         <div class="adm-kpis" id="kpis"></div>
         <div class="adm-duas">
@@ -184,7 +187,6 @@
         </div>
       </section>
 
-      <!-- ============================ CLIENTES ============================ -->
       <section id="secClientes" class="adm-secao" aria-labelledby="tituloSecao" hidden>
         <div class="adm-barra">
           <label class="adm-ordem">
@@ -193,35 +195,17 @@
               <option value="vencimento">Vence primeiro</option>
               <option value="acesso">Acessou por último</option>
               <option value="videos">Mais vídeos</option>
+              <option value="aulas">Mais aulas assistidas</option>
               <option value="nome">Nome</option>
             </select>
           </label>
         </div>
         <div class="adm-chips" id="filtros" role="group" aria-label="Filtrar clientes"></div>
 
-        <details class="adm-vidro adm-novo">
-          <summary>Novo cliente</summary>
-          <div class="adm-novo-corpo">
-            <label class="adm-campo">
-              <span>E-mail do cliente</span>
-              <input id="novoEmail" type="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="cliente@email.com">
-            </label>
-            <label class="adm-campo">
-              <span>Senha provisória</span>
-              <input id="novaSenha" type="text" autocomplete="off" placeholder="mínimo 6 caracteres">
-              <small>O cliente entra com ela e troca depois em “Esqueci minha senha”.</small>
-            </label>
-            <div class="adm-campo">
-              <span>Acesso por</span>
-              <div class="adm-seg" id="novoPrazo" role="radiogroup" aria-label="Prazo do acesso">
-                <button type="button" role="radio" aria-checked="false" data-dias="30">30 dias</button>
-                <button type="button" role="radio" aria-checked="false" data-dias="90">90 dias</button>
-                <button type="button" role="radio" aria-checked="true" data-dias="365" class="is-on">1 ano</button>
-              </div>
-            </div>
-            <button id="btCriar" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Criar e liberar</button>
-          </div>
-        </details>
+        <button id="btNovoCliente" class="adm-vidro adm-novo-botao" type="button">
+          <span>Novo cliente</span>
+          <span aria-hidden="true">+</span>
+        </button>
 
         <div id="listaClientes" class="adm-clientes" aria-live="polite"></div>
 
@@ -232,57 +216,19 @@
         <div id="listaSemConta" class="adm-maquinas" aria-live="polite"></div>
       </section>
 
-      <!-- ============================== AULAS ============================== -->
       <section id="secAulas" class="adm-secao" aria-labelledby="tituloSecao" hidden>
         <div class="adm-cabeca-secao adm-cabeca-linha">
           <div>
             <h2>Aulas</h2>
-            <p>O que aparece para o cliente. Cada aula é um vídeo do YouTube.</p>
+            <p>O que o cliente vê na área de aulas. Cada aula é um vídeo do YouTube.</p>
           </div>
           <button id="btNovaAula" class="adm-bt adm-bt-forte adm-bt-sm" type="button">Nova aula</button>
         </div>
-
-        <form id="formAula" class="adm-vidro adm-form-aula" hidden>
-          <h3 id="tituloFormAula">Nova aula</h3>
-          <label class="adm-campo">
-            <span>Título</span>
-            <input id="aulaTitulo" type="text" maxlength="120" required placeholder="Como importar do YouTube">
-          </label>
-          <label class="adm-campo">
-            <span>Link do YouTube</span>
-            <input id="aulaLink" type="text" autocapitalize="off" spellcheck="false" placeholder="https://youtu.be/…">
-            <small>Cole o link inteiro; o código do vídeo sai sozinho.</small>
-          </label>
-          <div class="adm-grade-2">
-            <label class="adm-campo">
-              <span>Seção</span>
-              <input id="aulaSecao" type="text" list="secoesExistentes" maxlength="60" placeholder="Começando">
-              <datalist id="secoesExistentes"></datalist>
-            </label>
-            <label class="adm-campo">
-              <span>Ordem</span>
-              <input id="aulaOrdem" type="number" min="0" max="9999" value="100" inputmode="numeric">
-            </label>
-          </div>
-          <label class="adm-campo">
-            <span>Descrição</span>
-            <textarea id="aulaDescricao" rows="3" maxlength="600" placeholder="O que a pessoa aprende nesta aula."></textarea>
-          </label>
-          <label class="adm-check">
-            <input id="aulaAtivo" type="checkbox" checked>
-            <span>Aparecer para o cliente</span>
-          </label>
-          <div class="adm-form-acoes">
-            <button id="btSalvarAula" class="adm-bt adm-bt-forte" type="button">Salvar aula</button>
-            <button id="btCancelarAula" class="adm-bt adm-bt-fraco" type="button">Cancelar</button>
-          </div>
-        </form>
-
         <div id="listaAulas" class="adm-aulas" aria-live="polite"></div>
       </section>
 
-      <!-- ============================ SUPORTE ============================ -->
       <section id="secSuporte" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+        <div class="adm-resumo" id="resumoSuporte"></div>
         <div class="adm-chips" id="filtrosSuporte" role="group" aria-label="Filtrar chamados"></div>
         <div class="adm-suporte">
           <div id="listaChamados" class="adm-chamados" aria-live="polite"></div>
@@ -302,9 +248,9 @@
                 <label class="adm-status-sel">
                   <span class="adm-sr">Status depois de enviar</span>
                   <select id="statusResposta">
-                    <option value="respondido">Respondido — esperando o cliente</option>
-                    <option value="em_analise">Em análise — ainda não respondi tudo</option>
-                    <option value="resolvido">Resolvido — encerrar</option>
+                    <option value="respondido">Respondido: aguardando o cliente</option>
+                    <option value="em_analise">Em análise: ainda não respondi tudo</option>
+                    <option value="resolvido">Resolvido: encerrar</option>
                   </select>
                 </label>
                 <button id="btResponder" class="adm-bt adm-bt-forte adm-bt-sm" type="submit">Enviar resposta</button>
@@ -314,48 +260,44 @@
         </div>
       </section>
 
-      <!-- ============================== EQUIPE ============================== -->
       <section id="secEquipe" class="adm-secao" aria-labelledby="tituloSecao" hidden>
-        <div class="adm-cabeca-secao">
-          <h2>Quem entra neste painel</h2>
-          <p><strong>Admin</strong> vê e faz tudo. <strong>Suporte</strong> só atende os chamados e não mexe em assinaturas nem em aulas.</p>
+        <div class="adm-cabeca-secao adm-cabeca-linha">
+          <div>
+            <h2>Quem entra neste painel</h2>
+            <p><strong>Admin</strong> vê e faz tudo. <strong>Suporte</strong> só atende os chamados.</p>
+          </div>
+          <button id="btNovoMembro" class="adm-bt adm-bt-forte adm-bt-sm" type="button">Adicionar pessoa</button>
         </div>
-
-        <details class="adm-vidro adm-novo">
-          <summary>Adicionar pessoa à equipe</summary>
-          <form id="formEquipe" class="adm-novo-corpo">
-            <label class="adm-campo">
-              <span>E-mail da pessoa</span>
-              <input id="equipeEmail" type="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nome@ativavid.com" required>
-            </label>
-            <label class="adm-campo">
-              <span>Nome (opcional)</span>
-              <input id="equipeNome" type="text" maxlength="60" placeholder="Ex.: Ice — suporte">
-            </label>
-            <label class="adm-campo">
-              <span>Senha provisória</span>
-              <input id="equipeSenha" type="text" autocomplete="off" placeholder="só se a pessoa ainda não tem login">
-              <small>Se ela já usa o ATIVAVID, deixe em branco. Se não, crie o login aqui e ela troca a senha depois.</small>
-            </label>
-            <div class="adm-campo">
-              <span>Papel</span>
-              <div class="adm-seg" id="equipePapel" role="radiogroup" aria-label="Papel na equipe">
-                <button type="button" role="radio" aria-checked="false" data-papel="suporte">Suporte</button>
-                <button type="button" role="radio" aria-checked="true" data-papel="admin" class="is-on">Admin</button>
-              </div>
-            </div>
-            <button id="btAddEquipe" class="adm-bt adm-bt-forte adm-bt-cheio" type="submit">Adicionar à equipe</button>
-          </form>
-        </details>
-
         <div id="listaEquipe" class="adm-equipe" aria-live="polite"></div>
+      </section>
+
+      <section id="secAluno" class="adm-secao" aria-labelledby="tituloSecao" hidden>
+        <div class="adm-vidro adm-aviso-aluno">
+          <p><strong>Você está vendo a área do aluno.</strong> É assim que o cliente vê as aulas. Nada aqui marca progresso.</p>
+          <button id="btVoltarAluno" class="adm-bt adm-bt-fraco adm-bt-sm" type="button">Voltar ao painel</button>
+        </div>
+        <div id="alunoLista" class="adm-aluno-lista" aria-live="polite"></div>
       </section>
 
     </main>
   </div>
 </div>
 
+<!-- MODAL. Uma só janela para cliente, aula, equipe e perfil. -->
+<div id="modal" class="adm-modal" hidden>
+  <div class="adm-modal-fundo" data-fechar></div>
+  <div class="adm-modal-caixa adm-vidro" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <header class="adm-modal-topo">
+      <h2 id="modalTitulo"></h2>
+      <button class="adm-icone-bt" type="button" data-fechar aria-label="Fechar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div id="modalCorpo" class="adm-modal-corpo"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/admin.js?v=20261010j"></script>
+<script src="/admin.js?v=20261010k"></script>
 </body>
 </html>
