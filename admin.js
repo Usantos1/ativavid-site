@@ -574,6 +574,9 @@
     });
     const mapa = { visao: "secVisao", clientes: "secClientes", aulas: "secAulas", suporte: "secSuporte", equipe: "secEquipe", academy: "secAcademy" };
     for (const [k, id] of Object.entries(mapa)) $(id).hidden = k !== s;
+    // no suporte a página não rola: lista e conversa rolam por dentro
+    document.documentElement.classList.toggle("adm-sem-rolagem", s === "suporte");
+    if (s === "suporte") requestAnimationFrame(ajustarAlturaSuporte);
     $("tituloSecao").textContent = SECOES[s].titulo;
     $("subSecao").textContent = SECOES[s].sub;
     document.title = `${SECOES[s].titulo} — Painel admin ATIVAVID`;
@@ -1521,6 +1524,15 @@
   // Tempo real: chamado, mensagem ou print novo atualiza a lista e a conversa aberta.
   let suporteAoVivo = null;
   let suporteAgendado = null;
+
+  // A grade ocupa exatamente o que sobra da tela abaixo dela.
+  function ajustarAlturaSuporte() {
+    const grade = $("suporteGrade");
+    if ($("secSuporte").hidden) return;
+    const topo = grade.getBoundingClientRect().top;
+    grade.style.height = `${Math.max(380, window.innerHeight - topo - 16)}px`;
+  }
+  window.addEventListener("resize", ajustarAlturaSuporte);
 
   function ouvirSuporte() {
     if (suporteAoVivo) return;

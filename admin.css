@@ -1870,3 +1870,8 @@
   .adm-sup-voltar { display: inline-grid; }
   .adm-sup-bolha { max-width: 88%; }
 }
+
+/* suporte: a página não rola; filtros quebram em linhas em vez de cortar */
+html.adm-sem-rolagem,
+html.adm-sem-rolagem body { overflow: hidden; }
+.adm-sup-filtros { flex-wrap: wrap; overflow: visible; }
