@@ -61,3 +61,18 @@
 .alu-embutido .adm-principal {
   padding-top: 8px;
 }
+
+.aulas-saudacao {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tinta);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* cartões de aula em grade, não uma coluna só */
+#listaAulas .adm-aluno-grade {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}

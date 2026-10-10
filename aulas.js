@@ -270,6 +270,7 @@
     const email = estado.dados.email || "";
     const nome = email.split("@")[0] || "Aluno";
     for (const id of ["avatarUsuario", "avatarMenu"]) $(id).textContent = iniciais(nome);
+    $("saudacao").textContent = `Olá, ${nome}`;
     $("nomeMenu").textContent = nome;
     $("quem").textContent = email;
   }
