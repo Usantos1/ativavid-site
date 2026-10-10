@@ -271,3 +271,18 @@
   grid-column: 2;
   justify-self: center;
 }
+
+/* tema claro: o vidro precisa de cor por trás para parecer vidro. O admin
+ * define o fundo mais pálido no claro; aqui a marca aparece mais. */
+.adm[data-tema="claro"] {
+  --mesh-1: color-mix(in srgb, var(--azul) 58%, transparent);
+  --mesh-2: color-mix(in srgb, var(--vermelho) 40%, transparent);
+  --mesh-3: color-mix(in srgb, var(--verde) 36%, transparent);
+}
+@media (prefers-color-scheme: light) {
+  .adm:not([data-tema="escuro"]) {
+    --mesh-1: color-mix(in srgb, var(--azul) 58%, transparent);
+    --mesh-2: color-mix(in srgb, var(--vermelho) 40%, transparent);
+    --mesh-3: color-mix(in srgb, var(--verde) 36%, transparent);
+  }
+}
