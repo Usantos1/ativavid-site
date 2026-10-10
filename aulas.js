@@ -309,13 +309,13 @@
         feito: feitas > 0,
         titulo: "Assista a primeira aula",
         sub: feitas > 0 ? "Você já começou." : "Comece por ela para entender o fluxo do programa.",
-        acao: pendente ? { texto: feitas > 0 ? "Continuar" : "Assistir", href: `#aulas/${pendente.id}` } : null,
+        acao: pendente ? { texto: feitas > 0 ? "Continuar" : "Assistir", href: `/aulas/aula/${pendente.id}` } : null,
       },
       {
         feito: aulas.length > 0 && feitas === aulas.length,
         titulo: "Assista a todas as aulas",
         sub: aulas.length ? `${feitas} de ${aulas.length} assistidas` : "Ainda não há aulas publicadas.",
-        acao: { texto: "Ver aulas", href: "#aulas" },
+        acao: { texto: "Ver aulas", href: "/aulas/todas" },
       },
       {
         feito: total > 0,
@@ -327,7 +327,7 @@
         feito: ativa,
         titulo: "Ter a assinatura ativa",
         sub: s.sub,
-        acao: { texto: "Ver conta", href: "#conta" },
+        acao: { texto: "Ver conta", href: "/aulas/conta" },
       },
     ];
 
@@ -397,7 +397,7 @@
   function cartaoAula(a) {
     const feita = progressoDe(a.id);
     const link = el("a", "adm-vidro aulas-card");
-    link.href = `#aulas/${a.id}`;
+    link.href = `/aulas/aula/${a.id}`;
     const capa = el("div", "aulas-capa");
     const img = document.createElement("img");
     img.src = `https://i.ytimg.com/vi/${encodeURIComponent(a.youtubeId)}/mqdefault.jpg`;
@@ -463,8 +463,8 @@
     atualizarBotaoAula();
     const ant = i > 0 ? lista[i - 1] : null;
     const prox = i >= 0 && i < lista.length - 1 ? lista[i + 1] : null;
-    setLink("btAnterior", ant ? `#aulas/${ant.id}` : null);
-    setLink("btProxima", prox ? `#aulas/${prox.id}` : null);
+    setLink("btAnterior", ant ? `/aulas/aula/${ant.id}` : null);
+    setLink("btProxima", prox ? `/aulas/aula/${prox.id}` : null);
   }
 
   function pararAula() {
@@ -546,7 +546,7 @@
       const s = situacaoChamado(c);
       const ult = c.mensagens[c.mensagens.length - 1];
       const link = el("a", "adm-vidro aulas-ticket-linha");
-      link.href = `#suporte/${c.id}`;
+      link.href = `/aulas/suporte/${c.id}`;
       const info = el("div", "aulas-ticket-info");
       info.append(
         el("strong", "", c.assunto),
@@ -753,7 +753,7 @@
   }
 
   function idChamadoDaRota() {
-    const [secao, id] = (location.hash || "").replace("#", "").split("/");
+    const [secao, id] = rotaAtual();
     return secao === "suporte" && id && id !== "novo" ? id : null;
   }
 
@@ -770,7 +770,7 @@
       desenharAnexos("novo");
       await carregarChamados();
       recado("Chamado enviado. A equipe responde por aqui.", "ok");
-      location.hash = `#suporte/${data.id}`;
+      irPara(`/aulas/suporte/${data.id}`);
     });
   });
 
@@ -811,13 +811,42 @@
     }
   }
 
-  /* ---------- rotas por # ---------- */
+  /* ---------- rotas (endereços de verdade, sem #) ---------- */
+
+  // /aulas · /aulas/todas · /aulas/aula/<id> · /aulas/suporte · /aulas/suporte/novo
+  // /aulas/suporte/<número> · /aulas/conta. Devolve [secao, id] no formato que
+  // o resto da página usa. Endereço antigo com # ainda é entendido.
+  function rotaAtual() {
+    let partes = location.pathname.replace(/^\/aulas\/?/, "").split("/").filter(Boolean);
+    if (!partes.length && location.hash) partes = location.hash.replace("#", "").split("/").filter(Boolean);
+    const [p1, p2] = partes;
+    if (!p1 || p1 === "inicio") return ["inicio"];
+    if (p1 === "todas") return ["aulas"];
+    if (p1 === "aula" || p1 === "aulas") return ["aulas", p2];
+    return [p1, p2];
+  }
+
+  function caminhoDe(secao, id) {
+    if (secao === "aulas") return id ? `/aulas/aula/${id}` : "/aulas/todas";
+    if (secao === "inicio") return "/aulas";
+    return id ? `/aulas/${secao}/${id}` : `/aulas/${secao}`;
+  }
+
+  function irPara(caminho, substituir = false) {
+    const url = caminho + location.search;
+    if (substituir) history.replaceState(null, "", url);
+    else history.pushState(null, "", url);
+    if (!$("painel").hidden) rotear();
+  }
 
   function rotear() {
     if (!estado.dados) return;
-    const [secao, id] = (location.hash || "#inicio").replace("#", "").split("/");
+    const [secao, id] = rotaAtual();
     const aula = secao === "aulas" && id ? aulasDaLista().find((x) => x.id === id) : null;
     const chave = aula ? "aula" : (TITULOS[secao] ? secao : "inicio");
+
+    const canonico = caminhoDe(chave === "aula" ? "aulas" : chave, aula ? aula.id : (chave === "suporte" ? id : undefined));
+    if (location.pathname !== canonico || location.hash) history.replaceState(null, "", canonico + location.search);
 
     if (chave !== "aula" && aulaAtual) pararAula();
     for (const [k, sid] of Object.entries(SECAO_DO_ID)) $(sid).hidden = k !== chave;
@@ -866,7 +895,7 @@
     carregarChamados()
       .then(() => {
         if (modo === "lista") return desenharListaChamados();
-        if (modo === "chamado" && !abrirChamadoDetalhe(id)) location.hash = "#suporte";
+        if (modo === "chamado" && !abrirChamadoDetalhe(id)) irPara("/aulas/suporte", true);
       })
       .catch((e) => recado(e.message, "erro"));
   }
@@ -895,7 +924,14 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") fecharMenus();
   });
-  window.addEventListener("hashchange", () => { if (!$("painel").hidden) rotear(); });
+  window.addEventListener("popstate", () => { if (!$("painel").hidden) rotear(); });
+  // links internos trocam de tela sem recarregar
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest && e.target.closest('a[href^="/aulas"]');
+    if (!link || e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    irPara(link.getAttribute("href"));
+  });
 
   if (embutido) $("painel").classList.add("alu-embutido");
   lerPreferencias();

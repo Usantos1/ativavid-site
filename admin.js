@@ -558,15 +558,27 @@
     return !cfg.admin || estado.papel === "admin";
   }
 
-  function secaoDoHash() {
-    const h = location.hash.replace("#", "");
-    if (secaoPermitida(h)) return h;
+  // Endereços de verdade: /admin/clientes, /admin/suporte… (sem #).
+  // Endereço antigo com # (/admin#clientes) ainda é entendido.
+  function secaoDaRota() {
+    let s = location.pathname.replace(/^\/admin\/?/, "").split("/")[0];
+    if (!s && location.hash) s = location.hash.replace("#", "");
+    if (secaoPermitida(s)) return s;
     return estado.papel === "admin" ? "visao" : "suporte";
   }
 
+  function irPara(secao) {
+    history.pushState(null, "", `/admin/${secao}${location.search}`);
+    if (!$("painel").hidden) rotear();
+  }
+
   function rotear() {
-    const s = secaoDoHash();
+    const s = secaoDaRota();
     estado.secao = s;
+    const canonica = `/admin/${s}`;
+    if (location.pathname !== canonica || location.hash) history.replaceState(null, "", canonica + location.search);
+    document.documentElement.classList.toggle("adm-tela-clientes", s === "clientes");
+    $("buscaGlobal").placeholder = s === "suporte" ? "Buscar chamados" : "Buscar clientes";
     $$(".adm-nav-item").forEach((a) => {
       const on = a.dataset.secao === s;
       a.classList.toggle("is-on", on);
@@ -716,10 +728,10 @@
       const corpo = el("div", "adm-pend-corpo");
       corpo.append(el("strong", "", p.titulo), el("span", "", p.texto));
       const bt = botao(p.acao, "adm-bt adm-bt-fraco adm-bt-sm", () => {
-        if (p.secao) { location.hash = p.secao; return; }
+        if (p.secao) { irPara(p.secao); return; }
         if (p.filtro) estado.filtro = p.filtro;
         else { estado.abertos.add(p.id); estado.filtro = "todos"; }
-        location.hash = "clientes";
+        irPara("clientes");
       });
       item.append(corpo, bt);
       at.appendChild(item);
@@ -786,7 +798,7 @@
 
   function casaBusca(c, q) {
     if (!q) return true;
-    const alvos = [c.email, ...(c.computadores || []).flatMap((m) => [m.label, m.host, m.osUser, m.emailNoPc, m.ultimoEmailAberto])];
+    const alvos = [c.email, nomeDoCliente(c.email), ...(c.computadores || []).flatMap((m) => [m.label, m.host, m.osUser, m.emailNoPc, m.ultimoEmailAberto])];
     return alvos.some((v) => String(v || "").toLowerCase().includes(q));
   }
 
@@ -810,6 +822,10 @@
       ? estado.semAssinatura.filter((s) => casaBusca(s, q)).sort((a, b) => String(a.email).localeCompare(String(b.email), "pt-BR"))
       : [];
     alvo.innerHTML = "";
+    const total = lista.length + semAss.length;
+    $("clientesResumo").textContent = q
+      ? `${plural(total, "cliente encontrado", "clientes encontrados")} para “${$("buscaGlobal").value.trim()}”`
+      : plural(total, "cliente", "clientes");
     if (!lista.length && !semAss.length) {
       alvo.appendChild(el("p", "adm-vazio", estado.clientes.length || estado.semAssinatura.length
         ? "Nada com este filtro ou busca."
@@ -1328,7 +1344,7 @@
     for (const x of pendentes) {
       const b = botao("", "adm-sino-item", () => {
         fecharMenus();
-        location.hash = "suporte";
+        irPara("suporte");
         abrirChamado(x.id);
       });
       b.append(el("strong", "", `#${x.id} · ${x.assunto}`), el("span", "", `${x.email} · ${rel(x.atualizado_em)}`));
@@ -2077,13 +2093,25 @@
     abrirModal(editando ? "Editar aula" : "Nova aula", corpo);
   }
 
-  // ============================================================ busca global  // ============================================================ busca global
+  // ============================================================ busca global
 
-  function buscaGlobal(ev) {
-    if (!ev.target.value.trim()) return;
+  // A busca da barra superior segue a página: no suporte procura chamados;
+  // nas outras, clientes (por nome, e-mail ou computador). Apagar o texto
+  // volta a lista inteira na hora.
+  function buscaGlobal() {
+    const q = $("buscaGlobal").value;
+    if (estado.secao === "suporte") {
+      estado.buscaChamado = q;
+      $("buscaChamados").value = q;
+      desenharSuporte();
+      return;
+    }
     if (estado.papel !== "admin") return;
-    if (location.hash !== "#clientes") location.hash = "clientes";
-    else desenharClientes();
+    if (estado.secao !== "clientes") {
+      if (q.trim()) irPara("clientes");
+      return;
+    }
+    desenharClientes();
   }
 
   // ============================================================ menus
@@ -2115,7 +2143,7 @@
   $("formResposta").addEventListener("submit", responder);
   $("statusResposta").addEventListener("change", mudarStatus);
   $("btNovoMembro").addEventListener("click", abrirNovoMembro);
-  $("btVerSuporte").addEventListener("click", () => { fecharMenus(); location.hash = "suporte"; });
+  $("btVerSuporte").addEventListener("click", () => { fecharMenus(); irPara("suporte"); });
   $("btPerfil").addEventListener("click", (e) => {
     e.stopPropagation();
     const menu = $("menuPerfil");
@@ -2145,7 +2173,14 @@
       $("buscaGlobal").focus();
     }
   });
-  window.addEventListener("hashchange", () => { if (!$("painel").hidden) rotear(); });
+  window.addEventListener("popstate", () => { if (!$("painel").hidden) rotear(); });
+  // links internos do painel trocam de página sem recarregar
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest && e.target.closest('a[href^="/admin/"]');
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    irPara(a.getAttribute("href").replace(/^\/admin\//, ""));
+  });
 
   lerPreferencias();
   $("btTema").setAttribute("aria-label", temaEfetivo() === "claro" ? "Usar tema escuro" : "Usar tema claro");

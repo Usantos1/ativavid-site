@@ -2016,3 +2016,29 @@ html.adm-sem-rolagem body { overflow: hidden; }
 .adm-receita-grade { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .adm-receita-nota { margin: 0; font-size: 12.5px; color: var(--texto-3); }
 @media (max-width: 640px) { .adm-receita-grade { grid-template-columns: 1fr; } }
+
+/* clientes: cabeçalho próprio, congelado logo abaixo da barra superior */
+.adm-tela-clientes .adm-cab { display: none; }
+.adm-cli-fixo {
+  position: sticky;
+  top: 80px;
+  z-index: 20;
+  display: grid;
+  gap: 10px;
+  margin: 0 -4px 12px;
+  padding: 14px 4px 12px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--borda);
+}
+.adm-cli-fixo-l1 { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; }
+.adm-cli-titulo { margin: 0 0 2px; font-family: var(--display); font-size: 30px; font-weight: 900; letter-spacing: -.02em; }
+.adm-cli-fixo-l1 .adm-ajuda { margin: 0; }
+.adm-cli-fixo-l2 { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.adm-cli-fixo-l2 .adm-chips { flex: 1; min-width: 0; padding: 2px; }
+.adm-cli-fixo-l2 .adm-ordem { flex: none; margin-left: 0; }
+@media (max-width: 959px) {
+  .adm-cli-fixo { top: 64px; }
+  .adm-cli-fixo-l2 { flex-wrap: wrap; }
+}

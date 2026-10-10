@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
-  <link rel="stylesheet" href="/admin.css?v=20261011d">
+  <link rel="stylesheet" href="/admin.css?v=20261011e">
   <link rel="stylesheet" href="/aulas.css?v=20261011b">
 </head>
 <body class="adm">
@@ -74,7 +74,7 @@
     </button>
 
     <div class="adm-side-logo">
-      <a href="#inicio" aria-label="ATIVAVID, início">
+      <a href="/aulas" aria-label="ATIVAVID, início">
         <img src="/assets/logo.png" alt="ATIVAVID" width="190" height="61">
         <img class="adm-logo-icone" src="/assets/icon.png" alt="" width="44" height="44">
       </a>
@@ -82,21 +82,21 @@
 
     <nav class="adm-nav-lista">
       <p class="adm-nav-grupo">Sua área</p>
-      <a class="adm-nav-item" href="#inicio" data-secao="inicio" data-rotulo="Início">
+      <a class="adm-nav-item" href="/aulas" data-secao="inicio" data-rotulo="Início">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
         <span>Início</span>
       </a>
-      <a class="adm-nav-item" href="#aulas" data-secao="aulas" data-rotulo="Aulas">
+      <a class="adm-nav-item" href="/aulas/todas" data-secao="aulas" data-rotulo="Aulas">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9.5 12 5l10 4.5-10 4.5z"/><path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/></svg>
         <span>Aulas</span>
       </a>
 
       <p class="adm-nav-grupo">Conta</p>
-      <a class="adm-nav-item" href="#suporte" data-secao="suporte" data-rotulo="Suporte">
+      <a class="adm-nav-item" href="/aulas/suporte" data-secao="suporte" data-rotulo="Suporte">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-4 3.5V16H4z"/></svg>
         <span>Suporte</span>
       </a>
-      <a class="adm-nav-item" href="#conta" data-secao="conta" data-rotulo="Conta">
+      <a class="adm-nav-item" href="/aulas/conta" data-secao="conta" data-rotulo="Conta">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.5 3.5-5.5 7-5.5s6.2 2 7 5.5"/></svg>
         <span>Conta</span>
       </a>
@@ -178,9 +178,9 @@
         </div>
         <h2 id="aulaTitulo" class="aulas-aula-titulo"></h2>
         <div class="aulas-aula-barra">
-          <a class="adm-bt adm-bt-fraco" id="btAnterior" href="#aulas">← Anterior</a>
+          <a class="adm-bt adm-bt-fraco" id="btAnterior" href="/aulas/todas">← Anterior</a>
           <button id="btConcluir" class="adm-bt adm-bt-forte" type="button"></button>
-          <a class="adm-bt adm-bt-fraco" id="btProxima" href="#aulas">Próxima →</a>
+          <a class="adm-bt adm-bt-fraco" id="btProxima" href="/aulas/todas">Próxima →</a>
         </div>
         <div id="aulaDescricao" class="aulas-descricao"></div>
       </section>
@@ -191,13 +191,13 @@
         <div id="suporteLista" class="aulas-suporte" hidden>
           <div class="aulas-suporte-topo">
             <p class="adm-ajuda" id="resumoChamados"></p>
-            <a class="adm-bt adm-bt-forte adm-bt-sm" href="#suporte/novo">Novo chamado</a>
+            <a class="adm-bt adm-bt-forte adm-bt-sm" href="/aulas/suporte/novo">Novo chamado</a>
           </div>
           <div id="listaChamados" class="aulas-tickets"></div>
         </div>
 
         <div id="suporteNovo" class="aulas-suporte" hidden>
-          <a class="adm-link aulas-voltar" href="#suporte">← Meus chamados</a>
+          <a class="adm-link aulas-voltar" href="/aulas/suporte">← Meus chamados</a>
           <article class="adm-vidro aulas-painel-form">
             <h2 class="aulas-titulo-bloco">Descreva o problema</h2>
             <form id="formChamado" class="aulas-form">
@@ -223,7 +223,7 @@
         </div>
 
         <div id="suporteChamado" class="aulas-chat-wrap" hidden>
-          <a class="adm-link aulas-voltar" href="#suporte">← Meus chamados</a>
+          <a class="adm-link aulas-voltar" href="/aulas/suporte">← Meus chamados</a>
           <article class="adm-vidro aulas-chat">
             <header class="aulas-chat-cab">
               <img class="aulas-chat-avatar" src="/assets/icon.png" alt="" width="42" height="42">
@@ -237,7 +237,7 @@
             <!-- chamado resolvido: o cliente não responde mais; abre outro -->
             <div id="chamadoEncerrado" class="aulas-chat-encerrado" hidden>
               <p><strong>Atendimento encerrado.</strong> <span id="chamadoEncerradoTexto"></span></p>
-              <a class="adm-bt adm-bt-forte adm-bt-sm" href="#suporte/novo">Abrir novo chamado</a>
+              <a class="adm-bt adm-bt-forte adm-bt-sm" href="/aulas/suporte/novo">Abrir novo chamado</a>
             </div>
             <form id="formResposta" class="aulas-chat-composer">
               <ul id="respostaAnexos" class="aulas-chat-anexos"></ul>
@@ -270,6 +270,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-<script src="/aulas.js?v=20261011b"></script>
+<script src="/aulas.js?v=20261011e"></script>
 </body>
 </html>
