@@ -620,7 +620,7 @@
     $("formResposta").hidden = encerrado;
     $("chamadoEncerrado").hidden = !encerrado;
     if (encerrado) {
-      $("chamadoEncerradoTexto").textContent = `A equipe encerrou este chamado em ${dia(c.atualizadoEm)}. Se precisar de mais ajuda, abra um novo chamado.`;
+      $("chamadoEncerradoTexto").textContent = `A equipe encerrou este chamado em ${dia(c.atualizadoEm)} às ${horaCurta(c.atualizadoEm)}. Se precisar de mais ajuda, abra um novo chamado.`;
     }
     const conversa = $("ticketConversa");
     const pertoDoFim = conversa.scrollHeight - conversa.scrollTop - conversa.clientHeight < 120;
