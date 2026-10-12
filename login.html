@@ -4,36 +4,65 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Entrar — ATIVAVID</title>
+  <meta name="description" content="Entre na sua conta ATIVAVID.">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#0b0c10">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0f1a">
+  <meta name="color-scheme" content="dark light">
   <link rel="icon" href="/assets/icon-64.png" type="image/png" sizes="64x64">
-  <link rel="stylesheet" href="/styles.css?v=20261012a">
-  <style>
-    .login-caixa { max-width: 380px; margin: 48px auto; padding: 28px; border-radius: 16px; background: #14161c; border: 1px solid #23262f; }
-    .login-caixa h1 { margin: 0 0 6px; font-size: 22px; }
-    .login-caixa p { margin: 0 0 18px; color: #9aa0ac; font-size: 14px; }
-    .login-caixa label { display: block; margin: 12px 0 6px; font-size: 13px; color: #c9ced8; }
-    .login-caixa input { width: 100%; box-sizing: border-box; padding: 11px 12px; border-radius: 10px; border: 1px solid #2c303b; background: #0b0c10; color: #f2f4f8; font-size: 15px; }
-    .login-caixa button { margin-top: 18px; width: 100%; padding: 12px; border: 0; border-radius: 10px; background: #e30004; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
-    .login-caixa button:disabled { opacity: .6; cursor: default; }
-    .login-recado { min-height: 20px; margin-top: 12px; font-size: 14px; color: #ff8a8a; }
-  </style>
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/poppins-900.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/source-sans-3.woff2" crossorigin>
+  <link rel="stylesheet" href="/admin.css?v=20261012c">
 </head>
-<body>
-  <main class="login-caixa">
-    <h1>Entrar</h1>
-    <p>Use o e-mail e a senha da sua conta ATIVAVID.</p>
-    <form id="formLogin" novalidate>
-      <label for="email">E-mail</label>
-      <input id="email" type="email" autocomplete="username" required>
-      <label for="senha">Senha</label>
-      <input id="senha" type="password" autocomplete="current-password" required>
-      <button id="btEntrar" type="submit">Entrar</button>
-      <p id="recado" class="login-recado" role="alert"></p>
-    </form>
-  </main>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-  <script src="/login.js?v=20261012a"></script>
+<body class="adm">
+<div class="adm-fundo" aria-hidden="true"></div>
+
+<main id="telaEntrar" class="adm-entrar">
+  <form id="formEntrar" class="adm-vidro adm-cartao" autocomplete="on">
+    <img class="adm-logo-entrar" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
+    <p class="adm-sub">Entre na sua conta</p>
+    <label class="adm-campo">
+      <span>E-mail</span>
+      <input id="email" type="email" name="email" autocomplete="username" required inputmode="email" autocapitalize="off" spellcheck="false" placeholder="voce@ativavid.com">
+    </label>
+    <label class="adm-campo">
+      <span>Senha</span>
+      <input id="senha" type="password" name="password" autocomplete="current-password" required placeholder="Sua senha">
+    </label>
+    <button id="btEntrar" class="adm-bt adm-bt-forte adm-bt-cheio" type="submit">Entrar</button>
+    <button id="btEsqueci" class="adm-link" type="button">Esqueci minha senha</button>
+    <p id="erroEntrar" class="adm-aviso" role="alert" hidden></p>
+    <p class="adm-rodape">A mesma conta que você usa no ATIVAVID do computador e do iPhone.</p>
+  </form>
+
+  <form id="formTrocar" class="adm-vidro adm-cartao" autocomplete="off" hidden>
+    <img class="adm-logo-entrar" src="/assets/logo.png" alt="ATIVAVID" width="280" height="89">
+    <p class="adm-sub">Trocar a senha</p>
+    <div id="passoPedir">
+      <label class="adm-campo">
+        <span>E-mail da sua conta</span>
+        <input id="emailTrocar" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="voce@ativavid.com">
+      </label>
+      <button id="btPedirCodigo" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Mandar o código</button>
+    </div>
+    <div id="passoCodigo" hidden>
+      <label class="adm-campo">
+        <span>Código que chegou no e-mail</span>
+        <input id="codigo" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="10" placeholder="000000">
+      </label>
+      <label class="adm-campo">
+        <span>Senha nova</span>
+        <input id="senhaNova" type="password" autocomplete="new-password" placeholder="mínimo 6 caracteres">
+      </label>
+      <button id="btTrocar" class="adm-bt adm-bt-forte adm-bt-cheio" type="button">Trocar a senha e entrar</button>
+      <button id="btReenviar" class="adm-link" type="button">Mandar o código de novo</button>
+    </div>
+    <p id="avisoTrocar" class="adm-aviso" role="alert" hidden></p>
+    <button id="btVoltar" class="adm-link" type="button">Voltar para a entrada</button>
+  </form>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="/login.js?v=20261012b"></script>
 </body>
 </html>
