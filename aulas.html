@@ -189,9 +189,15 @@
       <section id="secSuporte" class="adm-secao" aria-labelledby="tituloSecao" hidden>
 
         <div id="suporteLista" class="aulas-suporte" hidden>
-          <div class="aulas-suporte-topo">
-            <p class="adm-ajuda" id="resumoChamados"></p>
-            <a class="adm-bt adm-bt-forte adm-bt-sm" href="/aulas/suporte/novo">Novo chamado</a>
+          <div class="aulas-suporte-topo adm-vidro">
+            <div class="aulas-suporte-titulo">
+              <h2 class="aulas-suporte-h">Seus chamados</h2>
+              <p class="adm-ajuda" id="resumoChamados"></p>
+            </div>
+            <a class="adm-bt adm-bt-forte aulas-novo-chamado" href="/aulas/suporte/novo">
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              Novo chamado
+            </a>
           </div>
           <div id="listaChamados" class="aulas-tickets"></div>
         </div>

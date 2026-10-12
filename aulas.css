@@ -312,6 +312,14 @@
 
 .aulas-suporte { display: grid; gap: 18px; }
 .aulas-suporte-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.aulas-suporte-topo { padding: 18px 20px; border-radius: 22px; }
+.aulas-suporte-titulo { display: grid; gap: 4px; min-width: 0; }
+.aulas-suporte-h { margin: 0; font-size: 19px; font-weight: 800; color: var(--tinta); letter-spacing: -.01em; }
+.aulas-suporte-topo .adm-ajuda { margin: 0; }
+.aulas-novo-chamado { min-height: 46px; padding: 0 20px; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
+.aulas-novo-chamado svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.aulas-novo-chamado:hover { transform: translateY(-1px); }
+
 .aulas-tickets { display: grid; gap: 12px; }
 
 .aulas-ticket-linha {
