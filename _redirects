@@ -3,10 +3,10 @@
 /academy/*      /aulas        301
 
 # Entrar: a página decide a tela pela conta (equipe vai ao painel; aluno, às aulas).
-/login          /login.html       200
+/login          /login            200
 
 # Aula 1 (instalação): precisa vir ANTES de /aulas/*, que cairia na área do aluno.
-/aulas/instalacao  /instalacao.html  200
+/aulas/instalacao  /instalacao      200
 
 # Rotas do painel e da área do aluno: qualquer endereço abaixo delas abre a
 # mesma página, que decide a tela pelo endereço.
