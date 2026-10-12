@@ -31,7 +31,7 @@
     suporte: { titulo: "Suporte", sub: "Chamados dos clientes. Responda aqui; a resposta aparece na conta dele.", admin: false },
     equipe: { titulo: "Equipe", sub: "Quem entra neste painel e o que cada pessoa pode fazer.", admin: true },
     integracoes: { titulo: "Integrações", sub: "Stripe, Hotmart e os e-mails que o cliente recebe.", admin: true },
-    academy: { titulo: "Academy", sub: "A área do aluno com a sua conta: o que o cliente vê.", admin: false },
+    academy: { titulo: "Área do cliente", sub: "A área do cliente com a sua conta: o que o cliente vê.", admin: false },
   };
 
   const STATUS_CHAMADO = {
@@ -1748,7 +1748,7 @@
     const cfg = Object.assign({ chamadoRespondido: true, chamadoEncerrado: true, boasVindas: true }, (d.config && d.config.email) || {});
 
     const avisos = cartaoInt("Avisos que o cliente recebe",
-      "Saem de nao-responda@ativavid.com. O botão do e-mail leva direto para a conversa na área do aluno.",
+      "Saem de nao-responda@ativavid.com. O botão do e-mail leva direto para a conversa na área do cliente.",
       chip(st.resend ? "Resend conectado" : "Falta RESEND_API_KEY", st.resend ? "ok" : "atencao"));
     const opcoes = [
       ["chamadoRespondido", "Chamado respondido", "Quando a equipe responde. Respostas seguidas no mesmo chamado viram um e-mail só a cada 10 minutos.", "Seu chamado #106 foi respondido"],

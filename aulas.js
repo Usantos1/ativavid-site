@@ -259,7 +259,7 @@
 
   function desenharPerfil() {
     const email = estado.dados.email || "";
-    const nome = email.split("@")[0] || "Aluno";
+    const nome = email.split("@")[0] || "Cliente";
     for (const id of ["avatarUsuario", "avatarMenu"]) $(id).textContent = iniciais(nome);
     $("saudacao").textContent = `Olá, ${nome}`;
     $("nomeMenu").textContent = nome;
@@ -867,13 +867,13 @@
 
     if (aula) {
       abrirAulaPagina(aula);
-      document.title = `${aula.titulo || "Aula"} — Área do aluno ATIVAVID`;
+      document.title = `${aula.titulo || "Aula"} — Área do cliente ATIVAVID`;
     } else if (chave === "suporte") {
       rotearSuporte(id);
     } else {
       $("tituloSecao").textContent = TITULOS[chave].titulo;
       $("subSecao").textContent = TITULOS[chave].sub;
-      document.title = `${TITULOS[chave].titulo} — Área do aluno ATIVAVID`;
+      document.title = `${TITULOS[chave].titulo} — Área do cliente ATIVAVID`;
     }
     window.scrollTo(0, 0);
   }
@@ -890,11 +890,11 @@
     if (modo === "novo") {
       $("tituloSecao").textContent = "Novo chamado";
       $("subSecao").textContent = "Conte o que aconteceu. Um print ajuda muito.";
-      document.title = "Novo chamado — Área do aluno ATIVAVID";
+      document.title = "Novo chamado — Área do cliente ATIVAVID";
     } else {
       $("tituloSecao").textContent = "Suporte";
       $("subSecao").textContent = "Abra um chamado e acompanhe a resposta da equipe.";
-      document.title = "Suporte — Área do aluno ATIVAVID";
+      document.title = "Suporte — Área do cliente ATIVAVID";
     }
     carregarChamados()
       .then(() => {
