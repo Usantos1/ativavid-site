@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar — ATIVAVID</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0b0c10">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="/assets/icon-64.png" type="image/png" sizes="64x64">
+  <link rel="stylesheet" href="/styles.css?v=20261012a">
+  <style>
+    .login-caixa { max-width: 380px; margin: 48px auto; padding: 28px; border-radius: 16px; background: #14161c; border: 1px solid #23262f; }
+    .login-caixa h1 { margin: 0 0 6px; font-size: 22px; }
+    .login-caixa p { margin: 0 0 18px; color: #9aa0ac; font-size: 14px; }
+    .login-caixa label { display: block; margin: 12px 0 6px; font-size: 13px; color: #c9ced8; }
+    .login-caixa input { width: 100%; box-sizing: border-box; padding: 11px 12px; border-radius: 10px; border: 1px solid #2c303b; background: #0b0c10; color: #f2f4f8; font-size: 15px; }
+    .login-caixa button { margin-top: 18px; width: 100%; padding: 12px; border: 0; border-radius: 10px; background: #e30004; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
+    .login-caixa button:disabled { opacity: .6; cursor: default; }
+    .login-recado { min-height: 20px; margin-top: 12px; font-size: 14px; color: #ff8a8a; }
+  </style>
+</head>
+<body>
+  <main class="login-caixa">
+    <h1>Entrar</h1>
+    <p>Use o e-mail e a senha da sua conta ATIVAVID.</p>
+    <form id="formLogin" novalidate>
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" autocomplete="current-password" required>
+      <button id="btEntrar" type="submit">Entrar</button>
+      <p id="recado" class="login-recado" role="alert"></p>
+    </form>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+  <script src="/login.js?v=20261012a"></script>
+</body>
+</html>
