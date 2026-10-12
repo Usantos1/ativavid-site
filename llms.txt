@@ -1,11 +1,11 @@
 # ATIVAVID
 
-> Editor de vídeo com IA que roda no computador do cliente: Windows 10/11 (64 bits) ou Mac com chip Apple ou Intel (macOS 12+). A pessoa arrasta o vídeo bruto e, em cerca de 2 minutos, recebe o vídeo cortado, legendado no estilo da marca, com headline, trilha, capa e a legenda do post, pronto para Reels, Shorts, TikTok e YouTube. O vídeo não sai do computador. Produto brasileiro, em português. 7 dias grátis, sem cartão.
+> Editor de vídeo com IA que roda no computador do cliente: Windows 10/11 (64 bits) ou Mac com chip Apple ou Intel (macOS 12+). A pessoa arrasta o vídeo bruto e, em cerca de 2 minutos, recebe o vídeo cortado, legendado no estilo da marca, com headline, trilha, capa e a legenda do post, pronto para Reels, Shorts, TikTok e YouTube. O vídeo não sai do computador. Produto brasileiro, em português. Assinatura mensal ou anual.
 
 O problema que o ATIVAVID resolve é o da edição que come a noite: quem precisa postar todo dia grava rápido, mas perde de 40 minutos a 2 horas editando cada vídeo, ou paga de R$ 120 a R$ 650 por Reel a um editor. O ATIVAVID faz o trabalho pesado na máquina da pessoa e deixa a timeline aberta para o ajuste fino.
 
 - [Site](https://ativavid.com/): apresentação, calculadora de economia, preços e dúvidas.
-- [Baixar o teste grátis](https://ativavid.com/): pelo botão Baixar do site; um formulário rápido libera o instalador certo (Windows 10/11, Mac com chip Apple ou Mac Intel). O teste de 7 dias começa no app.
+- [Quero o ATIVAVID](https://ativavid.com/): pelo botão do site; um formulário rápido e depois o pagamento na Hotmart. Depois do pagamento, o instalador certo (Windows 10/11, Mac com chip Apple ou Mac Intel).
 - [Preços](https://ativavid.com/#preco): planos Pro Mensal, Pro Anual e Pro Escala.
 - [Dúvidas frequentes](https://ativavid.com/#faq): respostas curtas sobre privacidade, requisitos e custo.
 - [Instagram @ativavid](https://instagram.com/ativavid): perfil oficial do produto.
@@ -44,7 +44,7 @@ Etapas automáticas: transcrição local → corte inteligente → legenda no es
 
 ## Preços (oferta de lançamento, em reais)
 
-- **Teste grátis**: 7 dias com todos os recursos, sem cartão.
+- **Assinatura**: mensal ou anual, com todos os recursos.
 - **Pro Mensal**: R$ 79,90/mês (valor cheio R$ 99,90). 1 computador (Windows ou Mac), vídeos ilimitados.
 - **Pro Anual**: R$ 799/ano (valor cheio R$ 899), cerca de R$ 66,58 por mês. 1 computador.
 - **Pro Escala**: sob consulta, a partir de 2 computadores, para agências e operações de tráfego.

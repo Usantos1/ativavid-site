@@ -42,7 +42,7 @@
     var nome = macIntel ? 'Mac com processador Intel' : 'Mac com chip Apple';
     var pub = info ? info[chave] : undefined;
     main.dataset.sistema = macIntel ? 'mac-intel' : 'mac';
-    detectado.textContent = 'Reconhecemos um Mac. Este é o instalador para você: 7 dias grátis, sem cartão.';
+    detectado.textContent = 'Reconhecemos um Mac. Este é o instalador para você.';
     if (info && !pub) {
       botao.removeAttribute('href');
       botao.setAttribute('aria-disabled', 'true');
@@ -83,7 +83,7 @@
       } catch (e) { /* sem WebGL: sem palpite */ }
     }
   } else if (windows) {
-    detectado.textContent = 'Reconhecemos um Windows. Este é o instalador para você: 7 dias grátis, sem cartão.';
+    detectado.textContent = 'Reconhecemos um Windows. Este é o instalador para você.';
   } else if (celular) {
     main.hidden = true;
     detectado.textContent = 'O ATIVAVID é um programa para computador.';
