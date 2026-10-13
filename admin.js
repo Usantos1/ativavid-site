@@ -835,7 +835,9 @@
 
   function casaBusca(c, q) {
     if (!q) return true;
-    const alvos = [c.email, nomeDoCliente(c.email), ...(c.computadores || []).flatMap((m) => [m.label, m.host, m.osUser, m.emailNoPc, m.ultimoEmailAberto])];
+    // a busca também acha pelo código do computador (o cliente manda o código para pedir liberação)
+    const soDisp = (estado.dispositivos || []).filter((d) => String(d.account_email || "").toLowerCase() === String(c.email || "").toLowerCase());
+    const alvos = [c.email, nomeDoCliente(c.email), ...(c.computadores || []).flatMap((m) => [m.label, m.host, m.osUser, m.emailNoPc, m.ultimoEmailAberto, m.deviceId]), ...soDisp.flatMap((d) => [d.label, d.device_id])];
     return alvos.some((v) => String(v || "").toLowerCase().includes(q));
   }
 
@@ -1285,6 +1287,8 @@
     const nome = el("div", "adm-maq-nome");
     nome.append(el("strong", "", m.label || m.host || shortId(m.deviceId)));
     nome.append(el("span", "adm-maq-id", [m.host, m.osUser].filter(Boolean).join(" · ") || shortId(m.deviceId)));
+    // o código completo: é o que o cliente manda para pedir liberação
+    if (m.deviceId) nome.append(el("code", "adm-maq-codigo", m.deviceId));
     topo.append(nome, chip(st.rot, st.tom));
     return topo;
   }
