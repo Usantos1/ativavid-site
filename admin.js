@@ -1327,8 +1327,19 @@
   function linhaMaquina(m, c) {
     const st = estadoMaquina(m, c);
     const box = el("div", `adm-maq adm-maq-${st.tom}`);
-    box.append(cabecaMaquina(m, st), gradeMaquina(m, false), botaoBloquearMaquina(m));
+    box.append(cabecaMaquina(m, st), gradeMaquina(m, false), botaoBloquearMaquina(m), botaoDesvincularMaquina(m));
     return box;
+  }
+
+  // Desvincula o computador da conta: tira o lugar dele (release_device). Pede confirmação em dois toques.
+  function botaoDesvincularMaquina(m) {
+    const bt = botao("Desvincular computador", "adm-bt adm-bt-perigo adm-bt-sm", null);
+    bt.addEventListener("click", () => doisToques(bt, () => ocupado(bt, async () => {
+      const r = await licenca("release_device", { p_device_id: m.deviceId });
+      recado(r.message || "Computador desvinculado.", r.ok === false ? "erro" : "ok");
+      await carregar();
+    })));
+    return bt;
   }
 
   function botaoBloquearMaquina(m) {
