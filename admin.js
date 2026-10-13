@@ -46,6 +46,7 @@
   const $$ = (sel, raiz = document) => Array.from(raiz.querySelectorAll(sel));
 
   const estado = {
+    dispositivos: [],
     papel: "",
     email: "",
     nome: "",
@@ -614,6 +615,12 @@
     if (!data || data.ok === false) { recado((data && data.message) || "Sem permissão.", "erro"); return; }
     estado.clientes = Array.isArray(data.clientes) ? data.clientes : [];
     estado.semAssinatura = Array.isArray(data.semAssinatura) ? data.semAssinatura : [];
+    // Dispositivos ligados às contas (a ficha só mostrava os da lista de computadores,
+    // e um aparelho ligado por outro caminho sumia). Falhar aqui não derruba a tela.
+    try {
+      const d2 = await licenca("list_devices", {});
+      estado.dispositivos = d2 && d2.ok !== false && Array.isArray(d2.devices) ? d2.devices : [];
+    } catch (e) { estado.dispositivos = []; }
     desenharVisao();
     desenharFiltros();
     desenharClientes();
@@ -1189,13 +1196,20 @@
     f.appendChild(aulasCol);
 
     const col = el("section", "adm-ficha-col");
-    col.appendChild(el("h4", "adm-ficha-titulo", maqs.length
-      ? plural(maqs.length, "Computador ligado à conta", "Computadores ligados à conta")
+    // computadores ligados à conta: a lista da conta + os que só aparecem na lista de dispositivos
+    const ids = new Set(maqs.map((m) => String(m.deviceId || "")));
+    const soDispositivos = (estado.dispositivos || []).filter((d) =>
+      String(d.account_email || "").toLowerCase() === String(c.email || "").toLowerCase()
+      && !ids.has(String(d.device_id || "")));
+    const total = maqs.length + soDispositivos.length;
+    col.appendChild(el("h4", "adm-ficha-titulo", total
+      ? plural(total, "Computador ligado à conta", "Computadores ligados à conta")
       : "Nenhum computador ligado à conta"));
-    if (!maqs.length) {
+    if (!total) {
       col.appendChild(el("p", "adm-ficha-vazia", "Quando este cliente entrar num computador com a conta, ele aparece aqui."));
     }
     for (const m of maqs) col.appendChild(linhaMaquina(m, c));
+    for (const d of soDispositivos) col.appendChild(linhaDispositivoLigado(d, c));
     f.appendChild(col);
 
     return f;
@@ -1286,6 +1300,24 @@
     else campo2("Primeira vez", dia(m.primeiraVez));
     if (m.bloqueadoEm) campo2("Bloqueado em", `${dia(m.bloqueadoEm)}${m.motivoBloqueio ? ` — ${m.motivoBloqueio}` : ""}`);
     return grade;
+  }
+
+  // Um computador ligado à conta: mostra o ID e o nome, e libera o lugar (release_device).
+  function linhaDispositivoLigado(d, c) {
+    const box = el("div", "adm-maq adm-maq-ok");
+    const nome = d.label || "Computador sem nome";
+    const cab = el("div", "adm-maq-cab");
+    cab.append(el("strong", "", nome));
+    cab.append(el("span", "adm-ajuda", `ID ${String(d.device_id || "").slice(0, 16)}… · último acesso ${d.last_seen ? rel(d.last_seen) : "—"}`));
+    box.append(cab);
+    const bt = botao("Desvincular este computador", "adm-bt adm-bt-perigo adm-bt-sm", null);
+    bt.addEventListener("click", () => doisToques(bt, () => ocupado(bt, async () => {
+      const r = await licenca("release_device", { p_device_id: d.device_id });
+      recado(r.message || "Computador desvinculado. A conta libera um lugar.", r.ok === false ? "erro" : "ok");
+      await carregar();
+    })));
+    box.append(bt);
+    return box;
   }
 
   function linhaMaquina(m, c) {
