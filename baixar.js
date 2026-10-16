@@ -84,10 +84,20 @@
     }
   } else if (windows) {
     detectado.textContent = 'Reconhecemos um Windows. Este é o instalador para você.';
+  } else if (celular && !/Android/i.test(ua)) {
+    // iPhone e iPad: o app da App Store
+    main.dataset.sistema = 'iphone';
+    detectado.textContent = 'Reconhecemos um iPhone. O ATIVAVID está na App Store.';
+    botao.href = 'https://apps.apple.com/br/app/ativavid-editor-com-ia/id6819453789';
+    botao.target = '_blank';
+    botao.rel = 'noopener';
+    botao.dataset.cta = 'baixar-principal-iphone';
+    texto.textContent = 'Baixar na App Store';
+    detalhe.textContent = 'iOS 17 ou mais novo · grátis para baixar';
   } else if (celular) {
     main.hidden = true;
-    detectado.textContent = 'O ATIVAVID é um programa para computador.';
-    avisar('Abra ativavid.com/baixar no seu Windows ou Mac para instalar. Os instaladores estão logo abaixo, se quiser baixar mesmo assim.');
+    detectado.textContent = 'No Android, o ATIVAVID é um programa para computador.';
+    avisar('Abra ativavid.com/baixar no seu Windows ou Mac para instalar. No iPhone, ele está na App Store.');
   } else if (linux) {
     detectado.textContent = 'O ATIVAVID ainda não tem versão para Linux.';
     avisar('Ele roda em Windows 10/11 e em Mac (chip Apple ou Intel).');

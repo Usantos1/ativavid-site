@@ -6,7 +6,7 @@
       "displayName": "ATIVAVID — Editor de vídeo com IA para Windows e Mac",
       "type": "text/markdown; profile=\"urn:air:agent-skills\"",
       "url": "https://ativavid.com/llms.txt",
-      "description": "Editor de vídeo com IA para Windows e Mac com chip Apple: transcreve, corta silêncios e erros, legenda no estilo da marca, cria headline, trilha, capa e a legenda do post para Reels, Shorts, TikTok e YouTube, sem o vídeo sair do computador. Para lojas, criadores, agências e gestores de tráfego. Assinatura mensal ou anual.",
+      "description": "Editor de vídeo com IA para Windows, Mac e iPhone: transcreve, corta silêncios e erros, legenda no estilo da marca, cria headline, trilha, capa e a legenda do post para Reels, Shorts, TikTok e YouTube, sem o vídeo sair do computador. Para lojas, criadores, agências e gestores de tráfego. Assinatura mensal ou anual.",
       "capabilities": [
         "editar_video_com_ia_no_pc",
         "cortar_silencios_e_erros",
