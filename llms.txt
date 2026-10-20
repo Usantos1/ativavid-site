@@ -46,7 +46,7 @@ Etapas automáticas: transcrição local → corte inteligente → legenda no es
 
 - **Assinatura**: mensal ou anual, com todos os recursos.
 - **Pro Mensal**: R$ 69,90/mês (valor cheio R$ 99,90). 1 computador (Windows ou Mac), vídeos ilimitados.
-- **Pro Anual**: R$ 689,90/ano (valor cheio R$ 899), cerca de R$ 57,49 por mês. 1 computador.
+- **Pro Anual**: R$ 587/ano (valor cheio R$ 899), cerca de R$ 48,92 por mês. 1 computador.
 - **Pro Escala**: sob consulta, a partir de 2 computadores, para agências e operações de tráfego.
 
 A assinatura é feita dentro do app. Cancela quando quiser; vídeos, projetos e estilos ficam no computador do cliente.

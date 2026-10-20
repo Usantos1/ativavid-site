@@ -634,7 +634,7 @@
   // Receita recorrente ESTIMADA: plano de cada cliente ativo x tabela de preços
   // atual. As vendas antigas não gravaram o valor pago (licenses.amount_cents
   // vazio), então o valor exato só existe na Stripe.
-  const PRECO_ANUAL_CENTAVOS = 68990;
+  const PRECO_ANUAL_CENTAVOS = 58700;
   const PRECO_MENSAL_CENTAVOS = 6990;
   const brl = (centavos) => (centavos / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -879,7 +879,7 @@
   // da Stripe. O preço de cada um TEM de estar em STRIPE_PRICE_ID (secret do
   // payments-webhook), senão o pagamento não libera o acesso.
   const PLANOS_VENDA = [
-    { id: "anual", nome: "Anual", valor: "R$ 689,90 por ano", url: CHECKOUT_ANUAL },
+    { id: "anual", nome: "Anual", valor: "R$ 587,00 por ano", url: CHECKOUT_ANUAL },
     { id: "mensal", nome: "Mensal", valor: "R$ 69,90 por mês", url: CHECKOUT_MENSAL },
     { id: "mensal-antigo", nome: "Mensal antigo", valor: "R$ 59,00 por mês", url: "https://buy.stripe.com/9B68wQgFH6HP2Tk6oodwc02" },
   ];
