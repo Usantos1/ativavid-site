@@ -21,8 +21,8 @@
   const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtvb2xiZGl2ZHFucXhsdWtjdHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NzM5NTUsImV4cCI6MjEwMjE0OTk1NX0.PV9L4Ign4PfLAd2mgwQVVIlGr9AxbP54Gt2-BRLma_s";
   const TRIAL_DIAS = 7;
   const DIA = 86400000;
-  const CHECKOUT_ANUAL = "https://buy.stripe.com/5kQ7sMexzgip2Tk8wwdwc00";
-  const CHECKOUT_MENSAL = "https://buy.stripe.com/9B63cw0GJ6HPfG6aEEdwc01";
+  const CHECKOUT_ANUAL = "https://buy.stripe.com/bJedRadtv4zH3XofYYdwc05";
+  const CHECKOUT_MENSAL = "https://buy.stripe.com/4gM14o2ORgip1PgdQQdwc04";
 
   const SECOES = {
     visao: { titulo: "Visão geral", sub: "O que precisa de atenção hoje.", admin: true },
@@ -634,7 +634,7 @@
   // Receita recorrente ESTIMADA: plano de cada cliente ativo x tabela de preços
   // atual. As vendas antigas não gravaram o valor pago (licenses.amount_cents
   // vazio), então o valor exato só existe na Stripe.
-  const PRECO_ANUAL_CENTAVOS = 58700;
+  const PRECO_ANUAL_CENTAVOS = 58900;
   const PRECO_MENSAL_CENTAVOS = 6990;
   const brl = (centavos) => (centavos / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -879,7 +879,7 @@
   // da Stripe. O preço de cada um TEM de estar em STRIPE_PRICE_ID (secret do
   // payments-webhook), senão o pagamento não libera o acesso.
   const PLANOS_VENDA = [
-    { id: "anual", nome: "Anual", valor: "R$ 587,00 por ano", url: CHECKOUT_ANUAL },
+    { id: "anual", nome: "Anual", valor: "R$ 589,00 por ano", url: CHECKOUT_ANUAL },
     { id: "mensal", nome: "Mensal", valor: "R$ 69,90 por mês", url: CHECKOUT_MENSAL },
     { id: "mensal-antigo", nome: "Mensal antigo", valor: "R$ 59,00 por mês", url: "https://buy.stripe.com/9B68wQgFH6HP2Tk6oodwc02" },
   ];
